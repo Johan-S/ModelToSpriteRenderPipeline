@@ -58,3 +58,6 @@ Unit_Number	Unit_Name	Faction	AnimationType	Template	Gold_Cost	Training_Cost	Res
 84	Awoken	Vampires	FistFighter	Vampire-Untrained	160	5	2	40	Unit	Fist			Lifesteal			Robe Hood	Acolyte_Robes		Humanoid	2	20	12	10	0	0	10	10	10	12	0	17	40	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600				PT_Male_Armor_Ex2_gauntlets_04_A		
 85	Phage	Vampires	FistFighter	Vampire-Trained	200	20	6	60	Unit	Fist			Lifesteal			None	Boiled_Leather_Armor		Humanoid	2	22	13	11	0	0	11	11	11	13	0	20	60	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600				PT_Male_Armor_Ex1_gauntlets_11		
 86	Counsel Member	Vampires	2Handed-Slash	Vampire-Professional	250	40	28	80	Unit	Iron_Longsword			Lifesteal			None	Iron_Scalemail		Humanoid	2	24	14	12	0	0	12	12	12	13	0	25	80	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600	PT_Medieval_Longsword_02_a			PT_Male_Armor_Ex1_gauntlets_13		
+
+
+150	Wolf		Wolf	Human-Trained	100	60	7	10	Commander										Wolf	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1								
