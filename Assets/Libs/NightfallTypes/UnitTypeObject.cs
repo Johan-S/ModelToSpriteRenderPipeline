@@ -108,7 +108,12 @@ public class UnitTypeObject : ScriptableObject {
          return;
       }
 
-      throw new Exception($"Bad bundle, should always have MS!");
+      if (b.time_ms.IsNullOrEmpty()) {
+         throw new Exception($"Bad bundle, should always have MS!");
+      } else {
+         Debug.Assert(b.sprites.Length == b.time_ms.Length);
+      }
+
    }
 
 

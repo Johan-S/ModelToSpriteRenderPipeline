@@ -54,7 +54,7 @@ public static partial class GameData {
 
       res.animation_sprites = new();
 
-      TransferFieldData(from_o, res.animation_sprites, deep: false);
+      TransferFieldData(from_o.animations, res.animation_sprites, deep: false);
 
       res.sprite = from_o.sprite;
 
