@@ -9,10 +9,8 @@ using UnityEngine;
 
 [DefaultExecutionOrder(-600)]
 public class EngineDataInit : MonoBehaviour, IEngineDataPart {
-
-
    public bool load_from_simple_objects;
-   
+
    public EngineDataHolder engine_data_init;
 
    public ExportPipelineSheets engine_sheets;
@@ -46,7 +44,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       var prefab = Resources.Load<EngineDataInit>("MainSheetsLoader");
 
       Instantiate(prefab);
-      
+
       // new GameObject("EngineDataInit").AddComponent<EngineDataInit>();
       return instance;
    }
@@ -76,11 +74,14 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       instance = this;
       DontDestroyOnLoad(gameObject);
 
-      if (load_subs) {
+      if (sheets_override) {
+         var sh = sheets_override;
+         engine_data_init = MakeEngineData(sh, Array.Empty<IEngineDataPart>(), null);
+      } else if (load_subs) {
          var data_refs = GetComponentsInChildren<EngineDataSheetRef>().ToArray();
          engine_data_init = MakeEngineData(null, data_refs, custom_engine_data_objects);
-      } else if(sheets_override || engine_sheets) {
-         var sh = sheets_override ? sheets_override : engine_sheets;
+      } else if (engine_sheets) {
+         var sh = engine_sheets;
          var data_refs = GetComponentsInChildren<EngineDataSheetRef>().ToArray();
          engine_data_init = MakeEngineData(sh, data_refs, custom_engine_data_objects);
       } else {
@@ -138,26 +139,27 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       if (name == "Animation Type") return true;
       return name.EndsWith("_ID");
    }
-   
+
    static T CopyDucked<T>(object fr) where T : new() {
       T res = new();
       Std.CopyShallowDuckTyped(fr, res);
       return res;
    }
+
    static bool AddDucked<T>(object fr, LookupList<T> o) where T : class, Named, new() {
       T res = new();
       Std.CopyShallowDuckTyped(fr, res);
       return o.AddOrIgnore(res);
    }
+
    static void AddDucked<T>(object fr, List<T> o) where T : new() {
       T res = new();
       Std.CopyShallowDuckTyped(fr, res);
       o.Add(res);
    }
 
-   static EngineDataHolder MakeEngineData(ExportPipelineSheets sheets, IEngineDataPart[] iengine_datas, EngineDataHolder custom_engine_data_objects) {
-
-
+   static EngineDataHolder MakeEngineData(ExportPipelineSheets sheets, IEngineDataPart[] iengine_datas,
+      EngineDataHolder custom_engine_data_objects) {
       var flow = new LoadDataFlow();
 
 
@@ -175,7 +177,8 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       return MakeEngineDataFromGears(flow.gear_data, custom_engine_data_objects);
    }
 
-   static EngineDataHolder MakeEngineDataFromGears(GameTypeCollection fgear_data, EngineDataHolder custom_engine_data_objects) {
+   static EngineDataHolder MakeEngineDataFromGears(GameTypeCollection fgear_data,
+      EngineDataHolder custom_engine_data_objects) {
       var engine_stuff = new EngineDataHolder();
       engine_stuff.unit_types = new();
       engine_stuff.base_types = new();
@@ -185,11 +188,11 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       var ug = new GameTypeCollection(engine_stuff);
 
       if (custom_engine_data_objects) {
-       
          foreach (var cu in custom_engine_data_objects.unit_types) {
             engine_stuff.unit_types.Add(cu);
-         }  
+         }
       }
+
       foreach (var utc in engine_stuff.base_types.units) {
          var val = ug.GetAsset(utc);
 
@@ -203,7 +206,9 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       return engine_stuff;
    }
-   public static IEnumerable<(string htype, string[] row, string[] hdrs)> ParseGenericSheetRows(IEnumerable<string> rows) {
+
+   public static IEnumerable<(string htype, string[] row, string[] hdrs)> ParseGenericSheetRows(
+      IEnumerable<string> rows) {
       string[] header = null;
       string htype = "";
       foreach (var row_string in rows) {
@@ -233,7 +238,6 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             var new_header = row_string.Trim().Split("\t").Trim();
             if (htype == old_htype && htype == "Animation_Type") {
                header = header.Zip(new_header, (s, t) => $"{s}\t{t}").ToArray();
-
             } else {
                header = new_header;
             }
@@ -243,8 +247,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       }
    }
 
-   public static void  AddGenericSheetRows(LoadDataFlow flow, IEnumerable<string> rows) {
-
+   public static void AddGenericSheetRows(LoadDataFlow flow, IEnumerable<string> rows) {
       var rowd = ParseGenericSheetRows(rows).ToList();
       LoadRowd(flow, rowd);
    }
@@ -280,10 +283,10 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
                if (sh) AddGenericSheetRows(flow, sh.GetLines());
             }
          } else {
-
             if (sheets.animations) {
                AddGenericSheetRows(flow, sheets.animations.GetLines());
             }
+
             AddRowsL("Armor_ID", sheets.armor.GetLines());
             AddRowsL("Helmet_ID", sheets.helmet.GetLines());
             AddRowsL("Shield_ID", sheets.shield.GetLines());
@@ -304,7 +307,6 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       var flow = new LoadDataFlow();
 
 
-
       LoadRowd(flow, rowd.Map(x => (x.htype, x.row, (string[])null)));
 
       foreach (var la in flow.lazy) {
@@ -322,7 +324,6 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
    public static string GetAssetName(string htype, string[] row) {
       if (htype == "Spell_ID") {
-
          return row.Get(3);
       }
 
@@ -339,7 +340,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       public string htype;
       public string[] row;
       public string[] hdrs;
-      
+
       public string name;
 
       public string GetDebugPrefix() {
@@ -355,25 +356,24 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
    }
 
    static void LoadRowd(LoadDataFlow flow, List<(string htype, string[] row,
-      string[] hdrs)>  rowd) {
-
+      string[] hdrs)> rowd) {
       foreach (var (htype, row, hdrs) in rowd) {
          try {
             last_parsed_asset = new LastParsedAsset(htype, row, hdrs);
             LoadSingle(flow, htype, row, hdrs);
             flow.parse_count++;
-         } catch (Exception e) {
+         }
+         catch (Exception e) {
             flow.error_count++;
             Debug.LogError($"Error While pasing {last_parsed_asset?.name ?? "UNKNOWN"}: {e}");
          }
-         last_parsed_asset = null;
 
+         last_parsed_asset = null;
       }
    }
 
    static void LoadSingle(LoadDataFlow flow, string htype, string[] row,
       string[] hdrs) {
-      
       var gear_data = flow.gear_data;
       var lazy = flow.lazy;
       if (htype == "Unit_ID") {
@@ -398,6 +398,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate Weapon: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -408,6 +409,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate Armor: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -418,6 +420,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate Shield: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -428,6 +431,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate Helmet: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -441,6 +445,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate Spell: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -451,6 +456,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Duplicate simple spell: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
 
@@ -464,22 +470,22 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             Debug.LogError($"Found duplicate SimpleBuff: {val.GetType().Name}: {val.name}");
             return;
          }
+
          flow.row_back_map[val] = (htype, row, hdrs);
       }
-      
+
       if (htype == "Animation_Type") {
-         
          Debug.Assert(hdrs.Length != 0);
 
          var cats = hdrs.map(x => x.Split("\t")[0]);
          var fields = hdrs.map(x => x.Split("\t")[1]);
-         
+
          string type = row[0];
 
          Dictionary<(string, string), ExportPipelineSheets.AnimationParsed> res = new();
 
          List<ExportPipelineSheets.AnimationParsed> arr = new();
-         
+
          for (int j = 1; j < cats.Length; j++) {
             string cat = cats[j];
             string field = fields[j];
@@ -494,20 +500,21 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
                tc = res[key] = new(type, cat);
                arr.Add(tc);
             }
-            
+
             if (field == "Name") tc.clip = data;
             if (field == "Frames") tc.capture_frame = data.Split(",").Select(x => int.Parse(x.Trim())).ToArray();
             if (field == "DurationMS") tc.time_ms = data.Split(",").Select(x => int.Parse(x.Trim())).ToArray();
-
          }
 
          var err_arr = arr.Filtered(x => (x.capture_frame?.Length ?? 0) != (x.time_ms?.Length ?? 0));
 
          if (err_arr.Count > 0) {
-            var msg = err_arr.join(", ", x => $"{x.category}: Capture Frames ({x.capture_frame?.Length ?? 0}) != Time MS ({x.time_ms?.Length ?? 0}) ");
+            var msg = err_arr.join(", ",
+               x =>
+                  $"{x.category}: Capture Frames ({x.capture_frame?.Length ?? 0}) != Time MS ({x.time_ms?.Length ?? 0}) ");
             Debug.LogError($"Error while parsing animation {type}: {msg}");
          }
-         
+
          gear_data.parsed_animations.AddRange(arr);
       }
    }

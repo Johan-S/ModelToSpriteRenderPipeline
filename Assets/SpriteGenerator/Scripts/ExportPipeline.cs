@@ -165,9 +165,6 @@ public class ExportPipeline : MonoBehaviour {
 
       EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
 
-
-      Debug.Log($"Units: {EngineDataInit.gear_data.units.join("\n", x => x.name)}");
-
       unit_viewer_running = Instantiate(unit_viewer_prefab);
 
       IEnumerator CloseAfterEsc() {

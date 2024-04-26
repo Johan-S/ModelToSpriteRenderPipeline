@@ -58,6 +58,37 @@ public class EngineDataHolder : ScriptableObject {
       [HideInInspector] public List<ExportPipelineSheets.AnimationParsed> animation_data = new();
 
       [HideInInspector] public ADict adict;
+      
+      
+      public GameData.UnitAnimationSprites GetAnimationSprites(string unit, string animation_class) {
+      
+      
+         var acl = animation_data.Where(x => x.animation_type == animation_class).ToList();
+
+      
+         var maybe_cat = Sprites.GetUnitCats(unit);
+
+         var animation_sprites = new GameData.UnitAnimationSprites();
+         foreach (var (name, am) in animation_sprites.GetAllAnimations()) {
+            var cl = acl.Find(x => x.category == name);
+            if (cl == null) continue;
+            var sprites = maybe_cat.sprites.Where(x => x.animation_category == name).ToArray();
+
+
+            if (sprites.Length != cl.capture_frame.Length) throw new Exception();
+
+            Debug.Assert(sprites.Length == cl.capture_frame.Length);
+
+
+            am.sprites = sprites.map(x => x.sprite);
+            am.time_ms = cl.time_ms.Copy();
+                  
+
+            am.animation_duration_ms = am.time_ms.Sum();
+         }
+
+         return animation_sprites;
+      }
 
    }
 
@@ -124,10 +155,12 @@ public class EngineDataHolder : ScriptableObject {
          }
       };
    }
+   
+
 
    public void FillanimationsFor(UnitTypeObject u) {
       
-      u.animations ??= Sprites.GetAnimationSprites(u.sprite_gen_name, u.animation_class);
+      u.animations = base_type_ref.GetAnimationSprites(u.sprite_gen_name, u.animation_class);
 
       u.sprite_ref = Sprites.GetUnitCats(u.sprite_gen_name).idle_sprite;
 
@@ -195,6 +228,11 @@ public class EngineDataHolder : ScriptableObject {
                replaced++;
             }
          }
+      }
+
+      foreach (var a in ExportPipeline.GetDirectAnimationsParsed()) {
+         base_type_ref.animation_data.Add(a);
+         // Debug.Log($"{a.animation_type}, {a.category}");
       }
 
       foreach (var a in base_type_ref.animation_data) {

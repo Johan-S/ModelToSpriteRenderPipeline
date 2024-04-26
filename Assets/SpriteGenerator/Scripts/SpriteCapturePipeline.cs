@@ -41,7 +41,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       var dt = diff * t;
       
-      Debug.Log($"Diff: {clip.name} - {dt}  ({diff})");
+      // Debug.Log($"Diff: {clip.name} - {dt}  ({diff})");
       
       var pos_before_root = model.transform.position;
 

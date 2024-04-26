@@ -142,24 +142,34 @@ public class UnitViewer : MonoBehaviour {
       
    }
 
+   bool init_done;
+
+   public void SetUnits(List<UnitTypeDetails> units_to_view) {
+      
+
+      units = SelectUtils.MakeSelectClass(units_to_view, can_click_selected:true, can_toggle_off:true, default_selected:-1);
+      units.extra_callback = () => {
+            
+      };
+
+      units.selected_comp = null;
+
+      init_done = true;
+      AnnotatedUI.Visit(transform, this);
+   }
+
    public SelectClass<UnitTypeDetails> units;
 
    public bool include_no_sprites;
 
    // Start is called before the first frame update
    void Start() {
-      
+      if (!init_done) {
+         var ul = gear_data.game_units.Where(x => include_no_sprites||x.sprite);
+         SetUnits(ul.Select(x => new UnitTypeDetails { unit = x})
+            .ToList());
+      }
 
-      var ul = gear_data.game_units.Where(x => include_no_sprites||x.sprite);
-
-      units = SelectUtils.MakeSelectClass(ul.Select(x => new UnitTypeDetails { unit = x})
-         .ToList(), can_click_selected:true, can_toggle_off:true, default_selected:-1);
-      units.extra_callback = () => {
-            
-      };
-
-      units.selected_comp = null;
-      AnnotatedUI.Visit(transform, this);
 
    }
 
