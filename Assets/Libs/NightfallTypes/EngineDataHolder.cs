@@ -75,7 +75,9 @@ public class EngineDataHolder : ScriptableObject {
             var sprites = maybe_cat.sprites.Where(x => x.animation_category == name).ToArray();
 
 
-            if (sprites.Length != cl.capture_frame.Length) throw new Exception();
+            if (sprites.Length != cl.capture_frame.Length) {
+               Debug.LogError($"Wrong capture frame: {unit} - {animation_class} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+            }
 
             Debug.Assert(sprites.Length == cl.capture_frame.Length);
 
