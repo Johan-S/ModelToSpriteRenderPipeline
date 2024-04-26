@@ -1,0 +1,89 @@
+﻿<root>
+   
+   <model name="Archer">
+
+      <model name="Archer">
+
+      </model>
+
+      <color
+      />
+      <color
+         skin-color="#f0f"
+         hair-color="#ff0"
+         metal-2-color="#00f"
+         leather-1-color="#00f"
+         leather-2-color="#00f"
+         leather-3-color="#00f"
+         cloth-1-color="#00f"
+         cloth-2-color="#00f"
+         cloth-3-color="#00f"
+      />
+      <animation name="RunForward">
+         <capture time="0"/>
+         <capture time="10"/>
+         <capture time="25"/>
+      </animation>
+      <animation name="BowShot">
+         <capture time="8"/>
+         <capture time="16"/>
+         <capture time="25"/>
+         <capture time="30"/>
+      </animation>
+   </model>
+
+   <model name="Swordsman">
+
+      <color
+         skin-color="#f0f"
+         hair-color="#ff0"
+         metal-2-color="#fff"
+      />
+      <color
+         skin-color="#fff"
+         hair-color="#ff0"
+         metal-2-color="#000"
+      />
+      <animation name="RunForward">
+         <capture time="0"/>
+         <capture time="10"/>
+         <capture time="25"/>
+      </animation>
+      <animation name="MeleeAttack_OneHanded">
+         <capture time="8"/>
+         <capture time="16"/>
+         <capture time="25"/>
+      </animation>
+      <animation name="MeleeAttack_TwoHanded">
+         <capture time="8"/>
+         <capture time="16"/>
+         <capture time="25"/>
+      </animation>
+   </model>
+   <model name="HeavyArcher">
+
+      <color
+      />
+      <color
+         skin-color="#f0f"
+         hair-color="#ff0"
+         metal-2-color="#00f"
+         leather-1-color="#00f"
+         leather-2-color="#00f"
+         leather-3-color="#00f"
+         cloth-1-color="#00f"
+         cloth-2-color="#00f"
+         cloth-3-color="#00f"
+      />
+      <animation name="RunForward">
+         <capture time="0"/>
+         <capture time="10"/>
+         <capture time="25"/>
+      </animation>
+      <animation name="BowShot">
+         <capture time="8"/>
+         <capture time="16"/>
+         <capture time="25"/>
+      </animation>
+   </model>
+</root>

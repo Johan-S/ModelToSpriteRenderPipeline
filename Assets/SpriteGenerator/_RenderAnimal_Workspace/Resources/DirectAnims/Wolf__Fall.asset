@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 488ebbaf21720a5428d539d9041cea26, type: 3}
+  m_Name: Wolf__Fall
+  m_EditorClassIdentifier: 
+  animation_type: Wolf
+  category: Fall
+  clip: WL_Fall_Low
+  auto_frames_per_s: 6
+  capture_frame: 
+  time_ms: 

@@ -1,0 +1,14 @@
+
+Weapon_ID	Weapon_Name	Damage	Hands_Requirement	Damage_Type	Number_Of_Attacks	Cooldown	Length	Attack	Defense	Encumberance	Resources	Range	Precision	Material	Effects	Sprite_Name	Wood_1Color	Wood_2Color	Wood_3Color	Metal_1Color	Metal_2Color	Metal_3Color	Metal_4Color	Leather_2Color	Leather_3Color
+
+1	Tusk	4		Piercing	1	1	1	-3	0	0	1	Bone		Damage_Armor+1
+2	Inlayed_Tusk	6		Magical	1	1	1	-2	0	0	5	Bone		
+
+6	Claws	2		Slashing	2	1	0	2	0	0	1	Bone		
+7	Hoof	-3		Blunt	1	2	0	-2	0	0	1	Bone		
+8	Touch_of_God	0		Magical	1	1	0	0	0	0	0	Magical		Convert+10
+9	Lesser Lifesteal	-4		Magical	1	1	0	0	0	0	0	Magical		Lifesteal+.5,ArmorPiercing+.3
+10	Lifesteal	0		Magical	1	1	0	0	0	0	0	Magical		Lifesteal+.5,ArmorPiercing+.5
+11	Greater Lifesteal	4		Magical	1	1	0	0	0	0	0	Magical		Lifesteal+.5,ArmorPiercing+.6
+
+

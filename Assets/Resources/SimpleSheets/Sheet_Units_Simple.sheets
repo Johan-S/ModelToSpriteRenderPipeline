@@ -1,0 +1,73 @@
+Unit_Number	Unit_Name	Faction	AnimationType	Template	Gold_Cost	Training_Cost	Resources_Cost	Population_Cost	Type	Weapon_Primary	Weapon_Secondary	Quiver Slot	Innate_Primary	Innate_Secondary	Shield	Helmet	Armor	Mount	Anatomy	Size	HP	Strength	M._Affinity	Resistence_(Expand_Later)	Nat_Protection	Attack	Defense	Precision	Combat_Speed	Enc	Morale	Cur_Age	Max_Age	Combat Speed	Abilities	Magic	Leadership	Theme Color	Weapon Main_Hand	Weapon Off_Hand	Body_Armor	Gauntlets	Helmet	Shield
+// Villager (Club)
+27	Villager		Sword&Shield	Human-Untrained	7	2	2	10	Unit	Wooden_Club							Cloth_Vest		Humanoid	2	10	8	10	0	0	9	9	8	9	2	8	20	60						PT_Club_01_a		PT_Male_Armor_Ex1_body_01	PT_Male_Armor_naked_00_gauntlets		
+
+// Town Guard (Spear)
+30	Guard		Spearman	Human-Trained	9	10	7	10	Unit	Bronze_Spear						Cloth_Visor	Full_Padded_Armor		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60						PT_Medieval_Pike_04_a_short		PT_Male_Armor_Ex1_body_04	PT_Male_Armor_cloth_00_gauntlets		
+
+// Town Guard (Spear)
+34	Archer		Archer	Human-Untrained	7	2	10	10	Unit	Bronze_Dagger	Shortbow					Leather_Helmet	Leather_Armor		Humanoid	2	10	8	10	0	0	9	9	8	9	2	8	20	60						PT_Medieval_Dagger_01_b	PT_Medieval_Bow_01_a	PT_Male_Armor_Ex1_body_02	PT_Male_Armor_cloth_00_gauntlets		
+
+// Skirmisher (Sling and Cudgel)
+43	Skirmisher		Sword&Shield	Human-Professional	10	20	13	10	Unit	Bronze_Cudgel	Sling				Bronze_Buckler	Boiled_Leather_Helmet	Boiled_Leather_Armor		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60						PT_Medieval_Mace_02_b		PT_Male_Armor_Ex1_body_08	PT_Male_Armor_Ex1_gauntlets_11		
+
+// Light Infantry (Pike)
+48	Light Infantry		Spearman	Human-Professional	10	20	23	10	Unit	Iron_Pike						Bronze_Half_Helm	Bronze_Chainmail		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60						PT_Medieval_Pike_04_b		PT_Male_Armor_Ex1_body_12	PT_Male_Armor_Ex1_gauntlets_13		
+
+// Heavy Infantry (Longsword & Shield)
+51	Heavy Infantry		Sword&Shield	Human-Professional	10	20	30	10	Unit	Iron_Longsword					Iron_Shield	Iron_Full_Helm	Iron_Chainmail		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60						PT_Medieval_Longsword_02_a		PT_Male_Armor_Ex1_body_12	PT_Male_Armor_Ex1_gauntlets_13		
+
+// Heavy_Leather
+
+54	Crossbowman		Crossbow	Human-Professional	10	20	30	10	Unit	Crossbow						Iron_Half_Helm	Full_Padded_Armor		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60						PT_Medieval_Crossbow_01_b		PT_Male_Armor_Ex1_body_12	PT_Male_Armor_Ex1_gauntlets_13		
+
+
+// Sky Priest
+55	Sky Priest		Mage	Human-Trained	100	60	4	10	Commander	Bronze_Spear						None	Clerical_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Heavens+1		#214C6F00	PT_Medieval_Pike_04_a_short		PT_Male_Armor_Ex2_body_01_A	PT_Male_Armor_naked_00_gauntlets		
+
+// Windblown
+56	Windblown		Mage	Human-Trained	160	90	4	10	Commander	Bronze_Spear						None	Priest_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Heavens+2		#214C6F00	PT_Medieval_Pike_04_a_short		PT_Male_Armor_Ex2_body_01_B	PT_Male_Armor_Ex2_gauntlets_01_B		
+
+// Stoneshaper
+58	Stoneshaper		Mage	Human-Trained	160	90	2	10	Commander	Wooden_Club						None	Wizard_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Terra+2		#BC725600	PT_Club_01_a		PT_Male_Armor_Ex2_body_04_B	PT_Male_Armor_Ex2_gauntlets_04_A		
+
+// Crystal Steward
+60	Crystal Steward		Mage	Human-Trained	160	90	4	10	Commander	Bronze_Dagger						None	Crystal_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Order+2		#EEA54E00	PT_Medieval_Dagger_01_b		PT_Male_Armor_Ex2_body_01_C	PT_Male_Armor_Ex2_gauntlets_01_B		
+
+
+// Soulweaver
+64	Soulweaver		Mage	Human-Trained	160	90	4	10	Commander	Bronze_Dagger						None	Wizard_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Spirit+2		#479F9F00	PT_Medieval_Dagger_01_b		PT_Male_Armor_Ex2_body_04_B	PT_Male_Armor_Ex2_gauntlets_04_A		
+
+
+// Monk
+65	Monk		Mage	Human-Trained	100	60	1	10	Commander	Fist						None	Monk_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Body+1		#AD797200			PT_Male_Armor_Ex2_body_08_A	PT_Male_Armor_naked_00_gauntlets		
+
+
+// Lifeshaper
+68	Lifeshaper		Mage	Human-Trained	160	90	3	10	Commander	Wood Staff						None	Acolyte_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Growth+2		#28571D00	PT_Medieval_Staff_01_a		PT_Male_Armor_Ex2_body_04_A	PT_Male_Armor_Ex2_gauntlets_04_A		
+
+
+// Necromancer
+70	Necromancer		Mage	Human-Trained	160	90	4	10	Commander	Bronze Staff						None	Entropic_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+2		#3A0D3700	PT_Medieval_Staff_02_b		PT_Male_Armor_Ex2_body_02_B	PT_Male_Armor_Ex2_gauntlets_02_A		
+
+// Demonologist
+72	Demonologist		Mage	Human-Trained	220	120	4	10	Commander	Bronze_Dagger						None	Acolyte_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+2,Order+2		#48151600	PT_Medieval_Dagger_01_b		PT_Male_Armor_Ex2_body_04_A	PT_Male_Armor_Ex2_gauntlets_04_A		
+
+
+// Thrall (Club)
+75	Thrall	Vampires	Sword&Shield	Human-Untrained	7	2	6	10	Unit	Iron_Cudgel						Cloth_Visor	Cloth_Vest		Humanoid	2	10	8	10	0	0	9	9	8	9	2	8	20	60					#BFAEFF00	PT_Medieval_Mace_02_b		PT_Male_Armor_Ex1_body_01	PT_Male_Armor_naked_00_gauntlets		
+
+// Shadowguard (Halberd)
+78	Shadowguard	Vampires	Poleaxe	Human-Professional	10	20	39	10	Unit	Steel_Poleaxe						Steel_Half_Helm	Full_Steel_Ringmail		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60					#BFAEFF00	PT_Medieval_Pike_07_c		PT_Male_Armor_Ex1_body_21	PT_Male_Armor_Ex1_gauntlets_22		
+
+// Shadeborn (2h Sword)
+80	Shadeborn	Vampires	2Handed-Slash	Vampire-Trained	30	20	42	60	Unit	Steel_Longsword			Lesser Lifesteal			Steel_Full_Helm	Steel_Scalemail		Humanoid	2	22	13	11	0	0	11	11	11	13	0	20	60	500		Blunt_Resistent+.3,Slash_Resistent+.3			#BFAEFF00	PT_Medieval_Longsword_02_b			PT_Male_Armor_Ex1_gauntlets_13		
+
+// Blood Reaver (Dual Axes)
+82	Blood Reaver	Vampires	Sword&Shield	Vampire-Professional	40	40	50	80	Unit	Steel_Axe	Steel_Axe		Lifesteal			Steel_Plate_Helm	Steel_Plate		Humanoid	2	24	14	12	0	0	12	12	12	13	0	25	80	500		Blunt_Resistent+.5,Slash_Resistent+.5			#BFAEFF00	PT_Medieval_ShortWaraxe_02_b	PT_Medieval_ShortWaraxe_02_b		PT_Male_Armor_Ex1_gauntlets_13		
+
+// Awoken	Vampires
+84	Awoken	Vampires	FistFighter	Vampire-Untrained	160	5	2	40	Unit	Fist			Lifesteal			Robe Hood	Acolyte_Robes		Humanoid	2	20	12	10	0	0	10	10	10	12	0	17	40	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600				PT_Male_Armor_Ex2_gauntlets_04_A		
+
+// Counsel Member	Vampires
+86	Counsel Member	Vampires	2Handed-Slash	Vampire-Professional	250	40	28	80	Unit	Iron_Longsword			Lifesteal			None	Iron_Scalemail		Humanoid	2	24	14	12	0	0	12	12	12	13	0	25	80	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600	PT_Medieval_Longsword_02_a			PT_Male_Armor_Ex1_gauntlets_13		

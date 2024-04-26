@@ -1,0 +1,61 @@
+
+Weapon_ID	Weapon_Name	Damage	Hands_Requirement	Damage_Type	Number_Of_Attacks	Cooldown	Length	Attack	Defense	Encumberance	Resources	Range	Precision	Material	Effects	Sprite_Name	Wood_1Color	Wood_2Color	Wood_3Color	Metal_1Color	Metal_2Color	Metal_3Color	Metal_4Color	Leather_2Color	Leather_3Color
+1	Fist	0	1_or_2	Piercing	2	1	0	1	2	0	0	0													
+2	Wooden_Spear	4	1_or_2	Piercing	1	1	3	1	0	0	1	0		Wood		PT_Medieval_Pike_01_a_short	#3C1E1900					#8C676100			
+3	Bronze_Spear	5	1_or_2	Piercing	1	1	3	2	0	0	3	0		Bronze		PT_Medieval_Pike_04_a_short	#3C1E1900			#E2A30700		#AB5E1E00			
+4	Iron_Spear	5	1_or_2	Piercing	1	1	3	2	0	0	4	0		Iron		PT_Medieval_Pike_04_b_short	#9F5F2E00			#8C5B5B00		#8C5B5B00	#E2B9B900		
+5	Steel_Spear	6	1_or_2	Piercing	1	1	3	2	0	0	6	0		Steel		PT_Medieval_Pike_04_c_short	#9F5F2E00			#BDC9D400	#FFFFFF00	#92C7D600	#B6B9CC00		
+6	Wooden_Club	6	1_or_2	Blunt	1	1	1	-1	-2	1	1	0		Wood		PT_Club_01_a	#844C4300					#8C676100			
+7	Bronze_Cudgel	8	1_or_2	Blunt	1	1	1	-1	-2	1	3	0		Bronze		PT_Medieval_Mace_02_b	#AB5E1E00			#593B2000		#E2A30700			
+8	Iron_Cudgel	9	1_or_2	Blunt	1	1	1	-1	-2	1	4	0		Iron		PT_Medieval_Mace_02_b	#AB5E1E00			#593B2000		#8C5B5B00			
+9	Steel_Cudgel	10	1_or_2	Blunt	1	1	1	-1	-2	1	6	0		Steel		PT_Medieval_Mace_01_c	#AB5E1E00			#90776000			#B6B9CC00	#9A4B41	
+10	Bronze_Shortsword	5	1	Slashing	1	1	1	2	2	0	5	0		Bronze		PT_Medieval_Sword_01_a	#AB5E1E00			#E2A30700		#C8853D00			
+11	Iron_Shortsword	6	1	Slashing	1	1	1	2	2	0	6	0		Iron		PT_Medieval_Sword_01_c	#AB5E1E00			#8C5B5B00	#8C5B5B00	#AB5E1E00	#E2B9B900		
+12	Steel_Shortsword	8	1	Slashing	1	1	1	2	2	0	8	0		Steel		PT_Medieval_Sword_06_a	#AB5E1E00			#C3C3C300		#787B8E00			
+13	Bronze_Longsword	7	1_or_2	Slashing	1	1	2	2	1	0	7	0		Bronze		PT_Medieval_Longsword_01_a	#AB5E1E00			#E2A30700		#E0985500			
+14	Iron_Longsword	8	1_or_2	Slashing	1	1	2	2	1	0	8	0		Iron		PT_Medieval_Longsword_02_a	#AB5E1E00			#8C5B5B00		#8C5B5B00			
+15	Steel_Longsword	9	1_or_2	Slashing	1	1	2	2	1	0	10	0		Steel		PT_Medieval_Longsword_02_b	#AB5E1E00			#C3C3C300		#787B8E00			
+16	Pike_of_Bronze_and_Ivory	8	2	Piercing	1	1	4	2	1	0	20	0		Magical		PT_Medieval_Pike_06_b	#FFE0C600			#E2A30700		#E0985500			
+17	Ivory_Scimitar	8	1	Slashing	1	1	2	5	1	0	15	0		Magical		PT_Medieval_Sword_05_a									
+18	Sandstone_Club	5	1	Blunt	1	1	3	1	-2	2	20	0		Stone	D-AOE+1,Displace(15,Front,3)	PT_Medieval_Club_01_c	#F3C4AF00	#F3C4AF00			#B47A5E00	#B79B9700			
+19	Heqa	2	1	Blunt	1	1	2	-2	0	0	3	0		Bronze		PT_Medieval_Staff_01_b	#F3C4AF00			#B0430B00	#FFBA0000				
+20	Divine_Rod	5	1	Blunt	1	1	2	1	1	0	2	0		Bronze		PT_Medieval_Staff_01_c	#F3C4AF00			#FDAE0000	#FFBA0000				
+21	Divine_Sword	9	1	Slashing	1	1	2	4	3	0	20	0		Magical	Divine_AP_Damage+9	PT_Medieval_Sword_06_c	#F3C4AF00			#FDAE0000	#FFBA0000	#FFF57700	#FFFFFF00		
+22	Sword_of_Heavens	12	2	Slashing	1	1	3	6	6	0	20	0		Magical	Divine_AP_Damage+9,AOE+1	PT_Medieval_Sword_07_c	#F3C4AF00			#FDAE0000	#FFBA0000	#FFF57700	#FFFFFF00		
+23	Staff_of_Divinity	20	2	Blunt	1	1	5	6	6	0	20	0		Magical	D-AOE+1,Displace(20,Front,6)	PT_Medieval_Staff_02_c				#FDAE0000	#FFBA0000	#FFF57700	#FFFFFF00		
+24	Wooden_Pitchfork	3	1_or_2	Piercing	1	1	3	0	0	0	0	0		Wood		PT_Medieval_Hayfork_01									
+25	Stone_Dagger	1	1	Piercing	1	1	1	2	2	0	2	0		Stone		PT_Medieval_Dagger_01_a	#AB5E1E00			#B9A79C00		#A69E7500			
+26	Bronze_Dagger	2	1	Piercing	1	1	1	3	1	0	3	0		Bronze		PT_Medieval_Dagger_01_b	#AB5E1E00			#E2A30700		#E0985500			
+27	Iron_Dagger	3	1	Piercing	1	1	1	3	1	0	4	0		Iron		PT_Medieval_Dagger_02_a	#AB5E1E00			#8C5B5B00		#71484800			
+28	Steel_Dagger	4	1	Piercing	1	1	1	3	1	0	5	0		Steel		PT_Medieval_Dagger_02_b	#AB5E1E00			#C3C3C300		#787B8E00			
+29	Javelin	5	1_or_2	Piercing	1	1	3	1	0	0	1	Str		Wood		PT_Medieval_Pike_04_c_short	#3C1E1900			#CF795100	#CF795100	#C55C3500	#9C614900		
+30	Shortbow	5	1_or_2	Piercing	1	1			-1	0	3	20	0	Wood	1/3_StrBonus	PT_Medieval_Bow_01_a	#C84D1000								#220806
+31	Composite Shortbow	5	1_or_2	Piercing	1	1			-1	0	5	25	0	Iron	1/3_StrBonus	PT_Medieval_Bow_02_a	#C84D1000								#220806
+32	Longbow	6	1_or_2	Piercing	1	1			-2	0	5	30	0	Wood	1/3_StrBonus	PT_Medieval_Longbow_01_a	#C84D1000								#220806
+33	Composite Longbow	7	1_or_2	Piercing	1	1			-2	0	7	35	0	Iron	1/3_StrBonus	PT_Medieval_Longbow_02_a	#C84D1000								#220806
+34	Crossbow	9	1_or_2	Piercing	1	2			-2	0	9	25	0	Iron	ArmorPiercing+.5,No_StrBonus	PT_Medieval_Crossbow_01_b	#C84D1000					#52433E00			#220806
+35	Steel Crossbow	10	1_or_2	Piercing	1	2			-2	0	10	25	0	Steel	ArmorPiercing+.5,No_StrBonus	PT_Medieval_Crossbow_02_b	#7D300E00	#7D300E00	#591F0500	#C2C4C500		#C8BCB800			#220806
+36	Sling	4	1	Blunt	1	1			0	0	1	15	-4												
+37	Stone_Axe	6	1	Slashing	1	1	1	0	-1	1	3	0		Stone	Damage_Armor+1	PT_Medieval_ShortWaraxe_01_a									
+38	Bronze_Axe	8	1	Slashing	1	1	1	1	0	0	5	0		Bronze	Damage_Armor+1	PT_Medieval_ShortWaraxe_01_a	#AB5E1E00			#E2A30700		#E0985500			
+39	Iron_Axe	9	1	Slashing	1	1	1	1	0	0	6	0		Iron	Damage_Armor+1	PT_Medieval_ShortWaraxe_01_b	#AB5E1E00			#8C5B5B00		#71484800			
+40	Steel_Axe	10	1	Slashing	1	1	1	1	0	0	8	0		Steel	Damage_Armor+1	PT_Medieval_ShortWaraxe_02_b	#AB5E1E00			#C3C3C300		#787B8E00	#E2B9B900		
+41	Stone_Battle_Axe	7	2	Slashing	1	1	1	0	-1	1	4	0		Stone	Damage_Armor+2	PT_Medieval_Waraxe_01_a	#FF7E4500			#C8C0B000		#F9FFFD00			
+42	Bronze_Battle_Axe	9	2	Slashing	1	1	1	1	0	0	7	0		Bronze	Damage_Armor+2	PT_Medieval_Waraxe_01_a	#301B0A00			#E2A30700		#E0985500			
+43	Iron_Battle_Axe	10	2	Slashing	1	1	1	1	0	0	9	0		Iron	Damage_Armor+2	PT_Medieval_Waraxe_01_b	#AB5E1E00			#8C5B5B00		#71484800			
+44	Steel_Battle_Axe	12	2	Slashing	1	1	1	1	0	0	12	0		Steel	Damage_Armor+2	PT_Medieval_Waraxe_02_b	#8C5B5B00			#C3C3C300		#787B8E00	#E2B9B900		
+45	Iron_Rondel	1	1	Piercing	1	1	1	3	1	0	4	0		Iron	ArmorPiercing+.35	PT_Medieval_Dagger_02_c	#AB5E1E00			#8C5B5B00	#41313100	#71484800			
+46	Steel_Rondel	2	1	Piercing	1	1	1	3	1	0	5	0		Steel	ArmorPiercing+.35	PT_Medieval_Dagger_02_c	#AB5E1E00			#C3C3C300	#9F989800				
+47	Wooden_Pike	4	2	Piercing	1	1	5	-1	-1	0	2	0		Wood	Displace(8,Front,1)	PT_Medieval_Pike_01_a	#3C1E1900					#8C676100			
+48	Bronze_Pike	5	2	Piercing	1	1	5	0	-1	0	4	0		Bronze	Displace(8,Front,1)	PT_Medieval_Pike_04_a	#301B0A00			#E2A30700		#E0985500			
+49	Iron_Pike	5	2	Piercing	1	1	5	1	-1	0	5	0		Iron	Displace(8,Front,1)	PT_Medieval_Pike_04_b	#AB5E1E00			#8C5B5B00		#71484800	#9A5F5F00		
+50	Steel_Pike	6	2	Piercing	1	1	5	1	-1	0	7	0		Steel	Displace(8,Front,1)	PT_Medieval_Pike_04_c	#8C5B5B00			#C3C3C300	#9F989800	#787B8E00	#E2B9B900		
+51	Bronze_Poleaxe	9	2	Piercing	1	1	3	0	-1	0	6	0		Bronze	ArmorPiercing+.25	PT_Medieval_Pike_10_a	#301B0A00			#E2A30700		#E0985500			
+52	Iron_Poleaxe	10	2	Piercing	1	1	3	1	-1	0	8	0		Iron	ArmorPiercing+.25	PT_Medieval_Pike_07_b	#AB5E1E00			#8C5B5B00		#71484800	#9A5F5F00		
+53	Steel_Poleaxe	12	2	Piercing	1	1	3	1	-1	0	10	0		Steel	ArmorPiercing+.25	PT_Medieval_Pike_07_c	#8C5B5B00			#C3C3C300	#9F989800	#787B8E00	#E2B9B900		
+54	Wood Staff	2	2	Blunt	1	1	3	1	3	0	2	0		Wood		PT_Medieval_Staff_01_a	#3C1E1900			#8C676100					
+55	Bronze Staff	3	2	Blunt	1	1	3	1	3	0	3	0		Bronze		PT_Medieval_Staff_02_b	#301B0A00			#E2A30700			#543F2A00		
+56	Iron Staff	4	2	Blunt	1	1	3	1	3	0	4	0		Iron		PT_Medieval_Staff_02_c	#AB5E1E00			#8C5B5B00	#2B151500	#71484800	#9A5F5F00		
+57	Steel Staff	5	2	Blunt	1	1	3	1	3	0	5	0		Steel		PT_Medieval_Staff_04_c	#8C5B5B00			#C3C3C300	#2D324600	#787B8E00	#FFFFFF00		
+
+

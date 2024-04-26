@@ -1,0 +1,41 @@
+
+#SimpleSpell
+
+StoneShot	Terra+1	damage=20
+Fireball	Terra+1	damage=22, area=1, element=Fire, flags=ArmorPiercing
+Fireball_Swarm	Terra+1	damage=22,area=1,count=10,spread_area=20,element=Fire,flags=ArmorPiercing
+Force_Lightning	Terra+1	damage=22,flags=ArmorPiercing,element=Force,shape=Chain
+
+Force_Blast	Body+1	damage=5, area=1, element=Force, flags=ArmorNegating, shape=Caster, knockback_force=10
+
+#SimpleBuff
+
+Iron_Skin	Body+1	prot_bonus=20
+Stone_Skin	Body+1	prot_bonus=15
+Titan_Strength	Body+1	strength_bonus=15
+Bless	Heavens+1	
+Wind_Guide	Terra+1	
+Quickness	Body+1	speed_bonus=12
+Body_Ethereal	Spirit+1	def_bonus=12
+Burning_Skin	Terra+1	prot_bonus=15
+Giant_Growth	Body+1	size_bonus=1
+Titan_Growth	Body+1	size_bonus=2
+Shrink	Body+1	size_bonus=-1
+
+Unnatural_Body	Body+1,Death+1	strength_bonus=5, speed_bonus=5, prot_bonus=5
+
+
+Magically_Awakened	Heavens+1	
+Ethereal	Heavens+1	
+WeaponsPeircing.2	Heavens+1	
+WeaponsPeircing.3	Heavens+1	
+WeaponsPeircing.4	Heavens+1	
+WeaponsPeircing.5	Heavens+1	
+WeaponsPeircing.6	Heavens+1	
+Resolve	Heavens+1	
+Living_Armor	Heavens+1	
+Knockdown	Heavens+1	
+Entangled	Heavens+1	
+Paralysis	Heavens+1	
+Decay	Heavens+1	
+

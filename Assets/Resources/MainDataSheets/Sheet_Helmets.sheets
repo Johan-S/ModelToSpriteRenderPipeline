@@ -1,0 +1,19 @@
+
+
+Helmet_ID	Armor_Name	Protection_Head	Protection_Body	Attack	Defense	Encumberance	Resource_Cost	Material	Effects	Sprite_Name	Leather_1_Color	Leather_2_Color	Leather_3_Color	Cloth_1_Color	Cloth_2_Color	Cloth_3_Color	Metal_1_Color	Metal_2_Color	Metal_3_Color	Theme Color 1	Theme Color 2	Theme Color 3
+
+0	None	0		0	0	0	0															
+1	Cloth_Visor	2		0	0	0	1	Cloth		PT_Male_Armor_Ex1_helmet_nv_06	#633C1E					#8C886A00				Cloth_3_Color		
+2	Padded_Helmet	3		0	0	0	2	Cloth		PT_Male_Armor_Ex1_helmet_nv_01			#716B3F00							Leather_3_Color		
+3	Leather_Helmet	4		0	0	0	2	Leather		PT_Male_Armor_leather_00_helmet_nv	#C8C0AA	#46291E	#4D2109							Leather_1_Color		
+4	Studded_Leather_Helmet	5		0	-1	0	6	Leather		PT_Male_Armor_Ex1_helmet_05	#4D2109		#4D2109			#57554700			#BE6147	Cloth_3_Color		
+5	Bronze_Half_Helm	7		0	-1	1	12	Bronze		PT_Male_Armor_Ex1_helmet_nv_09	#602E12							#986C4B00	#1F0B02	Metal_3_Color		
+6	Bronze_Full_Helm	11		-1	-2	1	14	Bronze		PT_Male_Armor_Ex1_helmet_16								#986C4B00	#3A2011	Metal_3_Color		
+7	Iron_Half_Helm	10		0	-1	1	14	Iron		PT_Male_Armor_Ex1_helmet_nv_11		#9A8A6100						#7B705E00	#3A2011	Leather_2_Color		
+8	Iron_Full_Helm	13		-1	-2	1	16	Iron		PT_Male_Armor_Ex1_helmet_32									#73645B			
+9	Steel_Half_Helm	12		0	0	1	16	Steel		PT_Male_Armor_plate_00_helmet_nv								#59363400	#B4C7E0	Metal_2_Color		
+10	Steel_Full_Helm	15		-1	-2	1	20	Steel		PT_Male_Armor_Ex1_helmet_37								#D2DEEE	#001B3C	Metal_3_Color		
+11	Steel_Plate_Helm	20		-3	-3	1	20	Steel		PT_Male_Armor_Ex1_helmet_39							#292C7D	#AEB8C5	#AEB8C5	Metal_1_Color		
+12	Robe Hood	2		0	0	0	1	Cloth		PT_Male_Armor_05_A_helmet	#40344F00	#6A4A3D00	#6A4A3D00		#6A4A3D00	#25263500	#2B1A10	#2C2935	#1F120C	Cloth_3_Color	Metal_2_Color	Leather_1_Color
+
+
