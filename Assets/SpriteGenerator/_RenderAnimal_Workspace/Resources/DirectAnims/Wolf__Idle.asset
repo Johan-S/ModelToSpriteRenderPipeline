@@ -18,3 +18,5 @@ MonoBehaviour:
   auto_frames_per_s: 6
   capture_frame: 
   time_ms: 
+  looping_root: 0
+  model_offset: {x: 0.5, y: 0, z: 0}

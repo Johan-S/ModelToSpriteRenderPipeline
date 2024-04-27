@@ -11,6 +11,9 @@ public class GeneratedSpritesContainer : ScriptableObject {
    public const float FLOOR_PX = 39;
 
    public const float FLOOR_PIVOT = FLOOR_PX / 256;
+
+
+   public static readonly Vector2 DEFAULT_PIVOT = new Vector2(0.5f, FLOOR_PIVOT);
    
    public static Sprite GetStableIcon(string unit) {
       var i = GetInstance();
@@ -164,16 +167,20 @@ public class GeneratedSpritesContainer : ScriptableObject {
    public Sprite[] sprites;
 
 
-   static (string file_name, RectInt rect) ParseMetaRow(string row) {
+   static (string file_name, RectInt rect, Vector2 pivot) ParseMetaRow(string row) {
       row = row.Trim();
 
       var ab = row.Split("\t");
       var fn = ab[0];
       var ri = ab[1].Split(",").map(int.Parse);
 
+      float[] pivot_d = ab.Get(2)?.Split(",")?.map(float.Parse);
+
       RectInt rect = new(ri[0], ri[1], ri[2], ri[3]);
 
-      return (fn, rect);
+      Vector2 pivot = pivot_d == null ? DEFAULT_PIVOT : new Vector2(pivot_d[0], pivot_d[1]);
+
+      return (fn, rect, pivot);
    }
 
    public static GeneratedSpritesContainer MakeFromData(Texture2D atlas, string atlas_meta_text) {
@@ -193,11 +200,11 @@ public class GeneratedSpritesContainer : ScriptableObject {
 
       var data = rows.Select(ParseMetaRow).ToArray();
 
-      foreach (var (f, r) in data) {
+      foreach (var (f, r, pivot) in data) {
 
          Rect rf = new Rect(r.x, r.y, r.width, r.height);
 
-         var sprite = Sprite.Create(atlas, rf, new Vector2(0.5f, 0.5f), 64, 0, SpriteMeshType.FullRect);
+         var sprite = Sprite.Create(atlas, rf, pivot, 64, 0, SpriteMeshType.FullRect);
 
          sprite.name = f;
          

@@ -10,10 +10,13 @@ PresetManager:
       m_ManagedTypePPtr: {fileID: 0}
       m_ManagedTypeFallback: 
     second:
-    - m_Preset: {fileID: 2655988077585873504, guid: 89708f319f913f549a4f6cf2419a9bc2, type: 2}
+    - m_Preset: {fileID: 2655988077585873504, guid: 30d8bbd6bd3ed5648b85664527fbe0de, type: 2}
       m_Filter: 
       m_Disabled: 0
-    - m_Preset: {fileID: 2655988077585873504, guid: 7fabc15d5d41da14cafbb03e2370c5f1, type: 2}
+    - m_Preset: {fileID: 0}
+      m_Filter: 
+      m_Disabled: 0
+    - m_Preset: {fileID: 0}
       m_Filter: 
       m_Disabled: 0
     - m_Preset: {fileID: 0}

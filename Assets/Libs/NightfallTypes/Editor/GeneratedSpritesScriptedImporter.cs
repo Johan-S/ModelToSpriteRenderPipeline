@@ -5,6 +5,7 @@ using UnityEditor.AssetImporters;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using UnityEditor;
 using Object = UnityEngine.Object;
 
 [ScriptedImporter(1, "spritemeta")]
@@ -12,23 +13,26 @@ using Object = UnityEngine.Object;
 public class GeneratedSpritesScriptedImporter : ScriptedImporter {
 
    public Texture2D atlas;
-   static (string file_name, RectInt rect) ParseMetaRow(string row) {
-      row = row.Trim();
-
-      var ab = row.Split("\t");
-      var fn = ab[0];
-      var ri = ab[1].Split(",").map(int.Parse);
-
-      RectInt rect = new(ri[0], ri[1], ri[2], ri[3]);
-
-      return (fn, rect);
-   }
  
    public override void OnImportAsset(AssetImportContext ctx) {
 
       if (!atlas) {
-         Debug.LogError($"Need atlas!");
-         return;
+         var me = ctx.assetPath;
+         var dir = me[0..(me.LastIndexOf('/')+1)];
+         var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Join(dir, "atlas.png"));
+
+         if (tex) {
+            atlas = tex;
+            Debug.Log($"Added atlas {atlas.name}");
+            EditorUtility.SetDirty(this);
+         } else {
+         
+            // AssetDatabase.LoadAssetAtPath<>()
+         
+            Debug.LogError($"Need atlas!");
+            return;
+         }
+         
       }
 
 
@@ -53,7 +57,7 @@ public class GeneratedSpritesScriptedImporter : ScriptedImporter {
       foreach (var s in sprites) {
          
          
-         ctx.AddObjectToAsset($"sprite_{sprite_i++}", s);
+         ctx.AddObjectToAsset(s.name, s);
       }
 
       foreach (var g in gened_sprites) {

@@ -14,4 +14,6 @@ public class ModelBodyCategory : ScriptableObject {
 
    public bool no_gear;
 
+   public Vector3 model_offset;
+
 }

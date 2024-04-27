@@ -7,6 +7,9 @@ public class CameraHandle : MonoBehaviour {
 
    Camera my_cam;
 
+   public Vector2 OrthographicRectSize => new(my_cam.orthographicSize * 2, my_cam.orthographicSize * 2);
+   
+
    public float TotalDepth() => my_cam.farClipPlane - my_cam.nearClipPlane;
 
    Dictionary<(int, int), RenderTexture> render_textures;

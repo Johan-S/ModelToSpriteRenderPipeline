@@ -119,19 +119,23 @@ public class ExportPipeline : MonoBehaviour {
 
    TimeBenchmark time_benchmark;
 
-   List<(string FileOutput, RectInt rect)> sprite_gen_meta = new();
+   List<(string FileOutput, RectInt rect, Vector2 ground_center_pivot)> sprite_gen_meta = new();
 
 
-   string SpriteGenMetaRow((string FileOutput, RectInt rect) d) {
+   string SpriteGenMetaRow((string FileOutput, RectInt rect, Vector2 ground_center_pivot) d) {
       var r = d.rect;
+      var p = d.ground_center_pivot;
 
-      return $"{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}";
+      return $"{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
    void FinalizeMetaFile() {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      File.WriteAllText($"{export_to_folder}/atlas_meta.txt", meta_rows.join("\n"));
+      var mf = $"{export_to_folder}/atlas_meta.txt";
+      File.WriteAllText(mf, meta_rows.join("\n"));
+
+      File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
    }
 
 
@@ -276,7 +280,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var rect = new RectInt(pos.x * export_tex.width, pos.y * export_tex.height, export_tex.width, export_tex.height);
 
-      sprite_gen_meta.Add((FileOutput, rect));
+      sprite_gen_meta.Add((FileOutput, rect, GeneratedSpritesContainer.DEFAULT_PIVOT));
 
       return rect;
    }
@@ -329,12 +333,10 @@ public class ExportPipeline : MonoBehaviour {
    }
 
 
-   void RunOutputImpl(GameObject model_prefab, string name, Material res_mat, Material orig_mat,
-      AnimationClip animation_clip, int frame,
-      List<(string field, Color color)> colors, string animation_category) {
-      sprite_capture_pipeline.model.SetAnimationNow(animation_clip, frame);
+   void RunOutputImpl(GameObject model_prefab, ParsedUnit pu, AnimationWrap an, Material res_mat) {
+      sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
-      var FileOutput = GetFileOutput(model_prefab.name, animation_category, frame);
+      var FileOutput = GetFileOutput(model_prefab.name, an.category, an.frame);
 
       foreach (var x in GetChildRenders()) {
       }
@@ -357,6 +359,19 @@ public class ExportPipeline : MonoBehaviour {
       CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput);
 
 
+      if (an.animation_type_object != null) {
+         var cid = output_i - 1;
+         (string FileOutput, RectInt rect, Vector2 ground_center_pivot) o = sprite_gen_meta[cid];
+         Vector3 model_off = an.animation_type_object.model_offsetmodel_offset;
+         Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
+
+         if (model_off != default) {
+            var sprite_pivot = GetAdjustedSpritePivot(o.ground_center_pivot, model_off, camera_d);
+            sprite_gen_meta[cid] = (o.FileOutput, o.rect, sprite_pivot);
+         }
+      }
+
+
       var data = export_tex.EncodeToPNG();
 
       if (!only_atlas) {
@@ -368,6 +383,16 @@ public class ExportPipeline : MonoBehaviour {
             x.material = res_mat;
          }
       }
+   }
+
+   public Vector2 GetAdjustedSpritePivot(Vector2 original_pivot, Vector3 model_offset, Vector2 cap_size) {
+      Vector3 original_world_pos = original_pivot * cap_size;
+
+      var new_world_pos = original_world_pos + model_offset;
+
+      var new_pivot = new_world_pos / cap_size;
+
+      return new_pivot;
    }
 
    static IEnumerable<string> GetThemes(string[] names, string[] data) {
@@ -434,13 +459,13 @@ public class ExportPipeline : MonoBehaviour {
       var model = sprite_capture_pipeline.model;
 
 
-      foreach (var an in pu.animations) {
+      foreach (AnimationWrap an in pu.animations) {
          if (an.animation_type_object != null && an.animation_type_object.looping_root) {
             var move_back = sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
-            RunOutputImpl(model_prefab, an.name, res_mat, pu.material, an.clip, an.frame, pu.colors, an.category);
+            RunOutputImpl(model_prefab, pu, an, res_mat);
             move_back();
          } else {
-            RunOutputImpl(model_prefab, an.name, res_mat, pu.material, an.clip, an.frame, pu.colors, an.category);
+            RunOutputImpl(model_prefab, pu, an, res_mat);
          }
 
 
@@ -525,6 +550,27 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
+
+   public class AnimationWrap {
+      public AnimationWrap(string name, AnimationClip clip, string category, int frame,
+         AnimationTypeObject animation_type_object) {
+         this.name = name;
+         this.clip = clip;
+         this.category = category;
+         this.frame = frame;
+         this.animation_type_object = animation_type_object;
+      }
+
+
+      public string name;
+      public AnimationClip clip;
+      public string category;
+      public int frame;
+
+      public AnimationTypeObject animation_type_object;
+   }
+
+
    public class ParsedUnit {
       public string raw_name;
       public string out_name;
@@ -540,8 +586,7 @@ public class ExportPipeline : MonoBehaviour {
       public Dictionary<string, string> slot_map = new();
       public Dictionary<string, string> skin_map = new();
 
-      public List<(string name, AnimationClip clip, string category, int frame, AnimationTypeObject
-         animation_type_object)> animations = new();
+      public List<AnimationWrap> animations = new();
 
       public int idle_animation_id;
 
@@ -885,8 +930,7 @@ public class ExportPipeline : MonoBehaviour {
    public class AnimationSet {
       public string name;
 
-      public List<(string name, AnimationClip clip, string category, int frame, AnimationTypeObject
-         animation_type_object)> res = new();
+      public List<AnimationWrap> res = new();
    }
 
 
@@ -970,11 +1014,11 @@ public class ExportPipeline : MonoBehaviour {
                for (int i = 1; i < frames; i++) {
                   float time = i * len / (frames - 1);
 
-                  p.res.Add((data.clip, clip, data.category, Mathf.FloorToInt(time * 60), data));
+                  p.res.Add(new(data.clip, clip, data.category, Mathf.FloorToInt(time * 60), data));
                }
             } else {
                foreach (var fr in data.capture_frame) {
-                  p.res.Add((data.clip, clip, data.category, fr, data));
+                  p.res.Add(new(data.clip, clip, data.category, fr, data));
                }
             }
          }
@@ -1008,7 +1052,7 @@ public class ExportPipeline : MonoBehaviour {
                }
 
                foreach (var fr in data.capture_frame) {
-                  p.res.Add((data.clip, clip, data.category, fr, null));
+                  p.res.Add(new(data.clip, clip, data.category, fr, null));
                }
             }
          }
@@ -1052,12 +1096,15 @@ public class ExportPipeline : MonoBehaviour {
       GameObject model_prefab = Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
 
+      sprite_capture_pipeline.model.model_offset = u.model_body.body_category.model_offset;
+
       void RunLoadout(Action<GameObject> model_action) {
          model_prefab = omodel_prefab;
 
          // Debug.Log($"{model_name}: {model_prefab}");
          if (model_prefab) {
             var mod = sprite_capture_pipeline.model.ResetModel(model_prefab, model_action);
+
 
             model_prefab = mod;
          } else {

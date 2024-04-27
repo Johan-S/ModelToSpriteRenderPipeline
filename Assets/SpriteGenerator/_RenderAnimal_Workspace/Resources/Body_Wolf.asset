@@ -17,3 +17,4 @@ MonoBehaviour:
   bodyTypeName: Wolf
   animationTypeName: 
   no_gear: 1
+  model_offset: {x: 0.5, y: 0, z: 0}

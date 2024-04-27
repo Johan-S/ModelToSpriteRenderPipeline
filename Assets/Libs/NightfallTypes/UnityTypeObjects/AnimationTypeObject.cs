@@ -15,4 +15,7 @@ public class AnimationTypeObject : ScriptableObject {
 
 
    public bool looping_root;
+   
+   
+   public Vector3 model_offsetmodel_offset;
 }

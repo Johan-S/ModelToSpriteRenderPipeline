@@ -34,6 +34,7 @@ public class ModelHandle : MonoBehaviour {
       foreach (var o in sub_render_obj) {
          // o.GetComponent<Animator>().enabled = false;
          clip.SampleAnimation(o, x * clip.length);
+         o.transform.localPosition += model_offset;
       }
 
       SetActiveModel(0);
@@ -45,11 +46,13 @@ public class ModelHandle : MonoBehaviour {
       foreach (var o in sub_render_obj) {
          // o.GetComponent<Animator>().enabled = false;
          clip.SampleAnimation(o, frame * (1 / 60f));
+         o.transform.localPosition += model_offset;
       }
 
       SetActiveModel(0);
    }
-   [Header("Update Preview Frame")]
+
+   [Header("Update Preview Frame")] public Vector3 model_offset;
    
    [Range(0, 1)] public float animation_t = 0;
    public AnimationClip animation_clip;
@@ -172,6 +175,7 @@ public class ModelHandle : MonoBehaviour {
             
             
             animation_clip.SampleAnimation(model_root.gameObject, animation_time);
+            model_root.transform.localPosition += model_offset;
             animation_frame = Mathf.RoundToInt(animation_time * 60);
          }
       }
@@ -186,6 +190,7 @@ public class ModelHandle : MonoBehaviour {
          foreach (var o in sub_render_obj) {
             // o.GetComponent<Animator>().enabled = false;
             animation_clip.SampleAnimation(o, animation_time);
+            model_root.transform.localPosition += model_offset;
          }
       }
    }
@@ -207,6 +212,7 @@ public class ModelHandle : MonoBehaviour {
             bool a = o.activeSelf;
             o.SetActive(false);
             animation_clip.SampleAnimation(o, animation_time);
+            o.transform.localPosition += model_offset;
             o.SetActive(a);
          }
       }
