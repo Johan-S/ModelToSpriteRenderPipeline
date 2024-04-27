@@ -1409,6 +1409,14 @@ public class ExportPipeline : MonoBehaviour {
       CompleteJingle();
    }
 
+   public void OpenOutputFolder() {
+
+#if UNITY_EDITOR
+      UnityEditor.EditorUtility.RevealInFinder($"{export_to_folder}/atlas.png");
+#endif
+
+   }
+
    void CompleteJingle() {
 
       var pcp = SoundManager.instance.production_confirmed;

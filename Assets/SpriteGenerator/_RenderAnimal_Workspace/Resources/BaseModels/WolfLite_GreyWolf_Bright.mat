@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: WolfLite_GreyWolf
+  m_Name: WolfLite_GreyWolf_Bright
   m_Shader: {fileID: 4800000, guid: a5373e7a4216aa3409f9e01706d1f035, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -127,5 +127,5 @@ Material:
     - _MRE7: {r: 0.30588236, g: 0.6862745, b: 0, a: 0}
     - _MRE8: {r: 0, g: 0.638, b: 0, a: 0}
     - _MRE9: {r: 0, g: 0.16862746, b: 0.43137255, a: 0}
-    - _Tint: {r: 0.67665565, g: 0.7303585, b: 0.759, a: 0.50980395}
+    - _Tint: {r: 0.7392187, g: 0.7997396, b: 0.83, a: 0.50980395}
   m_BuildTextureStacks: []
