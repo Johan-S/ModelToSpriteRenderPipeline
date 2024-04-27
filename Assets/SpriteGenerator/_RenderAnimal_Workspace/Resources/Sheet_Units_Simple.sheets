@@ -60,16 +60,12 @@
 // Shadowguard (Halberd)
 78	Shadowguard	Vampires	Poleaxe	Human-Professional	10	20	39	10	Unit	Steel_Poleaxe						Steel_Half_Helm	Full_Steel_Ringmail		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60					#BFAEFF00	PT_Medieval_Pike_07_c		PT_Male_Armor_Ex1_body_21	PT_Male_Armor_Ex1_gauntlets_22		
 
-// Shadeborn (2h Sword)
 80	Shadeborn	Vampires	2Handed-Slash	Vampire-Trained	30	20	42	60	Unit	Steel_Longsword			Lesser Lifesteal			Steel_Full_Helm	Steel_Scalemail		Humanoid	2	22	13	11	0	0	11	11	11	13	0	20	60	500		Blunt_Resistent+.3,Slash_Resistent+.3			#BFAEFF00	PT_Medieval_Longsword_02_b			PT_Male_Armor_Ex1_gauntlets_13		
 
-// Blood Reaver (Dual Axes)
 82	Blood Reaver	Vampires	Sword&Shield	Vampire-Professional	40	40	50	80	Unit	Steel_Axe	Steel_Axe		Lifesteal			Steel_Plate_Helm	Steel_Plate		Humanoid	2	24	14	12	0	0	12	12	12	13	0	25	80	500		Blunt_Resistent+.5,Slash_Resistent+.5			#BFAEFF00	PT_Medieval_ShortWaraxe_02_b	PT_Medieval_ShortWaraxe_02_b		PT_Male_Armor_Ex1_gauntlets_13		
 
-// Awoken	Vampires
 84	Awoken	Vampires	FistFighter	Vampire-Untrained	160	5	2	40	Unit	Fist			Lifesteal			Robe Hood	Acolyte_Robes		Humanoid	2	20	12	10	0	0	10	10	10	12	0	17	40	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600				PT_Male_Armor_Ex2_gauntlets_04_A		
 
-// Counsel Member	Vampires
 86	Counsel Member	Vampires	2Handed-Slash	Vampire-Professional	250	40	28	80	Unit	Iron_Longsword			Lifesteal			None	Iron_Scalemail		Humanoid	2	24	14	12	0	0	12	12	12	13	0	25	80	500		Blunt_Resistent+.5,Slash_Resistent+.5			#48151600	PT_Medieval_Longsword_02_a			PT_Male_Armor_Ex1_gauntlets_13		
 
 69	Mortician		Mage	Human-Trained	100	60	7	10	Commander	Bronze_Axe						Robe Hood	Basic_Robes		Humanoid	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1		#21135E00	PT_Medieval_ShortWaraxe_01_a		PT_Male_Armor_05_A_body	PT_Male_Armor_05_C_gauntlets		
@@ -77,3 +73,5 @@
 
 
 87	Wolf		Wolf	Human-Trained	100	60	7	10	Commander										Wolf	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1								
+
+151	WolfBright		Wolf	Human-Trained	100	60	7	10	Commander										WolfBright	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1								

@@ -109,11 +109,13 @@ public class ExportPipeline : MonoBehaviour {
       }
 
 
-      public void LogTimes(int nc) {
+      public double LogTimes(int nc) {
          var dt = last_t - first_t;
 
          Debug.Log(
             $"Export Bench tot {dt / nc * 1000:0} ms  per render: {dt:0.0} / {nc} :\n{steps.join("\n", x => $"{x}: {times[x]}")}");
+
+         return dt;
       }
    }
 
@@ -132,10 +134,10 @@ public class ExportPipeline : MonoBehaviour {
    void FinalizeMetaFile() {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      var mf = $"{export_to_folder}/atlas_meta.txt";
+      var mf = $"{export_to_folder}/test_atlas.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
 
-      File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
+      // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
    }
 
 
@@ -1390,7 +1392,7 @@ public class ExportPipeline : MonoBehaviour {
 
       export_tex_tot.Apply();
 
-      time_benchmark.LogTimes(out_sprite_count);
+      var full_time = time_benchmark.LogTimes(out_sprite_count);
 
       var rb = export_tex_tot.EncodeToPNG();
 
@@ -1403,5 +1405,30 @@ public class ExportPipeline : MonoBehaviour {
       if (progress_text) {
          progress_text.transform.parent.gameObject.SetActive(false);
       }
+
+      CompleteJingle();
    }
+
+   void CompleteJingle() {
+
+      var pcp = SoundManager.instance.production_confirmed;
+
+      pcp.playOnAwake = false;
+      var p = Instantiate(pcp);
+      pcp.playOnAwake = true;
+
+      var cl = SoundManager.instance.click;
+      cl.playOnAwake = false;
+      var c = Instantiate(cl);
+      cl.playOnAwake = true;
+
+      var dp = AudioSettings.dspTime;
+      
+      p.PlayScheduled(dp);
+      c.PlayScheduled(dp + 0.165f);
+      
+      
+
+   }
+   
 }

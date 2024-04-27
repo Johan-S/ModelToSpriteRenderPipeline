@@ -265,6 +265,9 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
          void AddRowsL(string htype, IEnumerable<string> rows) {
             foreach (var row_string in rows) {
                if (row_string.Trim().Length == 0) continue;
+               if (row_string.StartsWith("//")) {
+                  continue;
+               }
                if (row_string.StartsWith("#")) {
                   continue;
                }

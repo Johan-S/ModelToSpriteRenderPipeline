@@ -55,13 +55,14 @@ public class SoundManager : MonoBehaviour {
       next_music_change = Time.realtimeSinceStartup;
    }
 
-   public static void ClickOk() {
-      if (instance) instance._ClickOk();
+   public static AudioSource ClickOk() {
+      if (instance) return instance._ClickOk();
+      return null;
    }
-   void _ClickOk() {
-      if (!can_play) return;
+   AudioSource _ClickOk() {
+      if (!can_play) return null;
       last_played_sound = Time.time;
-      Instantiate(click);
+      return Instantiate(click);
    }
    public void ButtonPress() {
       if (!can_play) return;
@@ -175,9 +176,9 @@ public class SoundManager : MonoBehaviour {
       sound_played = true;
       Instantiate(action_canceled);
    }
-   public void ProductionConfirmed() {
-      if (!can_play) return;
-      Instantiate(production_confirmed);
+   public AudioSource ProductionConfirmed() {
+      if (!can_play) return null;
+      return Instantiate(production_confirmed);
    }
    public void ProductionCancelled() {
       if (!can_play) return;

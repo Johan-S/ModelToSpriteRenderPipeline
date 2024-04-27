@@ -171,11 +171,14 @@ public class ModelHandle : MonoBehaviour {
          }
          if (!model_root) model_root = GetComponentInChildren<Animator>();
          if (model_root) {
+
+            animation_t += animation_speed / animation_clip.length * 0.01f;
+            if (animation_t > 1) animation_t -= 1;
             animation_time = animation_t * animation_clip.length;
             
             
             animation_clip.SampleAnimation(model_root.gameObject, animation_time);
-            model_root.transform.localPosition += model_offset;
+            // model_root.transform.localPosition = model_offset;
             animation_frame = Mathf.RoundToInt(animation_time * 60);
          }
       }
@@ -190,7 +193,7 @@ public class ModelHandle : MonoBehaviour {
          foreach (var o in sub_render_obj) {
             // o.GetComponent<Animator>().enabled = false;
             animation_clip.SampleAnimation(o, animation_time);
-            model_root.transform.localPosition += model_offset;
+            // model_root.transform.localPosition = model_offset;
          }
       }
    }

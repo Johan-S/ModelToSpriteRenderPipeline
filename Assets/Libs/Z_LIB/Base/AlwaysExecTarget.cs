@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -11,7 +12,29 @@ public class AlwaysExecTarget : MonoBehaviour {
    }
 
 
-   void Update() {
-      if (!Application.isPlaying) onEditorUpdate.Invoke();
+
+   double throttle = -1;
+   void RunMe() {
+
+      if (Application.isPlaying) return;
+
+      var rt = EditorApplication.timeSinceStartup;
+
+      if (rt > throttle + 0.01f) {
+         throttle = rt;
+         onEditorUpdate.Invoke();
+      }
+
+   }
+
+   void OnEnable() {
+      EditorApplication.update += RunMe;
+      
+   }
+
+   void OnDisable() {
+
+      EditorApplication.update -= RunMe;
+
    }
 }
