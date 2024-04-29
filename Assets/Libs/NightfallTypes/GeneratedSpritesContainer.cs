@@ -4,8 +4,6 @@ using System.Linq;
 using UnityEngine;
 
 public class GeneratedSpritesContainer : ScriptableObject {
-   
-
    static GeneratedSpritesContainer cache;
 
    public const float FLOOR_PX = 39;
@@ -14,7 +12,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
 
 
    public static readonly Vector2 DEFAULT_PIVOT = new Vector2(0.5f, FLOOR_PIVOT);
-   
+
    public static Sprite GetStableIcon(string unit) {
       var i = GetInstance();
       if (i) return i.lookup.Get(unit)?.icon_sprite;
@@ -22,53 +20,48 @@ public class GeneratedSpritesContainer : ScriptableObject {
    }
 
    public static void SetInstance(GeneratedSpritesContainer instance) {
-
       cache = instance;
-
    }
 
    public static void SetInstanceFromData(Texture2D atlas, string meta) {
-
       var o = MakeFromData(atlas, meta);
-      
+
       SetInstance(o);
-
-
    }
-   
-   
+
+
    public static GeneratedSpritesContainer GetInstance() {
       if (!cache) {
          cache = Resources.Load<GeneratedSpritesContainer>("AtlasGen/test_atlas");
          if (!cache) {
-            
             cache = Resources.LoadAll<GeneratedSpritesContainer>("").First();
             if (!cache) {
                Debug.LogError("Didn't found test_atlas meta file! Need GeneratedSpritesContainer to fetch sprites!");
                return null;
             }
          }
+
          if (cache.sprites != null) cache.SetSprites(cache.sprites);
       }
 
       if (cache.lookup.IsNullOrEmpty()) {
-         
          cache.SetSprites(cache.sprites);
       }
+
       return cache;
    }
-   
-   [SerializeField]
-   List<Sprite> genned_sprites;
+
+   [SerializeField] List<Sprite> genned_sprites;
 
    public IReadOnlyList<Sprite> GetSprites() {
       return sprites;
    }
+
    public IReadOnlyList<Sprite> GetGennedSprites() {
       return genned_sprites;
    }
 
-   public List<Sprite>  SetSprites(Sprite[] sl) {
+   public List<Sprite> SetSprites(Sprite[] sl) {
       genned_sprites ??= new();
       sprites = sl;
       if (sprites != null) {
@@ -76,14 +69,14 @@ public class GeneratedSpritesContainer : ScriptableObject {
          Dictionary<string, UnitCats> dicts = new();
          foreach (var spr in sprites) {
             var f = spr.name;
-            
+
             var spl = f.Split(".");
             var sc = new SpriteCats {
                full_name = f,
                unit_name = spl[0],
                animation_category = spl[1],
                tex = spr.texture,
-               sprite =  spr,
+               sprite = spr,
             };
             if (!dicts.TryGetValue(sc.unit_name, out var uc)) {
                uc = new UnitCats();
@@ -93,6 +86,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
 
             uc.sprites.Add(sc);
          }
+
          foreach (var uc in dicts.Values) {
             var spr = uc.sprites.FirstOrDefault(x => x.animation_category == "Idle") ?? uc.sprites[0];
 
@@ -104,26 +98,26 @@ public class GeneratedSpritesContainer : ScriptableObject {
             }
 
             if (!uc.icon_sprite) {
-               
                var idl_sprite = uc.idle_sprite;
 
                var rect = idl_sprite.rect;
                var nsz = rect.size * 0.5f;
                var np = rect.size - nsz;
 
-               float wanted_floor_px = 2; 
-               var floor = - rect.size * FLOOR_PIVOT;
+               float wanted_floor_px = 2;
+               var floor = -rect.size * FLOOR_PIVOT;
                floor.x = 0;
                var mp = np * 0.5f + floor;
 
                mp.y = (rect.size * FLOOR_PIVOT).y - wanted_floor_px;
-               
+
                var nr = new Rect(rect.position + mp, nsz);
 
                float new_floor_px = FLOOR_PX - mp.y;
                float new_floor_pivot = wanted_floor_px / nsz.y;
-               
-               uc.icon_sprite = Sprite.Create(idl_sprite.texture, nr, new Vector2(0.5f, new_floor_pivot), idl_sprite.pixelsPerUnit, 0, SpriteMeshType.FullRect);
+
+               uc.icon_sprite = Sprite.Create(idl_sprite.texture, nr, new Vector2(0.5f, new_floor_pivot),
+                  idl_sprite.pixelsPerUnit, 0, SpriteMeshType.FullRect);
 
                uc.icon_sprite.name = icon_gen_name;
 
@@ -133,8 +127,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
 
          lookup = dicts;
       }
-      
-      
+
 
       return genned_sprites;
    }
@@ -163,8 +156,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
       public Sprite sprite;
    }
 
-   [HideInInspector]
-   public Sprite[] sprites;
+   [HideInInspector] public Sprite[] sprites;
 
 
    static (string file_name, RectInt rect, Vector2 pivot) ParseMetaRow(string row) {
@@ -184,15 +176,14 @@ public class GeneratedSpritesContainer : ScriptableObject {
    }
 
    public static GeneratedSpritesContainer MakeFromData(Texture2D atlas, string atlas_meta_text) {
-      
       var container = ScriptableObject.CreateInstance<GeneratedSpritesContainer>();
 
       container.name = "GeneratedSpritesContainer_Made";
 
 
       int sprite_i = 1;
-      
-      
+
+
       var rows = atlas_meta_text.SplitLines();
 
 
@@ -201,13 +192,12 @@ public class GeneratedSpritesContainer : ScriptableObject {
       var data = rows.Select(ParseMetaRow).ToArray();
 
       foreach (var (f, r, pivot) in data) {
-
          Rect rf = new Rect(r.x, r.y, r.width, r.height);
 
          var sprite = Sprite.Create(atlas, rf, pivot, 64, 0, SpriteMeshType.FullRect);
 
          sprite.name = f;
-         
+
          sprites.Add(sprite);
       }
 
@@ -215,5 +205,4 @@ public class GeneratedSpritesContainer : ScriptableObject {
 
       return container;
    }
-
 }
