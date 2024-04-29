@@ -497,6 +497,9 @@ public static class Std {
       return arr;
    }
 
+   public static bool IsEmpty<T>(this ICollection<T> s) {
+      return s == null || s.Count == 0;
+   }
    public static bool IsNullOrEmpty<T>(this ICollection<T> s) {
       return s == null || s.Count == 0;
    }

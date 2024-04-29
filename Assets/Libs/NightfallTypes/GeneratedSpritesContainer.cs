@@ -4,7 +4,15 @@ using System.Linq;
 using UnityEngine;
 
 public class GeneratedSpritesContainer : ScriptableObject {
-   static GeneratedSpritesContainer cache;
+   public static void ClearCache() {
+      _cache = null;
+   }
+
+   static List<GeneratedSpritesContainer> _cache;
+   static List<GeneratedSpritesContainer> instances => GetInstance();
+
+   static GeneratedSpritesContainer extra_instance;
+   
 
    public const float FLOOR_PX = 39;
 
@@ -14,41 +22,50 @@ public class GeneratedSpritesContainer : ScriptableObject {
    public static readonly Vector2 DEFAULT_PIVOT = new Vector2(0.5f, FLOOR_PIVOT);
 
    public static Sprite GetStableIcon(string unit) {
-      var i = GetInstance();
-      if (i) return i.lookup.Get(unit)?.icon_sprite;
+      return Get(unit)?.icon_sprite;
+   }
+
+   public static UnitCats Get(string name) {
+      {
+         if (extra_instance && extra_instance.lookup.TryGetValue(name, out var k)) return k;
+      }
+      foreach (var c in GetInstance()) {
+         if (c.lookup.TryGetValue(name, out var k)) return k;
+      }
+
       return null;
    }
 
-   public static void SetInstance(GeneratedSpritesContainer instance) {
-      cache = instance;
+   public static void SetExtra(GeneratedSpritesContainer instance) {
+      extra_instance = instance;
    }
 
-   public static void SetInstanceFromData(Texture2D atlas, string meta) {
+   public static void SetExtra(Texture2D atlas, string meta) {
       var o = MakeFromData(atlas, meta);
 
-      SetInstance(o);
+      SetExtra(o);
    }
 
-
-   public static GeneratedSpritesContainer GetInstance() {
-      if (!cache) {
-         cache = Resources.Load<GeneratedSpritesContainer>("AtlasGen/test_atlas");
-         if (!cache) {
-            cache = Resources.LoadAll<GeneratedSpritesContainer>("").First();
-            if (!cache) {
-               Debug.LogError("Didn't found test_atlas meta file! Need GeneratedSpritesContainer to fetch sprites!");
-               return null;
-            }
+   static List<GeneratedSpritesContainer> GetInstance() {
+      if (_cache == null) {
+         _cache = Resources.LoadAll<GeneratedSpritesContainer>("").ToList();
+         if (_cache.IsNullOrEmpty()) {
+            Debug.LogError("Didn't found test_atlas meta file! Need GeneratedSpritesContainer to fetch sprites!");
+            return null;
          }
 
-         if (cache.sprites != null) cache.SetSprites(cache.sprites);
+         foreach (var c in _cache) {
+            if (c.sprites != null) c.SetSprites(c.sprites);
+         }
       }
 
-      if (cache.lookup.IsNullOrEmpty()) {
-         cache.SetSprites(cache.sprites);
+      foreach (var c in _cache) {
+         if (c.lookup.IsNullOrEmpty()) {
+            c.SetSprites(c.sprites);
+         }
       }
 
-      return cache;
+      return _cache;
    }
 
    [SerializeField] List<Sprite> genned_sprites;

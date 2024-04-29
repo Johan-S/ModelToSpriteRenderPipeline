@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Body_Wolf
   m_EditorClassIdentifier: 
   model_root_prefab: {fileID: 9206493791514366358, guid: 4d56422e7dc64af47b8473f20a96d926, type: 3}
-  material: {fileID: 2100000, guid: ab110e5718a8dfa40b338c4a762a2292, type: 2}
+  material: {fileID: 2100000, guid: d8491de49c040f540a6bb1da49831c39, type: 2}
   bodyTypeName: Wolf
   animationTypeName: 
   no_gear: 1

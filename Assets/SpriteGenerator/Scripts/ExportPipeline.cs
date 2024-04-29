@@ -134,7 +134,7 @@ public class ExportPipeline : MonoBehaviour {
    void FinalizeMetaFile() {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      var mf = $"{export_to_folder}/test_atlas.spritemeta";
+      var mf = $"{export_to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
 
       // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
@@ -166,7 +166,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      GeneratedSpritesContainer.SetInstanceFromData(export_tex, meta_rows.join("\n"));
+      GeneratedSpritesContainer.SetExtra(export_tex, meta_rows.join("\n"));
 
 
       EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
@@ -1397,7 +1397,7 @@ public class ExportPipeline : MonoBehaviour {
       var rb = export_tex_tot.EncodeToPNG();
 
       if (write_files) {
-         File.WriteAllBytes($"{export_to_folder}/atlas.png", rb);
+         File.WriteAllBytes($"{export_to_folder}/{sheets_pipeline_descriptor.output_name}.png", rb);
          FinalizeMetaFile();
       }
 

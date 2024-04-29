@@ -6,6 +6,11 @@ using UnityEngine;
 
 // [CreateAssetMenu(fileName = "NewFile", menuName = "NewExport", order = 0)]
 public class ExportPipelineSheets : ScriptableObject {
+
+
+   public string output_name = "new_sprites";
+   
+   [Header("Sheets")]
    public TextAsset armor;
    public TextAsset helmet;
    public TextAsset shield;

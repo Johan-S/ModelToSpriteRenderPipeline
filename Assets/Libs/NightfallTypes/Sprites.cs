@@ -2,23 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 using static DataParsing;
-using static GeneratedSpritesContainer;
-
 using static StatsAnnotations;
+
+using static GeneratedSpritesContainer;
 
 public static class Sprites {
    public static Sprite GetIconSprite(string name) => GetIcon(name);
-   public static Sprite GetIcon(string name) {
 
+   public static Sprite GetIcon(string name) {
       var sprite_gen_name = GetExportUnitName(name);
 
       return GetStableIcon(sprite_gen_name);
    }
 
    public static List<SpriteCats> GetUnitSprites(string name) {
-
       var c = GetUnitCats(name);
 
       if (!c) {
@@ -30,13 +28,9 @@ public static class Sprites {
    }
 
    public static UnitCats GetUnitCats(string name) {
-      
-      
       var sprite_gen_name = GetExportUnitName(name);
-      var sprite_cats = GetInstance().lookup.Get(sprite_gen_name);
+      var sprite_cats = GeneratedSpritesContainer.Get(sprite_gen_name);
 
       return sprite_cats;
    }
-
-
 }

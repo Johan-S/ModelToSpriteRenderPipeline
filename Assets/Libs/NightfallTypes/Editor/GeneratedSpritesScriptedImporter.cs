@@ -19,7 +19,14 @@ public class GeneratedSpritesScriptedImporter : ScriptedImporter {
       if (!atlas) {
          var me = ctx.assetPath;
          var dir = me[0..(me.LastIndexOf('/')+1)];
-         var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Join(dir, "atlas.png"));
+         string nm = me[(me.LastIndexOf('/') + 1)..];
+
+         nm  =nm[..nm.LastIndexOf('.')];
+         var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Join(dir, $"{nm}.png"));
+
+         if (!tex) {
+            tex = AssetDatabase.LoadAssetAtPath<Texture2D>(Path.Join(dir, $"atlas.png"));
+         }
 
          if (tex) {
             atlas = tex;
@@ -63,6 +70,8 @@ public class GeneratedSpritesScriptedImporter : ScriptedImporter {
       foreach (var g in gened_sprites) {
          ctx.AddObjectToAsset(g.name, g);
       }
+
+      GeneratedSpritesContainer.ClearCache();
 
    }
 }
