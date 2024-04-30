@@ -81,6 +81,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    public void InitTextures() {
+      if (result_rexture) return;
       result_rexture = MakeTex();
       basic_shading_texture = MakeTex();
       marker_texture = MakeTex();
@@ -93,6 +94,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public ExportPipeline.TimeBenchmark time_benchmark;
 
    public void RunPipeline() {
+      InitTextures();
       time_benchmark?.Begin();
 
       if (outline_parts) {

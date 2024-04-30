@@ -30,7 +30,7 @@ public class AlwaysExecTarget : MonoBehaviour {
 
       var rt = EditorApplication.timeSinceStartup;
 
-      if (rt > throttle + 0.05f) {
+      if (rt > throttle + 0.02f) {
          throttle = rt;
          onEditorUpdate.Invoke();
       }

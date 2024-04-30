@@ -92,7 +92,11 @@ public class ModelHandle : MonoBehaviour {
    }
 
    [Button]
-   public void UpdateModelAnimationPos() {
+   public void UpdateModelWithAnimationTime() {
+      UpdateModelAnimationPos(0);
+   }
+
+   public void UpdateModelAnimationPos(float dt) {
       if (animation_clip != null) {
          if (animation_clip.hasGenericRootTransform) {
             Debug.Log($"Root motion: {animation_clip.name}");
@@ -100,7 +104,7 @@ public class ModelHandle : MonoBehaviour {
 
          if (!model_root) model_root = GetComponentInChildren<Animator>();
          if (model_root) {
-            animation_t += animation_speed / animation_clip.length * 0.01f;
+            animation_t += animation_speed / animation_clip.length * dt;
             if (animation_t > 1) animation_t -= 1;
             animation_time = animation_t * animation_clip.length;
             SampleAnimation(model_root.gameObject, animation_time, animation_clip);
