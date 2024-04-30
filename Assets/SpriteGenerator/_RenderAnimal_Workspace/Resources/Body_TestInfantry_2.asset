@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Body_TestInfantry_2
   m_EditorClassIdentifier: 
   model_root_prefab: {fileID: 7373473492273603734, guid: 149cbdccb1e42144a8c59cadd591bf7a, type: 3}
-  material: {fileID: 2100000, guid: 8b7bbe0eb8e7ac6438b3556db1e02f13, type: 2}
+  material: {fileID: 2100000, guid: d0676e69d24609042a66c42488f5252f, type: 2}
   bodyTypeName: TestInfantry2
   animationTypeName: 
   no_gear: 1

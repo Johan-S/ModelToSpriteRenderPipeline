@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8289315158394484214}
   - component: {fileID: 8289315158394484215}
-  - component: {fileID: 8289315158394484213}
+  - component: {fileID: 9160190660306331020}
   m_Layer: 0
   m_Name: ModelRoot
   m_TagString: Untagged
@@ -54,7 +54,7 @@ MonoBehaviour:
   raw_color_material: {fileID: 2100000, guid: 676ccee694016294ba661d4065b88714, type: 2}
   forward_depth_material: {fileID: 2100000, guid: 9dcddea1781578541bc9962dcaad405a, type: 2}
   back_depth_material: {fileID: 2100000, guid: 03f64548388f0214db4ee477b19aa2b0, type: 2}
---- !u!114 &8289315158394484213
+--- !u!114 &9160190660306331020
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -66,20 +66,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 313e6f3c1d2d4c81bc5705ec64439fee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  alwaysEcecute: 0
-  notPlaymode: 0
+  alwaysEcecute: 1
+  notPlaymode: 1
   onEditorUpdate:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8289315158394484215}
         m_TargetAssemblyTypeName: ModelHandle, Assembly-CSharp
         m_MethodName: UpdateModelAnimationPos
-        m_Mode: 1
+        m_Mode: 4
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
-          m_FloatArgument: 0
+          m_FloatArgument: 0.02
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 1
