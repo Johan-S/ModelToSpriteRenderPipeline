@@ -25,44 +25,92 @@ public class CameraHandle_Shader : MonoBehaviour {
    void Start() {
       if (base_render_mesh) {
          var tl = GetMeshes(base_render_mesh).ToList();
-         
+
          Debug.Log($"meshes: {tl.Count}\n{tl.join("\n", x => x.tr.name)}");
       }
    }
 
-   Dictionary<object, Mesh> _cach = new();
-
    IEnumerable<(Transform tr, Mesh m)> GetMeshes(Transform t) {
-
-      foreach (var a in base_render_mesh.GetComponentsInChildren<MeshFilter>()) {
-         if (a.sharedMesh)yield return (a.transform, a.sharedMesh);
+      foreach (var a in t.GetComponentsInChildren<MeshFilter>()) {
+         if (a.sharedMesh) yield return (a.transform, a.sharedMesh);
       }
-      foreach (var a in base_render_mesh.GetComponentsInChildren<SkinnedMeshRenderer>()) {
+
+      foreach (var a in t.GetComponentsInChildren<SkinnedMeshRenderer>()) {
          if (!a.sharedMesh) continue;
-         var m = _cach.Get(a) ?? (_cach[a] = new Mesh());
-         
+         var m = new Mesh();
+
          a.BakeMesh(m);
          yield return (a.transform, m);
       }
    }
-   
+
 
    void Update() {
       if (cam && shader) {
          // am.RenderWithShader(shader, "");
       }
 
+      if (mat) {
+         Debug.Log($"mat shader: {mat.shader.name}");
+      }
+
       if (base_render_mesh) {
-
-         var ms = GetMeshes(base_render_mesh).ToArray();
-
-         FlatRenderMeshes(ms);
+         RenderMeshes(base_render_mesh);
          // FlatRenderMeshes(ms.Where(x => x).ToArray());
       }
+   }
+   Dictionary<(int, int), RenderTexture> render_textures = new();
+
+   public bool fun_colors;
+
+
+   public void RenderMeshes(Transform tr) {
+      var ms = GetMeshes(tr).ToArray();
+
+      FlatRenderMeshes(ms);
+   }
+
+   public void CaptureTo(Transform tr, Texture2D texture) {
+
+      var size = (texture.width, texture.height);
+
+      var tex = cam.targetTexture;
+      var rt = tex;
+
+
+      if (!rt || ( rt.width, rt.height) != size) {
+         
+         if (!render_textures.TryGetValue(size, out rt)) {
+            rt = new RenderTexture(size.width, size.height, 32);
+            render_textures[size] = rt;
+         }
+      }
+      
+
+
+      var ot = cam.targetTexture;
+
+      try {
+
+         cam.targetTexture = rt;
+         RenderMeshes(tr);
+
+         RenderTexture.active = rt;
+         texture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+
+         texture.Apply();
+      }
+      finally {
+         
+         RenderTexture.active = null;
+         cam.targetTexture = ot;
+      }
+
    }
 
 
    Color ColorFrom(int i) {
+      if (!fun_colors) return new Color32(255, 255, (byte)i, 255);
       Color cb = new Color();
       cb.a = 1;
 
@@ -114,8 +162,8 @@ public class CameraHandle_Shader : MonoBehaviour {
          // Debug.Log($"mesh: {meshes[i].name}");
 
          var mat = tr.localToWorldMatrix;
-         
-         
+
+
          mb.SetColor("_Color", ColorFrom(i));
          rp.matProps = mb;
          rp.layer = 15;
