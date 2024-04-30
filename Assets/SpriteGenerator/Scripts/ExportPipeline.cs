@@ -17,6 +17,8 @@ public class ExportPipeline : MonoBehaviour {
 
    public bool write_files = true;
 
+   public string prepend_to_sprite_name;
+
    [Header("Export Pipeline Description")]
    public ExportPipelineSheets sheets_pipeline_descriptor;
 
@@ -27,6 +29,9 @@ public class ExportPipeline : MonoBehaviour {
 
    public int atlas_sprites_per_row = 5;
    public string export_to_folder = "Gen";
+
+
+   [Header("Unit Filter")] public SimpleUnitTypeObject[] generate_only;
    [Header("Bindings")] public Material material;
 
    public GameObject model;
@@ -128,7 +133,7 @@ public class ExportPipeline : MonoBehaviour {
       var r = d.rect;
       var p = d.ground_center_pivot;
 
-      return $"{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
+      return $"{prepend_to_sprite_name}{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
    void FinalizeMetaFile() {
@@ -169,6 +174,28 @@ public class ExportPipeline : MonoBehaviour {
       GeneratedSpritesContainer.SetExtra(export_tex, meta_rows.join("\n"));
 
 
+      var ans = GetDirectAnimationsParsed().ToList();
+
+      ans.AddRange(sheets_pipeline_descriptor.animation_arr.Flatten());
+
+
+      UnitViewer.UnitTypeDetails ParseUntP(ParsedUnit u) {
+         var r = new UnitViewer.UnitTypeDetails();
+
+         r.unit = new GameData.UnitType();
+         r.unit.name = u.raw_name;
+         r.unit.sprite = GeneratedSpritesContainer.Get(u.out_name).idle_sprite;
+         r.unit.animation_sprites =
+            DataParsing.GetAnimationSprites(u.out_name, ans, u.animation_type,
+               GeneratedSpritesContainer.Get(u.out_name));
+         r.unit.stats = new();
+
+         return r;
+      }
+
+      var gu = parsed_pipeline_data.units.map(ParseUntP);
+
+
       EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
 
       unit_viewer_running = Instantiate(unit_viewer_prefab);
@@ -180,6 +207,9 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       StartCoroutine(CloseAfterEsc());
+
+
+      unit_viewer_running.SetUnits(gu);
    }
 
    void CopyAndDownsampleTo(Texture2D src, Texture2D dst, string FileOutput) {
@@ -335,10 +365,10 @@ public class ExportPipeline : MonoBehaviour {
    }
 
 
-   void RunOutputImpl(GameObject model_prefab, ParsedUnit pu, AnimationWrap an, Material res_mat) {
+   void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat) {
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
-      var FileOutput = GetFileOutput(model_prefab.name, an.category, an.frame);
+      var FileOutput = GetFileOutput(pu.out_name, an.category, an.frame);
 
       foreach (var x in GetChildRenders()) {
       }
@@ -385,6 +415,13 @@ public class ExportPipeline : MonoBehaviour {
             x.material = res_mat;
          }
       }
+
+
+      {
+         var holder = new GameObject($"_ UNIT {pu.out_name}").AddComponent<SpriteCaptureResultHolder>();
+
+         holder.used_material = res_mat;
+      }
    }
 
    public Vector2 GetAdjustedSpritePivot(Vector2 original_pivot, Vector3 model_offset, Vector2 cap_size) {
@@ -397,7 +434,7 @@ public class ExportPipeline : MonoBehaviour {
       return new_pivot;
    }
 
-   static IEnumerable<string> GetThemes(string[] names, string[] data) {
+   public static IEnumerable<string> GetThemes(string[] names, string[] data) {
       for (int i = 0; i < names.Length; i++) {
          if (names[i].Replace(" ", "_").StartsWith("Theme_Color")) {
             var val = data[i];
@@ -406,29 +443,13 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
-   static IEnumerable<(string field, Color color)> GetColors(string[] names, string[] data) {
-      for (int i = 0; i < names.Length; i++) {
-         if (names[i].Contains("_Color")) {
-            var cn = names[i];
 
-            var val = data[i].Trim();
-            if (val.Length == 0) continue;
-            if (ColorUtility.TryParseHtmlString(val, out Color col)) {
-               // col.a = 1;
-               yield return (ToName(cn), col);
-            } else {
-               Debug.Log($"Bad color: {cn} has {val}");
-            }
-         }
-      }
-   }
-
-   static string ToName(string s) {
+   public static string ToName(string s) {
       if (s.Length == 0) return "";
       return "_" + s.Replace("-", "").Replace("_", "").ToUpper();
    }
 
-   static Material ApplyMaterialColor(List<(string field, Color color)> colors, Material material) {
+   public static Material ApplyMaterialColor(List<(string field, Color color)> colors, Material material) {
       Material res_mat = Instantiate(material);
 
       foreach (var x in colors) {
@@ -447,7 +468,7 @@ public class ExportPipeline : MonoBehaviour {
 
    [NonSerialized] double rt;
 
-   IEnumerable RunOutput_Parsed(GameObject model_prefab, ParsedUnit pu) {
+   IEnumerable RunOutput_Parsed(ParsedUnit pu) {
       var folder = export_to_folder;
       if (!Directory.Exists(folder)) {
          Directory.CreateDirectory(folder);
@@ -464,10 +485,10 @@ public class ExportPipeline : MonoBehaviour {
       foreach (AnimationWrap an in pu.animations) {
          if (an.animation_type_object != null && an.animation_type_object.looping_root) {
             var move_back = sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
-            RunOutputImpl(model_prefab, pu, an, res_mat);
+            RunOutputImpl(pu, an, res_mat);
             move_back();
          } else {
-            RunOutputImpl(model_prefab, pu, an, res_mat);
+            RunOutputImpl(pu, an, res_mat);
          }
 
 
@@ -483,7 +504,8 @@ public class ExportPipeline : MonoBehaviour {
    Texture2D export_tex;
    Texture2D export_tex_tot;
 
-   static void ApplyTheme(Color theme_color, List<(string field, Color color)> rc, string theme_1, string theme_2,
+   public static void ApplyTheme(Color theme_color, List<(string field, Color color)> rc, string theme_1,
+      string theme_2,
       string theme_3) {
       if (theme_1.Length > 0) {
          var i = rc.FindIndex(x => x.field == theme_1);
@@ -517,19 +539,6 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
-   public class ParsedPart {
-      public string name;
-      public List<(string field, Color color)> colors = new();
-
-      public Transform part_prefab;
-
-      public string theme_1;
-      public string theme_2;
-      public string theme_3;
-
-      public bool HasTheme => theme_1.IsNonEmpty() || theme_2.IsNonEmpty() || theme_3.IsNonEmpty();
-   }
-
    public void AddThemePartTo(ParsedPart pp, Transform parent, Color? theme_color) {
       var tr = Instantiate(pp.part_prefab, parent);
       if (pp.HasTheme && theme_color is Color tc) {
@@ -553,60 +562,10 @@ public class ExportPipeline : MonoBehaviour {
    }
 
 
-   public class AnimationWrap {
-      public AnimationWrap(string name, AnimationClip clip, string category, int frame,
-         AnimationTypeObject animation_type_object) {
-         this.name = name;
-         this.clip = clip;
-         this.category = category;
-         this.frame = frame;
-         this.animation_type_object = animation_type_object;
-      }
-
-
-      public string name;
-      public AnimationClip clip;
-      public string category;
-      public int frame;
-
-      public AnimationTypeObject animation_type_object;
-   }
-
-
-   public class ParsedUnit {
-      public string raw_name;
-      public string out_name;
-      public string model_name;
-
-      public Material material => model_body.body_category?.material;
-      public ModelDataStuff model_body;
-
-      public bool no_gear => model_body.body_category.no_gear;
-
-      public List<(string field, Color color)> colors = new();
-
-      public Dictionary<string, string> slot_map = new();
-      public Dictionary<string, string> skin_map = new();
-
-      public List<AnimationWrap> animations = new();
-
-      public int idle_animation_id;
-
-      public Color? theme_color;
-   }
-
-   public class ParsedPipelineData {
-      public int output_n;
-
-      public Dictionary<string, ParsedPart> parts = new();
-
-      public List<ParsedUnit> units = new();
-   }
-
    Dictionary<string, Material> material_map;
    Material atoon_mat;
 
-   Material MapMat(Material a, string context) {
+   public Material MapMat(Material a, string context) {
       if (material_map == null) {
          atoon_mat = Resources.Load<Material>("BaseModels/Materials/Armors_Material_Toon");
          material_map = new();
@@ -630,48 +589,6 @@ public class ExportPipeline : MonoBehaviour {
       return material_map.Get(a.name, a);
    }
 
-   ParsedPart ParsePart(string name, string ob_name, List<(string field, Color color)> colors, List<string> themes) {
-      if (name == "None" && ob_name == "") return null;
-      var tr = parts_bundle.slotted_parts.Find(x => x.name == ob_name);
-      if (!tr) {
-         Debug.Log($"Missing part: {name}, '{ob_name}'");
-         return null;
-      }
-
-      tr = Instantiate(tr, dummy_holder);
-      Material last_mat = null;
-      Material last_rmat = null;
-
-      var pname = name;
-
-      var parts = new ParsedPart() {
-         name = pname,
-      };
-      parts.colors.AddRange(colors);
-
-      parts.theme_1 = ToName(themes.Get(0, ""));
-      parts.theme_2 = ToName(themes.Get(1, ""));
-      parts.theme_3 = ToName(themes.Get(2, ""));
-
-      if (colors.Count > 0) {
-         // Debug.Log($"Add colors to {name}, {colors.Count}: {colors.join(" | ")}");
-
-         foreach (var rend in tr.GetComponentsInChildren<Renderer>()) {
-            var mat = rend.sharedMaterial;
-            if (mat == last_mat) {
-               rend.material = last_rmat;
-            } else {
-               last_mat = mat;
-               last_rmat = ApplyMaterialColor(colors, MapMat(mat, name));
-               // Debug.Log($"Applied color to {tr.name}: {name}: {mat.name} {last_rmat.name}: {colors.join(", ")}");
-               rend.material = last_rmat;
-            }
-         }
-      }
-
-      parts.part_prefab = tr;
-      return parts;
-   }
 
    public class ParsedArmor {
       public string name;
@@ -688,242 +605,6 @@ public class ExportPipeline : MonoBehaviour {
       public List<(string field, Color color)> colors;
    }
 
-   ParsedPipelineData GetParsed_Sheets() {
-      ParsedPipelineData res = new();
-
-      string[] GetRows(string text) {
-         return text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
-      }
-
-      var unit_rows = GetRows(sheets_pipeline_descriptor.unit.text);
-      var shield_rows = GetRows(sheets_pipeline_descriptor.shield.text);
-      var armor_rows = GetRows(sheets_pipeline_descriptor.armor.text);
-      var helmet_rows = GetRows(sheets_pipeline_descriptor.helmet.text);
-      var weapon_rows = GetRows(sheets_pipeline_descriptor.weapon.text);
-
-      foreach (var unit_row in unit_rows) {
-         // Debug.Log($"ur: {unit_row}");
-      }
-
-      {
-         var names = shield_rows[0].Split("\t");
-
-         var sn = names.ToList().IndexOf("Sprite_Name");
-
-
-         foreach (var part_str in shield_rows[1..]) {
-            var data = part_str.Split("\t");
-
-
-            var name = data[1];
-            var model = data[sn];
-
-
-            var cols = GetColors(names, data).ToList();
-
-            // Debug.Log($"Colors: {cols.join(", ")}");
-
-            var pr = ParsePart(name, model, cols, GetThemes(names, data).ToList());
-
-            if (pr != null) {
-               res.parts[pr.name] = pr;
-            }
-         }
-      }
-      {
-         var names = helmet_rows[0].Split("\t");
-
-         var sn = names.ToList().IndexOf("Sprite_Name");
-
-
-         foreach (var part_str in helmet_rows[1..]) {
-            var data = part_str.Split("\t");
-            var name = data[1];
-            var model = data[sn];
-
-            // Debug.Log($"Name: {name}, {name.Length}");
-
-            var cols = GetColors(names, data).ToList();
-
-            var pr = ParsePart(name, model, cols, GetThemes(names, data).ToList());
-            if (pr != null) {
-               res.parts[pr.name] = pr;
-            }
-         }
-      }
-      Dictionary<string, ParsedArmor> armor_to_model_map = new();
-      {
-         var names = armor_rows[0].Split("\t");
-
-         var sn = names.ToList().IndexOf("Armor_Sprite_Name");
-
-
-         foreach (var part_str in armor_rows[1..]) {
-            var data = part_str.Split("\t");
-
-
-            var pa = new ParsedArmor();
-
-            pa.name = data[1];
-            pa.armor = data[sn];
-            pa.gauntlet = data[sn + 1];
-            pa.legging = data[sn + 2];
-            pa.boots = data[sn + 3];
-
-            pa.colors = GetColors(names, data).ToList();
-
-            var vals = sheets_pipeline_descriptor.armor_data[pa.name];
-
-            pa.theme_1 = ToName(vals["Theme Color 1"]);
-            pa.theme_2 = ToName(vals["Theme Color 2"]);
-            pa.theme_3 = ToName(vals["Theme Color 3"]);
-
-            if (pa.theme_1.Length > 0) {
-               //  Debug.Log($"{pa.name} {pa.theme_1}");
-            }
-
-            if (pa.theme_2.Length > 0) {
-               // Debug.Log($"{pa.name} {pa.theme_2}");
-            }
-
-            if (pa.theme_3.Length > 0) {
-               // Debug.Log($"{pa.name} {pa.theme_3}");
-            }
-
-            armor_to_model_map[pa.name] = pa;
-         }
-      }
-      {
-         var names = weapon_rows[0].Split("\t");
-
-         var sn = names.ToList().IndexOf("Sprite_Name");
-
-
-         foreach (var part_str in weapon_rows[1..]) {
-            var data = part_str.Split("\t");
-
-
-            var name = data[1];
-            var model = data[sn];
-
-            var cols = GetColors(names, data).ToList();
-
-            var pr = ParsePart(name, model, cols, GetThemes(names, data).ToList());
-            if (pr != null) {
-               res.parts[pr.name] = pr;
-            }
-         }
-      }
-
-      {
-         var dict = sheets_pipeline_descriptor.unit_data;
-         var names = unit_rows[0].Split("\t");
-
-
-         foreach (var part_str in unit_rows[1..]) {
-            if (part_str.StartsWith("//")) continue;
-            var data = part_str.Split("\t");
-            var name = data[1];
-
-            var vals = dict[name];
-
-
-            var atype = vals["AnimationType"].Replace("&", "_");
-            if (atype.Trim().Length == 0) {
-               Debug.LogError($"Skipping {name} due to lacking animation.");
-               continue;
-            }
-
-            ParsedUnit pu = new ParsedUnit();
-            pu.raw_name = name;
-            pu.model_name = defaultRenderModelName;
-            var helm = vals["Helmet"];
-
-            if (helm.Length == 0) {
-               // pu.model_name = "Archer";
-            }
-
-            var transo = model_mapping_by_body_type[vals["Anatomy"]];
-            pu.model_body = transo;
-            pu.model_name = transo.name;
-
-            // Debug.Log($"Transo name {transo.name}");
-
-
-            {
-               var armor_name = vals["Armor"];
-
-               if (armor_to_model_map.TryGetValue(armor_name, out var armor)) {
-                  var rc = armor.colors.ToList();
-
-                  if (ColorUtility.TryParseHtmlString(vals["Theme Color"], out var theme_color)) {
-                     pu.theme_color = theme_color;
-
-                     ApplyTheme(theme_color, rc, armor.theme_1, armor.theme_2, armor.theme_3);
-                  }
-
-                  pu.colors.AddRange(rc);
-
-                  var maps = new[] {
-                     ("Body_Armor", armor.armor),
-                     ("Leg_Armor", armor.legging),
-                     ("Gauntlets", armor.gauntlet),
-                     ("Boots", armor.boots),
-                  };
-
-                  foreach (var (slot, arm) in maps) {
-                     if (transo.skins_to_transform.TryGetValue(slot, out var value1)) {
-                        pu.skin_map[value1] = arm;
-                     } else {
-                        Debug.LogError($"Missing skin {slot} in {transo.name}");
-                     }
-                  }
-               }
-            }
-
-
-            // Debug.Log($"{armor.name}: {armor.colors.join(" ")}");
-
-
-            pu.out_name = GetExportUnitName(name);
-
-
-            var w1 = vals["Weapon_Primary"];
-            var w2 = vals["Weapon_Secondary"];
-
-            var sh = vals["Shield"];
-
-            if (!pu.no_gear) {
-               pu.slot_map[transo.slot_to_transform["Main_Hand"]] = w1;
-               pu.slot_map[transo.slot_to_transform["Off_Hand"]] = w2;
-               pu.slot_map[transo.slot_to_transform["Off_Hand_Shield"]] = sh;
-
-               if (transo.name != "Archer") {
-                  pu.slot_map[transo.slot_to_transform["NewHelmet"]] = helm;
-               } else {
-               }
-            }
-            // if (idle_only) atype = "Idle";
-
-            var animation_set = animation_sets[atype];
-
-            var anims = animation_set.res;
-            if (idle_only) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
-
-
-            pu.animations.AddRange(anims);
-            pu.idle_animation_id = pu.animations.FindIndex(x => x.category == "Idle");
-
-
-            res.units.Add(pu);
-         }
-      }
-
-      res.output_n = res.units.Sum(x => x.animations.Count);
-
-
-      return res;
-   }
 
    public static string GetExportUnitName(string orig_name) {
       return DataParsing.GetExportUnitName(orig_name);
@@ -937,12 +618,12 @@ public class ExportPipeline : MonoBehaviour {
 
 
    public static
-      IEnumerable<ExportPipelineSheets.AnimationParsed> GetDirectAnimationsParsed() {
+      IEnumerable<GameTypeCollection.AnimationParsed> GetDirectAnimationsParsed() {
       var clips = Resources.Load<AnimationBundle>("WolfAnimations");
 
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
 
-      var groups = anim_objs.GroupBy(x => x.animation_type.Replace("&", "_"));
+      var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
 
 
       foreach (var g in groups) {
@@ -952,7 +633,7 @@ public class ExportPipeline : MonoBehaviour {
 
          foreach (var data in g) {
             AnimationClip clip = clips.animation_clips.Find(x => x.name == data.clip);
-            var ap = new ExportPipelineSheets.AnimationParsed();
+            var ap = new GameTypeCollection.AnimationParsed();
 
             ap.clip = data.clip;
             ap.animation_type = data.animation_type;
@@ -1083,16 +764,8 @@ public class ExportPipeline : MonoBehaviour {
       return clip;
    }
 
-   [SerializeField] Transform dummy_holder;
+   [SerializeField] public Transform dummy_holder;
 
-
-   public class ModelDataStuff {
-      public string name;
-      public Dictionary<string, string> slot_to_transform = new();
-      public Dictionary<string, string> skins_to_transform = new();
-
-      public ModelBodyCategory body_category;
-   }
 
    GameObject PrepModelObject(ParsedUnit u) {
       GameObject model_prefab = Resources.Load<GameObject>($"BaseModels/{u.model_name}");
@@ -1173,24 +846,38 @@ public class ExportPipeline : MonoBehaviour {
             AddThemePartTo(part_o, slot, u.theme_color);
          }
 
-         model.name = u.out_name;
+         // model.name = u.out_name;
       });
       return model_prefab;
    }
 
-   public void SetActiveUnit(ParsedUnit u) {
+   public void SetActiveUnit(ParsedUnit pu) {
       if (sprite_capture_pipeline.exporting) return;
 
-      var model_prefab = PrepModelObject(u);
+      var model_prefab = PrepModelObject(pu);
 
-      sprite_capture_pipeline.model.animation_clip = u.animations[0].clip;
+      Material res_mat = ApplyMaterialColor(pu.colors, pu.material);
+
+
+      var nm = new GameObject("t");
+
+      nm.transform.parent = model.transform;
+
+
+      foreach (var x in model.GetComponentsInChildren<Renderer>(true)) {
+         if (x.transform.parent.parent == model.transform && !x.transform.parent.name.EndsWith($"(Clone)")) {
+            x.material = res_mat;
+         }
+      }
+
+      sprite_capture_pipeline.model.animation_clip = pu.animations[0].clip;
    }
 
 
    IEnumerator RunParsedPipeline(ParsedPipelineData parsed) {
       foreach (var u in parsed.units) {
-         var model_prefab = PrepModelObject(u);
-         foreach (var yield_st in RunOutput_Parsed(model_prefab, u)) {
+         var model = PrepModelObject(u);
+         foreach (var yield_st in RunOutput_Parsed(u)) {
             yield return yield_st;
          }
       }
@@ -1209,8 +896,8 @@ public class ExportPipeline : MonoBehaviour {
    void SetArcherNames() {
    }
 
-   ModelDataStuff MakeHeavyData() {
-      var res = new ModelDataStuff();
+   BodyModelData MakeHeavyData() {
+      var res = new BodyModelData();
       res.name = "Heavy Infantry";
       {
          string[] skinned_names = {
@@ -1239,8 +926,8 @@ public class ExportPipeline : MonoBehaviour {
       return res;
    }
 
-   ModelDataStuff MakeArcherDAta() {
-      var res = new ModelDataStuff();
+   BodyModelData MakeArcherDAta() {
+      var res = new BodyModelData();
       res.name = "Archer";
       {
          string[] skinned_names = {
@@ -1281,10 +968,13 @@ public class ExportPipeline : MonoBehaviour {
 
       animation_sets = GetanimationSets();
 
-      if (!animation_sets.ContainsKey("Poleaxe")) {
-         animation_sets["Poleaxe"] = animation_sets["Spearman"];
-         // Debug.Log($"Missing animation Poleaxe");
+      foreach (var ap in DataParsing.ANIMATION_SUBSTITUTE) {
+         if (!animation_sets.ContainsKey(ap.Key)) {
+            animation_sets[ap.Key] = animation_sets[ap.Value];
+            // Debug.Log($"Missing animation Poleaxe");
+         }
       }
+
 
       if (!animation_sets.ContainsKey("Crossbow")) {
          // animation_sets["Crossbow"] = animation_sets["Brute"];
@@ -1304,7 +994,7 @@ public class ExportPipeline : MonoBehaviour {
 
          // Debug.Log($"Mods: {model_types.join(", ", x => x.name)}");
          foreach (var mt in model_types) {
-            var res = new ModelDataStuff();
+            var res = new BodyModelData();
             res.name = mt.model_root_prefab.name;
             if (model_mappings.TryGetValue(res.name, out var cv)) {
                cv.body_category = mt;
@@ -1333,16 +1023,21 @@ public class ExportPipeline : MonoBehaviour {
       }
 
 
-      parsed_pipeline_data = GetParsed_Sheets();
+      parsed_pipeline_data = new(sheets_pipeline_descriptor, this);
+      if (this.generate_only.IsNonEmpty()) {
+         parsed_pipeline_data.units.Filter(x =>
+            generate_only.Exists(ut => ut.name == x.raw_name || ut.Unit_Name == x.raw_name));
+         parsed_pipeline_data.output_n = parsed_pipeline_data.units.Sum(x => x.animations.Count);
+      }
    }
 
    ParsedPipelineData parsed_pipeline_data;
 
 
-   Dictionary<string, ModelDataStuff> model_mapping_by_body_type;
+   public Dictionary<string, BodyModelData> model_mapping_by_body_type;
 
-   Dictionary<string, ModelDataStuff> model_mappings;
-   Dictionary<string, AnimationSet> animation_sets;
+   public Dictionary<string, BodyModelData> model_mappings;
+   public Dictionary<string, AnimationSet> animation_sets;
 
    IEnumerator RunPipeline() {
       time_benchmark = new();
@@ -1410,15 +1105,12 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    public void OpenOutputFolder() {
-
 #if UNITY_EDITOR
       UnityEditor.EditorUtility.RevealInFinder($"{export_to_folder}/atlas.png");
 #endif
-
    }
 
    void CompleteJingle() {
-
       var pcp = SoundManager.instance.production_confirmed;
 
       pcp.playOnAwake = false;
@@ -1431,12 +1123,8 @@ public class ExportPipeline : MonoBehaviour {
       cl.playOnAwake = true;
 
       var dp = AudioSettings.dspTime;
-      
+
       p.PlayScheduled(dp);
       c.PlayScheduled(dp + 0.165f);
-      
-      
-
    }
-   
 }

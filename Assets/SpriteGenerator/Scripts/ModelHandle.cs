@@ -163,7 +163,8 @@ public class ModelHandle : MonoBehaviour {
 
    void LateUpdate() {
    }
-
+   
+[Button]
    public void UpdateModelAnimationPos() {
       if (animation_clip != null) {
          if (animation_clip.hasGenericRootTransform) {

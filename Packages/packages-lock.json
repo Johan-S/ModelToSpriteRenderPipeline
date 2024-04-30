@@ -179,6 +179,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "klockan_std_lib": {
+      "version": "file:klockan_std_lib",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

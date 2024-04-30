@@ -764,7 +764,7 @@ public static class DataTypes {
 
 public class GameTypeCollection {
 
-   public List<ExportPipelineSheets.AnimationParsed> parsed_animations = new ();
+   public List<GameTypeCollection.AnimationParsed> parsed_animations = new ();
    
    public LookupList<GameData.UnitType> game_units;
    
@@ -976,5 +976,30 @@ public class GameTypeCollection {
       simple_buffs = new(e.simple_buff);
       simple_spells = new(e.simple_spells);
       magic_spells = new(e.spells);
+   }
+
+   [Serializable]
+   public class AnimationParsed {
+      public AnimationParsed() {
+         
+      }
+      public string animation_type;
+      public string category;
+      public string clip;
+
+      public int[] capture_frame;
+      public int[] time_ms;
+
+      public int auto_frames_per_s = 0;
+
+      public AnimationParsed(string animation_type, string category) {
+         this.animation_type = animation_type;
+         this.category = category;
+      }
+
+      public override string ToString() {
+
+         return $"{animation_type} {category}";
+      }
    }
 }

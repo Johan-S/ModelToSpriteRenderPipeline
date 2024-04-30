@@ -1,0 +1,64 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &758223786963746175
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 758223786963746168}
+  - component: {fileID: 758223786963746169}
+  m_Layer: 0
+  m_Name: SpriteCapturePipeline
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &758223786963746168
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758223786963746175}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &758223786963746169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 758223786963746175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 449c2c3bf587acb45a907cb2b0d303c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  size: 256
+  outline_depth: 1
+  outline_parts: 1
+  model: {fileID: 0}
+  display_handle: {fileID: 0}
+  camera_handle: {fileID: 0}
+  result_rexture: {fileID: 0}
+  basic_shading_texture: {fileID: 0}
+  marker_texture: {fileID: 0}
+  front_depth_texture: {fileID: 0}
+  back_depth_texture: {fileID: 0}
+  exporting: 0
+  shade_bottom: 1
+  shade_bottom_start: 0.4
+  shade_bottom_end: 0.22
+  shade_bottom_mag: 0.48
+  shader: {fileID: 7200000, guid: 1e38b816e9742e546a991b83edf3c8d7, type: 3}
+  try_shader_outlining: 1

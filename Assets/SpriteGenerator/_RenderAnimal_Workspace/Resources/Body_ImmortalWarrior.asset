@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b131216d89a4c5f83eba6c6e5a8b4cf, type: 3}
+  m_Name: Body_ImmortalWarrior
+  m_EditorClassIdentifier: 
+  model_root_prefab: {fileID: 7553629457191788985, guid: da905c3a6414c9b4d84e66a37cb25752, type: 3}
+  material: {fileID: 2100000, guid: 78bc03a5aa97e7f40baa12604e2726d9, type: 2}
+  bodyTypeName: ImmortalWarrior
+  animationTypeName: 
+  no_gear: 1
+  model_offset: {x: 0, y: 0, z: 0}

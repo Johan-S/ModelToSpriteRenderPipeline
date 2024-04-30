@@ -208,21 +208,3 @@ public class LoadDataFlow {
 
    public Dictionary<object, (string htype, string[] row, string[] hdrs)> row_back_map = new();
 }
-
-
-public static class DataParsing {
-   public static string GetExportUnitName(string orig_name) {
-      return orig_name.Replace(" (", "_").Replace("(", "_").Replace(")", "").Replace(" ", "_").Trim();
-   }
-   
-   public static bool AddDucked<T>(object fr, LookupList<T> o) where T : class, Named, new() {
-      T res = new();
-      Std.CopyShallowDuckTyped(fr, res);
-      return o.AddOrIgnore(res);
-   }
-   public static void AddDucked<T>(object fr, List<T> o) where T : new() {
-      T res = new();
-      Std.CopyShallowDuckTyped(fr, res);
-      o.Add(res);
-   }
-}

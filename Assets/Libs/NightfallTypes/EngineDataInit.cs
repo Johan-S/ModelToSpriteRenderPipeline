@@ -485,9 +485,9 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
          string type = row[0];
 
-         Dictionary<(string, string), ExportPipelineSheets.AnimationParsed> res = new();
+         Dictionary<(string, string), GameTypeCollection.AnimationParsed> res = new();
 
-         List<ExportPipelineSheets.AnimationParsed> arr = new();
+         List<GameTypeCollection.AnimationParsed> arr = new();
 
          for (int j = 1; j < cats.Length; j++) {
             string cat = cats[j];

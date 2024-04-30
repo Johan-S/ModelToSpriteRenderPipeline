@@ -8,7 +8,7 @@ using UnityEngine;
 using static DataTypes;
 using ADict =
    System.Collections.Generic.Dictionary<(string animation_type, string category),
-      ExportPipelineSheets.AnimationParsed>;
+      GameTypeCollection.AnimationParsed>;
 
 // [CreateAssetMenu(fileName = "GameEngineData", menuName = "EngineData", order = 0)]
 public class EngineDataHolder : ScriptableObject {
@@ -55,7 +55,7 @@ public class EngineDataHolder : ScriptableObject {
       public List<BattleData.UnitBuff> simple_buff = new();
 
 
-      [HideInInspector] public List<ExportPipelineSheets.AnimationParsed> animation_data = new();
+      [HideInInspector] public List<GameTypeCollection.AnimationParsed> animation_data = new();
 
       [HideInInspector] public ADict adict;
       
@@ -73,17 +73,29 @@ public class EngineDataHolder : ScriptableObject {
             var cl = acl.Find(x => x.category == name);
             if (cl == null) continue;
             var sprites = maybe_cat.sprites.Where(x => x.animation_category == name).ToArray();
-
-
-            if (sprites.Length != cl.capture_frame.Length) {
-               Debug.LogError($"Wrong capture frame: {unit} - {animation_class} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+            if (sprites.Length == 0) {
+               continue;
             }
 
-            Debug.Assert(sprites.Length == cl.capture_frame.Length);
+
 
 
             am.sprites = sprites.map(x => x.sprite);
             am.time_ms = cl.time_ms.Copy();
+            if (sprites.Length == 1) {
+               am.time_ms = new []{am.time_ms.Sum()};
+            } else {
+               Debug.Assert(sprites.Length == cl.capture_frame.Length);
+            }
+
+            if (sprites.Length != am.time_ms.Length) {
+               if (cl.auto_frames_per_s > 0) {
+                  am.time_ms = sprites.map(x => 1000 / cl.auto_frames_per_s);
+               } else {
+                  Debug.LogError($"Wrong capture frame: {unit} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+               }
+            }
+
                   
 
             am.animation_duration_ms = am.time_ms.Sum();

@@ -12,7 +12,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public bool outline_depth = true;
    public bool outline_parts = true;
 
-   [Header("Unity Bindings")] public ModelHandle model;
+   [Header("Unity Bindings")]
+   public ModelHandle model;
 
    public DisplayHandle display_handle;
    public CameraHandle camera_handle;
@@ -24,8 +25,19 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public Texture2D front_depth_texture;
    public Texture2D back_depth_texture;
 
+
+   
+
    public bool exporting;
 
+   [Header("Shading")] public bool shade_bottom;
+   [Range(0, 1)]
+   public float shade_bottom_start;
+   [Range(0, 1)]
+   public float shade_bottom_end;
+
+   [Range(0, 1)]
+   public float shade_bottom_mag;
    public Action HandleLoopingRootMotion(AnimationClip clip, float t) {
       
       
@@ -91,15 +103,53 @@ public class SpriteCapturePipeline : MonoBehaviour {
       result_rexture.SetPixels(basic_shading_texture.GetPixels());
       result_rexture.Apply();
 
+      if (shade_bottom) {
+         ShadeBottom(result_rexture);
+         result_rexture.Apply();
+      }
+
       AddBlackOutline(result_rexture, marker_texture);
       
       result_rexture.Apply();
+      
       
       
       time_benchmark?.Lap("Black Outline");
       
       
       model.SetActiveModel(0);
+   }
+
+   public void ShadeBottom(Texture2D t) {
+      
+      var px = t.GetPixels();
+
+      var be = Mathf.Min(shade_bottom_end, shade_bottom_start);
+
+      float he = be * t.height;
+      float hs = shade_bottom_start * t.height;
+      
+      for (int i = 0; i < px.Length; i++) {
+
+
+         int h = i / t.height;
+         
+         if (h > hs) break;
+         
+         
+         
+         
+         
+         var sh = h - he;
+         float a = 1;
+         if (sh > 0) a -= sh / (hs - he);
+
+         if (px[i].a != 0) px[i] = Color.Lerp(px[i], Color.black, a * this.shade_bottom_mag);
+
+      }
+      
+      t.SetPixels(px);
+      
    }
 
    public ComputeShader shader;

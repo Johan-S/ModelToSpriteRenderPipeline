@@ -22,34 +22,11 @@ public class ExportPipelineSheets : ScriptableObject {
    [Header("Dont use if you dont know")]
    public TextAsset[] multi_sheet_do_not_set;
 
-   [Serializable]
-   public class AnimationParsed {
-      public AnimationParsed() {
-         
-      }
-      public string animation_type;
-      public string category;
-      public string clip;
 
-      public int[] capture_frame;
-      public int[] time_ms;
+   public (GameTypeCollection.AnimationParsed[] arr, Dictionary<(string, string), GameTypeCollection.AnimationParsed> dict) GetGoodAnims () {
+      Dictionary<(string, string), GameTypeCollection.AnimationParsed> res = new();
 
-      public AnimationParsed(string animation_type, string category) {
-         this.animation_type = animation_type;
-         this.category = category;
-      }
-
-      public override string ToString() {
-
-         return $"{animation_type} {category}";
-      }
-   }
-
-
-   public (AnimationParsed[] arr, Dictionary<(string, string), AnimationParsed> dict) GetGoodAnims () {
-      Dictionary<(string, string), AnimationParsed> res = new();
-
-      List<AnimationParsed> arr = new();
+      List<GameTypeCollection.AnimationParsed> arr = new();
 
       var rows = animations.text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
       var cats = rows[0].Split("\t");
@@ -102,10 +79,10 @@ public class ExportPipelineSheets : ScriptableObject {
       return res;
    }
 
-   public Dictionary<(string, string), AnimationParsed> animation_good;
+   public Dictionary<(string, string), GameTypeCollection.AnimationParsed> animation_good;
 
    [NonSerialized]
-   public AnimationParsed[] animation_arr;
+   public GameTypeCollection.AnimationParsed[] animation_arr;
 
    public Dictionary<string, Dictionary<string, string>> unit_data;
    public Dictionary<string, Dictionary<string, string>> shield_data;
