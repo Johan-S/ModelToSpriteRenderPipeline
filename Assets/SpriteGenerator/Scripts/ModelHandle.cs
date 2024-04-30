@@ -104,26 +104,6 @@ public class ModelHandle : MonoBehaviour {
             x.material = Make(i++);
          }
       }
-      {
-         var go = Instantiate(model_game_object, model_game_object.transform.parent);
-
-
-         sub_render_obj.Add(go);
-
-         foreach (var x in go.GetComponentsInChildren<Renderer>()) {
-            x.material = forward_depth_material;
-         }
-      }
-      {
-         var go = Instantiate(model_game_object, model_game_object.transform.parent);
-
-
-         sub_render_obj.Add(go);
-
-         foreach (var x in go.GetComponentsInChildren<Renderer>()) {
-            x.material = back_depth_material;
-         }
-      }
    }
 
    void Init() {

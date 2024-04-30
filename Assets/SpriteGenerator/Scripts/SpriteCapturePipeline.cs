@@ -26,7 +26,14 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public Texture2D back_depth_texture;
 
 
-   
+   public Shader front_depth_shader;
+   public Shader back_depth_shader;
+
+   void Awake() {
+      front_depth_shader = Shader.Find("Unlit/DepthForward");
+      back_depth_shader = Shader.Find("Unlit/DepthBackward");
+   }
+
 
    public bool exporting;
 
@@ -90,10 +97,15 @@ public class SpriteCapturePipeline : MonoBehaviour {
       time_benchmark?.Begin();
       model.SetActiveModel(outline_parts ? 1 : -1);
       camera_handle.CaptureTo(marker_texture);
-      model.SetActiveModel(outline_depth ? 2 : -1);
-      camera_handle.CaptureTo(front_depth_texture);
-      model.SetActiveModel(outline_depth ? 3 : -1);
-      camera_handle.CaptureTo(back_depth_texture);
+      if (outline_depth) {
+         camera_handle.CaptureTo(front_depth_texture, front_depth_shader);
+         camera_handle.CaptureTo(back_depth_texture, back_depth_shader);
+      }
+     
+     // model.SetActiveModel(outline_depth ? 2 : -1);
+     // camera_handle.CaptureTo(front_depth_texture);
+     // model.SetActiveModel(outline_depth ? 3 : -1);
+     // camera_handle.CaptureTo(back_depth_texture);
 
       model.SetActiveModel(0);
       camera_handle.CaptureTo(basic_shading_texture);
