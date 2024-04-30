@@ -15,12 +15,10 @@ public class ModelHandle : MonoBehaviour {
       }
 
       Init();
-      foreach (var x in sub_render_obj) {
-         Destroy(x);
-         x.SetActive(false);
-      }
 
-      sub_render_obj = null;
+      Destroy(render_obj);
+      render_obj.SetActive(false);
+      model_root = null;
       var m = Instantiate(model, transform);
 
       model_action?.Invoke(m);
@@ -28,39 +26,33 @@ public class ModelHandle : MonoBehaviour {
       Init();
       return m;
    }
+
+   static void SampleAnimation(GameObject go, float time, AnimationClip clip) {
+      go.SetActive(false);
+      clip.SampleAnimation(go, time);
+      go.SetActive(true);
+   }
+
    public void SetAnimationNow_Float(AnimationClip clip, float x) {
-      SetActiveModel(-1);
-
-      foreach (var o in sub_render_obj) {
+      {
          // o.GetComponent<Animator>().enabled = false;
-         clip.SampleAnimation(o, x * clip.length);
-         o.transform.localPosition += model_offset;
+         SampleAnimation(render_obj, x * clip.length, clip);
+         render_obj.transform.localPosition += model_offset;
       }
-
-      SetActiveModel(0);
    }
 
    public void SetAnimationNow(AnimationClip clip, int frame) {
-      SetActiveModel(-1);
-
-      foreach (var o in sub_render_obj) {
-         // o.GetComponent<Animator>().enabled = false;
-         clip.SampleAnimation(o, frame * (1 / 60f));
-         o.transform.localPosition += model_offset;
-      }
-
-      SetActiveModel(0);
+      SampleAnimation(render_obj, frame * (1 / 60f), clip);
+      render_obj.transform.localPosition += model_offset;
    }
 
    [Header("Update Preview Frame")] public Vector3 model_offset;
-   
+
    [Range(0, 1)] public float animation_t = 0;
    public AnimationClip animation_clip;
 
-   [Header("Animation Settings")]
-   
-
-   [Range(0, 2)] public float animation_speed = 1;
+   [Header("Animation Settings")] [Range(0, 2)]
+   public float animation_speed = 1;
 
 
    [FormerlySerializedAs("animation_frame")] [Header("Output")]
@@ -74,53 +66,20 @@ public class ModelHandle : MonoBehaviour {
 
    Animator model_root;
 
-   GameObject model_game_object => model_root.gameObject;
 
-   [NonSerialized]
-   public List<GameObject> sub_render_obj = new();
+   public GameObject render_obj => model_root.gameObject;
 
-   public void SetActiveModel(int id) {
+   public void SetActiveModel(bool a) {
       Init();
-      for (int i = 0; i < sub_render_obj.Count; i++) {
-         sub_render_obj[i].SetActive(i == id);
-      }
-   }
-
-
-   void InitRenderObjs() {
-      Material Make(int n) {
-         var m = Instantiate(raw_color_material);
-         m.color = new Color32(255, 255, (byte)n, 255);
-         return m;
-      }
-
-      {
-         var go = Instantiate(model_game_object, model_game_object.transform.parent);
-
-         sub_render_obj.Add(go);
-
-         int i = 0;
-         foreach (var x in go.GetComponentsInChildren<Renderer>()) {
-            x.material = Make(i++);
-         }
-      }
+      render_obj.SetActive(a);
    }
 
    void Init() {
-      if (sub_render_obj != null && sub_render_obj.Count > 0 && model_root) {
+      if (model_root) {
          return;
       }
 
-      sub_render_obj = new();
       model_root = GetComponentInChildren<Animator>();
-
-      sub_render_obj.Add(model_root.gameObject);
-      try {
-         InitRenderObjs();
-      }
-      finally {
-         SetActiveModel(-1);
-      }
    }
 
 
@@ -129,52 +88,24 @@ public class ModelHandle : MonoBehaviour {
       Init();
    }
 
-   void OnEnable() {
-      Application.onBeforeRender += Beforerender;
-   }
-
-   void OnDisable() {
-      Application.onBeforeRender -= Beforerender;
-   }
-
-   void Beforerender() {
-      SetActiveModel(0);
-   }
-
    void LateUpdate() {
    }
-   
-[Button]
+
+   [Button]
    public void UpdateModelAnimationPos() {
       if (animation_clip != null) {
          if (animation_clip.hasGenericRootTransform) {
             Debug.Log($"Root motion: {animation_clip.name}");
          }
+
          if (!model_root) model_root = GetComponentInChildren<Animator>();
          if (model_root) {
-
             animation_t += animation_speed / animation_clip.length * 0.01f;
             if (animation_t > 1) animation_t -= 1;
             animation_time = animation_t * animation_clip.length;
-            
-            
-            animation_clip.SampleAnimation(model_root.gameObject, animation_time);
+            SampleAnimation(model_root.gameObject, animation_time, animation_clip);
             // model_root.transform.localPosition = model_offset;
             animation_frame = Mathf.RoundToInt(animation_time * 60);
-         }
-      }
-   }
-
-   void FixedUpdate() {
-      if (animation_clip != null) {
-         if (animation_time > animation_clip.length) {
-            animation_time = 0;
-         }
-
-         foreach (var o in sub_render_obj) {
-            // o.GetComponent<Animator>().enabled = false;
-            animation_clip.SampleAnimation(o, animation_time);
-            // model_root.transform.localPosition = model_offset;
          }
       }
    }
@@ -192,13 +123,8 @@ public class ModelHandle : MonoBehaviour {
             animation_time = animation_t * animation_clip.length;
          }
 
-         foreach (var o in sub_render_obj) {
-            bool a = o.activeSelf;
-            o.SetActive(false);
-            animation_clip.SampleAnimation(o, animation_time);
-            o.transform.localPosition += model_offset;
-            o.SetActive(a);
-         }
+
+         SampleAnimation(render_obj, animation_time, animation_clip);
       }
    }
 

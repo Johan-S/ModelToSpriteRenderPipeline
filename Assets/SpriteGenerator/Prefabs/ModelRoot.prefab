@@ -45,7 +45,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06e3d98b993755342a6f18ce52e769dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animation_t: 0.412
+  model_offset: {x: 0, y: 0, z: 0}
+  animation_t: 0
   animation_clip: {fileID: 2391939131189775494, guid: fbff60777b0b7d24da8322010bbc60e2, type: 3}
   animation_speed: 0
   animation_time: 0.43351722
@@ -65,6 +66,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 313e6f3c1d2d4c81bc5705ec64439fee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alwaysEcecute: 0
+  notPlaymode: 0
   onEditorUpdate:
     m_PersistentCalls:
       m_Calls:

@@ -50,11 +50,11 @@ public class SpriteCapturePipeline : MonoBehaviour {
       
       model.SetAnimationNow_Float(clip, 0);
 
-      var pstart = model.sub_render_obj[0].transform.position;
+      var pstart = model.render_obj.transform.position;
       
       model.SetAnimationNow_Float(clip, 1);
       
-      var pend = model.sub_render_obj[0].transform.position;
+      var pend = model.render_obj.transform.position;
 
       var diff = pstart - pend;
 
@@ -93,21 +93,16 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public ExportPipeline.TimeBenchmark time_benchmark;
 
    public void RunPipeline() {
-      
       time_benchmark?.Begin();
-      model.SetActiveModel(outline_parts ? 1 : -1);
-      camera_handle.CaptureTo(marker_texture);
+
+      if (outline_parts) {
+         camera_handle.CaptureTo(model.render_obj.transform, marker_texture);  
+      }
       if (outline_depth) {
          camera_handle.CaptureTo(front_depth_texture, front_depth_shader);
          camera_handle.CaptureTo(back_depth_texture, back_depth_shader);
       }
      
-     // model.SetActiveModel(outline_depth ? 2 : -1);
-     // camera_handle.CaptureTo(front_depth_texture);
-     // model.SetActiveModel(outline_depth ? 3 : -1);
-     // camera_handle.CaptureTo(back_depth_texture);
-
-      model.SetActiveModel(0);
       camera_handle.CaptureTo(basic_shading_texture);
       
       time_benchmark?.Lap("Unity Render");
@@ -127,9 +122,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
       
       
       time_benchmark?.Lap("Black Outline");
-      
-      
-      model.SetActiveModel(0);
    }
 
    public void ShadeBottom(Texture2D t) {

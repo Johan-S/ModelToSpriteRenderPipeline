@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[ExecuteAlways]
 public class CameraHandle_Shader : MonoBehaviour {
    public Shader shader;
 
@@ -38,6 +37,7 @@ public class CameraHandle_Shader : MonoBehaviour {
       foreach (var a in t.GetComponentsInChildren<SkinnedMeshRenderer>()) {
          if (!a.sharedMesh) continue;
          var m = new Mesh();
+         
 
          a.BakeMesh(m);
          yield return (a.transform, m);
@@ -109,29 +109,6 @@ public class CameraHandle_Shader : MonoBehaviour {
    }
 
 
-   Color ColorFrom(int i) {
-      if (!fun_colors) return new Color32(255, 255, (byte)i, 255);
-      Color cb = new Color();
-      cb.a = 1;
-
-
-      float scale = 0.5f;
-
-      while (i > 0) {
-         if ((i & 1) == 1) cb.r += scale;
-         i >>= 1;
-         if ((i & 1) == 1) cb.g += scale;
-         i >>= 1;
-         if ((i & 1) == 1) cb.b += scale;
-         i >>= 1;
-
-         scale /= 2;
-      }
-
-
-      return cb;
-   }
-
 
    public void FlatRenderMeshes((Transform tr, Mesh m)[] meshes) {
       RenderParams rp = new RenderParams(mat);
@@ -164,10 +141,9 @@ public class CameraHandle_Shader : MonoBehaviour {
          var mat = tr.localToWorldMatrix;
 
 
-         mb.SetColor("_Color", ColorFrom(i));
+         mb.SetColor("_Color", CameraHandle.ColorFrom(i, fun_colors));
          rp.matProps = mb;
          rp.layer = 15;
-         Debug.Log("Render");
          Graphics.RenderMesh(rp, m, 0, mat);
       }
 

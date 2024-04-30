@@ -78,6 +78,7 @@ public class ExportPipeline : MonoBehaviour {
    public void ExecuteMyPipeline() {
       if (executed) return;
 
+      sprite_capture_pipeline.exporting = true;
 
       IEnumerator SubPl() {
          yield return
