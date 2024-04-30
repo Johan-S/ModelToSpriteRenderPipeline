@@ -130,6 +130,17 @@ public class ExportPipeline : MonoBehaviour {
    List<(string FileOutput, RectInt rect, Vector2 ground_center_pivot)> sprite_gen_meta = new();
 
 
+   int _ResultHolderTicker;
+   public SpriteCaptureResultHolder NewResultHolder(string name) {
+
+
+      var a = new GameObject(name).AddComponent<SpriteCaptureResultHolder>();
+      a.transform.parent = dummy_holder.transform;
+      a.transform.position = new Vector3((_ResultHolderTicker % 10) * 2 + 10, _ResultHolderTicker / 10);
+      _ResultHolderTicker++;
+      return a;
+   }
+
    string SpriteGenMetaRow((string FileOutput, RectInt rect, Vector2 ground_center_pivot) d) {
       var r = d.rect;
       var p = d.ground_center_pivot;
@@ -416,13 +427,6 @@ public class ExportPipeline : MonoBehaviour {
             x.material = res_mat;
          }
       }
-
-
-      {
-         var holder = new GameObject($"_ UNIT {pu.out_name}").AddComponent<SpriteCaptureResultHolder>();
-
-         holder.used_material = res_mat;
-      }
    }
 
    public Vector2 GetAdjustedSpritePivot(Vector2 original_pivot, Vector3 model_offset, Vector2 cap_size) {
@@ -499,6 +503,12 @@ public class ExportPipeline : MonoBehaviour {
 
          yield return null;
          rt = Time.realtimeSinceStartupAsDouble;
+      }
+
+      {
+         var holder = NewResultHolder($"_ UNIT {pu.out_name}");
+
+         holder.used_material = res_mat;
       }
    }
 
@@ -960,7 +970,6 @@ public class ExportPipeline : MonoBehaviour {
 
    void InitSheets() {
       if (!dummy_holder) dummy_holder = new GameObject("DummyHolder").transform;
-      dummy_holder.gameObject.SetActive(false);
       if (sheets_inited) return;
       sheets_inited = true;
       sheets_pipeline_descriptor.InitData();
@@ -1044,6 +1053,7 @@ public class ExportPipeline : MonoBehaviour {
       time_benchmark = new();
 
 
+      dummy_holder.gameObject.SetActive(false);
       export_tex = new Texture2D(export_size, export_size);
 
 
@@ -1103,6 +1113,7 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       CompleteJingle();
+      dummy_holder.gameObject.SetActive(true);
    }
 
    public void OpenOutputFolder() {

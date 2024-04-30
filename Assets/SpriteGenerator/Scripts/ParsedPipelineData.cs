@@ -290,7 +290,9 @@ public class ParsedPipelineData {
          return null;
       }
 
-      tr = GameObject.Instantiate(tr, pipeline.dummy_holder);
+      var rs = pipeline.NewResultHolder($"_ _ ITEM {name} _ {ob_name}");
+
+      tr = GameObject.Instantiate(tr, rs.transform);
       Material last_mat = null;
       Material last_rmat = null;
 
@@ -317,12 +319,8 @@ public class ParsedPipelineData {
                last_rmat = ApplyMaterialColor(colors, pipeline.MapMat(mat, name));
                // Debug.Log($"Applied color to {tr.name}: {name}: {mat.name} {last_rmat.name}: {colors.join(", ")}");
                rend.material = last_rmat;
+               rs.used_material = last_rmat;
             }
-         }
-
-         if (last_rmat) {
-            var rs = new GameObject($"_ _ ITEM {name} _ {ob_name}").AddComponent<SpriteCaptureResultHolder>();
-            rs.used_material = last_rmat;
          }
       }
 
