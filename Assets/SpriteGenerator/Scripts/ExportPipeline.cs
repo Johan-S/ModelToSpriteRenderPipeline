@@ -889,6 +889,11 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
+      if (pu.model_body.body_category) {
+         var r = pu.model_body.body_category.relative_model_height_for_shading;
+         sprite_capture_pipeline.relative_model_height_for_shading = r == 0 ? 1 : r;
+      }
+
       sprite_capture_pipeline.model.animation_clip = pu.animations[0].clip;
    }
 
