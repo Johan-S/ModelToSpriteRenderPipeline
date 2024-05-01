@@ -354,7 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  load_unit_on_play: {fileID: -6951753125974283355, guid: 1f4f95e524e588048ad0fabf08839b87, type: 3}
+  load_unit_on_play: {fileID: 558734403567846002, guid: 42a9cea554fc5c1418bcb6b3306dca4c, type: 3}
   idle_only: 0
   only_atlas: 1
   only_atlas_meta: 0
@@ -368,7 +368,7 @@ MonoBehaviour:
   export_size: 128
   atlas_sprites_per_row: 4
   export_to_folder: Gen
-  generate_only: []
+  override_units: []
   material: {fileID: 2100000, guid: 0d195eee3bd774243bc645641a269e5d, type: 2}
   model: {fileID: 746774659}
   sprite_capture_pipeline: {fileID: 420694997}
@@ -455,6 +455,7 @@ MonoBehaviour:
   shade_bottom_start: 0.4
   shade_bottom_end: 0.22
   shade_bottom_mag: 0.48
+  relative_model_height_for_shading: 1
   shader: {fileID: 7200000, guid: 1e38b816e9742e546a991b83edf3c8d7, type: 3}
   try_shader_outlining: 1
 --- !u!1 &431468297
@@ -1512,6 +1513,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c109d20e41296243bd439e19eab0b34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  color_mat: {fileID: 0}
 --- !u!114 &1493323222
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -18,3 +18,4 @@ MonoBehaviour:
   animationTypeName: 
   no_gear: 1
   model_offset: {x: 0.5, y: 0, z: 0}
+  relative_model_height_for_shading: 0.4

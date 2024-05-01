@@ -397,6 +397,14 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
+      sprite_capture_pipeline.relative_model_height_for_shading = 1;
+
+      if (pu.model_body.body_category) {
+         var shading_height = pu.model_body.body_category.relative_model_height_for_shading;
+         if (shading_height > 0) {
+            sprite_capture_pipeline.relative_model_height_for_shading = shading_height;
+         }
+      }
 
       sprite_capture_pipeline.RunPipeline();
 

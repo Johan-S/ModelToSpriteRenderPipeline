@@ -16,4 +16,6 @@ public class ModelBodyCategory : ScriptableObject {
 
    public Vector3 model_offset;
 
+
+   public float relative_model_height_for_shading;
 }

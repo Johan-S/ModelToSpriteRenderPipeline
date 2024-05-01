@@ -45,6 +45,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    [Range(0, 1)]
    public float shade_bottom_mag;
+
+
+   [Range(0, 3)]
+   public float relative_model_height_for_shading = 1;
    public Action HandleLoopingRootMotion(AnimationClip clip, float t) {
       
       
@@ -126,14 +130,23 @@ public class SpriteCapturePipeline : MonoBehaviour {
       time_benchmark?.Lap("Black Outline");
    }
 
+   float MapShadingHeight(float h) {
+
+      var x = h - 0.25f;
+      if (x < 0) return x;
+
+      return (x * relative_model_height_for_shading + 0.25f);
+
+   }
+
    public void ShadeBottom(Texture2D t) {
       
       var px = t.GetPixels();
 
-      var be = Mathf.Min(shade_bottom_end, shade_bottom_start);
+      var be = MapShadingHeight(Mathf.Min(shade_bottom_end, shade_bottom_start));
 
       float he = be * t.height;
-      float hs = shade_bottom_start * t.height;
+      float hs = MapShadingHeight(shade_bottom_start) * t.height * relative_model_height_for_shading;
       
       for (int i = 0; i < px.Length; i++) {
 
