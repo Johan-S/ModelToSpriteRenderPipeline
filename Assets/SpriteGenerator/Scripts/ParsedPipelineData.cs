@@ -23,6 +23,9 @@ public class ParsedPipelineData {
    Dictionary<string, AnimationSet> animation_sets => pipeline.animation_sets;
 
 
+   public IList<IUnitTypeForRender> extra_units => pipeline.override_units;
+
+
    public ParsedPipelineData(ExportPipelineSheets sheets_pipeline_descriptor, ExportPipeline pipeline) {
       this.pipeline = pipeline;
       this.sheets_pipeline_descriptor = sheets_pipeline_descriptor;
@@ -31,20 +34,17 @@ public class ParsedPipelineData {
    }
 
 
+   Dictionary<string, ParsedArmor> armor_to_model_map = new();
    void init() {
       string[] GetRows(string text) {
          return text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
       }
 
-      var unit_rows = GetRows(sheets_pipeline_descriptor.unit.text);
+      var unit_rows = sheets_pipeline_descriptor.unit ? GetRows(sheets_pipeline_descriptor.unit?.text) : Array.Empty<string>();
       var shield_rows = GetRows(sheets_pipeline_descriptor.shield.text);
       var armor_rows = GetRows(sheets_pipeline_descriptor.armor.text);
       var helmet_rows = GetRows(sheets_pipeline_descriptor.helmet.text);
       var weapon_rows = GetRows(sheets_pipeline_descriptor.weapon.text);
-
-      foreach (var unit_row in unit_rows) {
-         // Debug.Log($"ur: {unit_row}");
-      }
 
       {
          var names = shield_rows[0].Split("\t");
@@ -92,7 +92,6 @@ public class ParsedPipelineData {
             }
          }
       }
-      Dictionary<string, ParsedArmor> armor_to_model_map = new();
       {
          var names = armor_rows[0].Split("\t");
 
@@ -158,111 +157,128 @@ public class ParsedPipelineData {
 
       {
          var dict = sheets_pipeline_descriptor.unit_data;
-         var names = unit_rows[0].Split("\t");
+
+         if (unit_rows.Length > 1) {
+            foreach (var part_str in unit_rows[1..]) {
+               if (part_str.StartsWith("//")) continue;
+               var data = part_str.Split("\t");
+               var name = data[1];
+
+               var vals = dict[name];
 
 
-         foreach (var part_str in unit_rows[1..]) {
-            if (part_str.StartsWith("//")) continue;
-            var data = part_str.Split("\t");
-            var name = data[1];
+               var an_type = vals["AnimationType"];
+               var transo = pipeline.model_mapping_by_body_type[vals["Anatomy"]];
 
-            var vals = dict[name];
+               var pu = CreateParsedUnit(an_type, name, transo);
 
 
-            var an_type = vals["AnimationType"];
-            var atype = DataParsing.NormalizeAnimationName(an_type);
-            if (atype.Trim().Length == 0) {
-               Debug.LogError($"Skipping {name} due to lacking animation.");
-               continue;
-            }
 
-            ParsedUnit pu = new ParsedUnit();
-            pu.animation_type = an_type;
-            pu.raw_name = name;
-            pu.model_name = pipeline.defaultRenderModelName;
-            var helm = vals["Helmet"];
+               {
+                  var armor_name = vals["Armor"];
 
-            if (helm.Length == 0) {
-               // pu.model_name = "Archer";
-            }
+                  if (armor_to_model_map.TryGetValue(armor_name, out var armor)) {
+                     var rc = armor.colors.ToList();
 
-            var transo = pipeline.model_mapping_by_body_type[vals["Anatomy"]];
-            pu.model_body = transo;
-            pu.model_name = transo.name;
+                     if (ColorUtility.TryParseHtmlString(vals["Theme Color"], out var theme_color)) {
+                        pu.theme_color = theme_color;
 
-            // Debug.Log($"Transo name {transo.name}");
+                        ApplyTheme(theme_color, rc, armor.theme_1, armor.theme_2, armor.theme_3);
+                     }
+
+                     pu.colors.AddRange(rc);
+
+                     var maps = new[] {
+                        ("Body_Armor", armor.armor),
+                        ("Leg_Armor", armor.legging),
+                        ("Gauntlets", armor.gauntlet),
+                        ("Boots", armor.boots),
+                     };
+                     var helm = vals["Helmet"];
+
+                     foreach (var (slot, arm) in maps) {
+                        if (pu.model_body.skins_to_transform.TryGetValue(slot, out var value1)) {
+                           pu.skin_map[value1] = arm;
+                        } else {
+                           Debug.LogError($"Missing skin {slot} in {transo.name}");
+                        }
+                     }
 
 
-            {
-               var armor_name = vals["Armor"];
+                     var w1 = vals["Weapon_Primary"];
+                     var w2 = vals["Weapon_Secondary"];
 
-               if (armor_to_model_map.TryGetValue(armor_name, out var armor)) {
-                  var rc = armor.colors.ToList();
+                     var sh = vals["Shield"];
 
-                  if (ColorUtility.TryParseHtmlString(vals["Theme Color"], out var theme_color)) {
-                     pu.theme_color = theme_color;
+                     if (!pu.no_gear) {
+                        pu.slot_map[pu.model_body.slot_to_transform["Main_Hand"]] = w1;
+                        pu.slot_map[pu.model_body.slot_to_transform["Off_Hand"]] = w2;
+                        pu.slot_map[pu.model_body.slot_to_transform["Off_Hand_Shield"]] = sh;
 
-                     ApplyTheme(theme_color, rc, armor.theme_1, armor.theme_2, armor.theme_3);
-                  }
-
-                  pu.colors.AddRange(rc);
-
-                  var maps = new[] {
-                     ("Body_Armor", armor.armor),
-                     ("Leg_Armor", armor.legging),
-                     ("Gauntlets", armor.gauntlet),
-                     ("Boots", armor.boots),
-                  };
-
-                  foreach (var (slot, arm) in maps) {
-                     if (transo.skins_to_transform.TryGetValue(slot, out var value1)) {
-                        pu.skin_map[value1] = arm;
-                     } else {
-                        Debug.LogError($"Missing skin {slot} in {transo.name}");
+                        if (pu.model_body.name != "Archer") {
+                           pu.slot_map[pu.model_body.slot_to_transform["NewHelmet"]] = helm;
+                        } else {
+                        }
                      }
                   }
                }
+
+               units.Add(pu);
             }
+         }
+         
+      }
+      
+      if (this.extra_units != null) {
+         
+         foreach (var u in extra_units) {
 
-
-            // Debug.Log($"{armor.name}: {armor.colors.join(" ")}");
-
-
-            pu.out_name = GetExportUnitName(name);
-
-
-            var w1 = vals["Weapon_Primary"];
-            var w2 = vals["Weapon_Secondary"];
-
-            var sh = vals["Shield"];
-
-            if (!pu.no_gear) {
-               pu.slot_map[transo.slot_to_transform["Main_Hand"]] = w1;
-               pu.slot_map[transo.slot_to_transform["Off_Hand"]] = w2;
-               pu.slot_map[transo.slot_to_transform["Off_Hand_Shield"]] = sh;
-
-               if (transo.name != "Archer") {
-                  pu.slot_map[transo.slot_to_transform["NewHelmet"]] = helm;
-               } else {
-               }
-            }
-            // if (idle_only) atype = "Idle";
-
-            var animation_set = animation_sets[atype];
-
-            var anims = animation_set.res;
-            if (pipeline.idle_only) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
-
-
-            pu.animations.AddRange(anims);
-            pu.idle_animation_id = pu.animations.FindIndex(x => x.category == "Idle");
-
+            var model_data = pipeline.MakeModelData(u.ModelBody);
+            
+            var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
 
             units.Add(pu);
-         }
+         }     
       }
 
       output_n = units.Sum(x => x.animations.Count);
+   }
+
+   ParsedUnit CreateParsedUnit(string an_type, string name, BodyModelData model_body) {
+      
+      
+      var atype = DataParsing.NormalizeAnimationName(an_type);
+      if (atype.Trim().Length == 0) {
+         Debug.LogError($"Skipping {name} due to lacking animation.");
+         return null;
+      }
+      
+      ParsedUnit pu = new ParsedUnit();
+      pu.animation_type = an_type;
+      pu.raw_name = name;
+      pu.model_name = pipeline.defaultRenderModelName;
+
+      pu.model_body = model_body;
+      pu.model_name = model_body.name;
+
+      // Debug.Log($"Transo name {transo.name}");
+
+
+      // Debug.Log($"{armor.name}: {armor.colors.join(" ")}");
+
+
+      pu.out_name = GetExportUnitName(name);
+      // if (idle_only) atype = "Idle";
+
+      var animation_set = animation_sets[atype];
+
+      var anims = animation_set.res;
+      if (pipeline.idle_only) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
+
+
+      pu.animations.AddRange(anims);
+      pu.idle_animation_id = pu.animations.FindIndex(x => x.category == "Idle");
+      return pu;
    }
 
    static IEnumerable<(string field, Color color)> GetColors(string[] names, string[] data) {

@@ -627,6 +627,7 @@ public static class AnnotatedUI {
 
 
    public static bool FastStartsWith(this string a, string b) {
+      if (a.IsEmpty()) return b.IsEmpty();
       if (a.Length < b.Length) return false;
       for (int i = 0; i < b.Length; i++) {
          if (a[i] != b[i]) return false;

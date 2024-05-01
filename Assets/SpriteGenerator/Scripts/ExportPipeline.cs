@@ -31,7 +31,7 @@ public class ExportPipeline : MonoBehaviour {
    public string export_to_folder = "Gen";
 
 
-   [Header("Unit Filter")] public SimpleUnitTypeObject[] generate_only;
+   [Header("Unit Filter")] public UnitTypeForRender[] override_units;
    [Header("Bindings")] public Material material;
 
    public GameObject model;
@@ -779,7 +779,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    GameObject PrepModelObject(ParsedUnit u) {
-      GameObject model_prefab = Resources.Load<GameObject>($"BaseModels/{u.model_name}");
+      GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ?? Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
 
       sprite_capture_pipeline.model.model_offset = u.model_body.body_category.model_offset;
@@ -1004,41 +1004,39 @@ public class ExportPipeline : MonoBehaviour {
 
          // Debug.Log($"Mods: {model_types.join(", ", x => x.name)}");
          foreach (var mt in model_types) {
-            var res = new BodyModelData();
-            res.name = mt.model_root_prefab.name;
-            if (model_mappings.TryGetValue(res.name, out var cv)) {
-               cv.body_category = mt;
-               model_mapping_by_body_type[mt.bodyTypeName] = cv;
-               // Debug.Log($"Duplicate model: {res.name}");
-               continue;
-            }
 
-            res.body_category = mt;
-
-            /*
-            res.skins_to_transform["Body_Armor"] = "";
-            res.skins_to_transform["Leg_Armor"] = "";
-            res.skins_to_transform["Gauntlets"] = "";
-            res.skins_to_transform["Boots"] = "";
-            res.skins_to_transform["Cape"] = "";
-
-            res.slot_to_transform["Main_Hand"] = "";
-            res.slot_to_transform["Off_Hand"] = "";
-            res.slot_to_transform["Off_Hand_Shield"] = "";
-            res.slot_to_transform["NewHelmet"] = "";
-            */
-            model_mappings[res.name] = res;
-            model_mapping_by_body_type[mt.bodyTypeName] = res;
+            var init = MakeModelData(mt);
          }
       }
 
 
       parsed_pipeline_data = new(sheets_pipeline_descriptor, this);
-      if (this.generate_only.IsNonEmpty()) {
-         parsed_pipeline_data.units.Filter(x =>
-            generate_only.Exists(ut => ut.name == x.raw_name || ut.Unit_Name == x.raw_name));
-         parsed_pipeline_data.output_n = parsed_pipeline_data.units.Sum(x => x.animations.Count);
+      // if (this.generate_only.IsNonEmpty()) {
+      //    parsed_pipeline_data.units.Filter(x =>
+      //       generate_only.Exists(ut => ut.name == x.raw_name || ut.Unit_Name == x.raw_name));
+      //    parsed_pipeline_data.output_n = parsed_pipeline_data.units.Sum(x => x.animations.Count);
+      // }
+   }
+
+   public BodyModelData MakeModelData(ModelBodyCategory mt) {
+      
+      if (!model_mappings.TryGetValue(mt.model_root_prefab.name, out var res)) {
+         res = new BodyModelData();
+         res.name = mt.model_root_prefab.name;
+
+         res.body_category = mt;
+
+         // res.skins_to_transform["Body_Armor"] = "";
+   
+         // res.slot_to_transform["Main_Hand"] = "";
+         model_mappings[res.name] = res;
+         model_mapping_by_body_type[mt.bodyTypeName] = res;
       }
+
+      res.body_category ??= mt;
+      model_mapping_by_body_type[mt.bodyTypeName] = res;
+      // Debug.Log($"Duplicate model: {res.name}");
+      return res;
    }
 
    ParsedPipelineData parsed_pipeline_data;

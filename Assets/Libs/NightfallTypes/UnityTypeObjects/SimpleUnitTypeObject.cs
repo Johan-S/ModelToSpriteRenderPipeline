@@ -6,7 +6,15 @@ using UnityEngine;
 
 using UnityEditor;
 
-public class SimpleUnitTypeObject : ScriptableObject, Named {
+public class SimpleUnitTypeObject : ScriptableObject, Named, IUnitTypeForRender {
+   
+
+   public string ExportName => Unit_Name;
+   public ModelBodyCategory ModelBody => null;
+   public string ModelBodyName => Anatomy;
+   
+   string IUnitTypeForRender.AnimationType => AnimationType;
+   
    public int Unit_Id;
    public string Unit_Name;
    public string Faction;
@@ -72,7 +80,7 @@ public class SimpleUnitTypeObject : ScriptableObject, Named {
          vars ??= new();
 
          if (!vars.icon) {
-            if (Unit_Name.StartsWith("r/")) {
+            if (Unit_Name.FastStartsWith("r/")) {
                vars.icon = serialized_icon;
             } else {
                var gen_name = DataParsing.GetExportUnitName(Unit_Name);

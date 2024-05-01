@@ -11,6 +11,14 @@ Unit_Number	Unit_Name	Faction	AnimationType	Template	Gold_Cost	Training_Cost	Res
 
 
 
+160	Plate Greatsword		2Handed-Slash	Human-Trained	100	60	7	10	Commander										Buff_Plate_Human_2hsword	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1								
+
+
+
+160	Plate Shield		Sword&Shield	Human-Trained	100	60	7	10	Commander										Buff_Plate_Human_Shield	2	10	9	10	0	0	10	10	10	10	2	10	30	60			Death+1								
+
+
+
 
 
 

@@ -65,6 +65,7 @@ public class ExportPipelineSheets : ScriptableObject {
 
    public Dictionary<string, Dictionary<string, string>> GetData(string tsv) {
       var rows = tsv.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
+      if (rows.Length == 0) return new();
       var names = rows[0].Split("\t").EnsureUniqueSymbols();
 
       var res = new Dictionary<string, Dictionary<string, string>>();
@@ -92,7 +93,7 @@ public class ExportPipelineSheets : ScriptableObject {
    public void InitData() {
       if (animations) (animation_arr, animation_good) = GetGoodAnims();
 
-      unit_data = GetData(unit.text);
+      unit_data = GetData(unit ? unit.text : "");
       shield_data = GetData(shield.text);
       armor_data = GetData(armor.text);
       helmet_data = GetData(helmet.text);
