@@ -355,10 +355,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   load_unit_on_play: {fileID: 558734403567846002, guid: 42a9cea554fc5c1418bcb6b3306dca4c, type: 3}
-  idle_only: 0
+  idle_only: 1
   only_atlas: 1
   only_atlas_meta: 0
-  write_files: 1
+  write_files: 0
   prepend_to_sprite_name: 
   sheets_pipeline_descriptor: {fileID: 11400000, guid: 65629498018618f419ec1a2966b120f5, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
@@ -374,6 +374,7 @@ MonoBehaviour:
   sprite_capture_pipeline: {fileID: 420694997}
   progress_text: {fileID: 1898128246}
   defaultRenderModelName: Heavy Infantry
+  render_icon_sprites: 0
   executed: 0
   unit_viewer_prefab: {fileID: 3063332255528249544, guid: cf66ae4dd0d0f094db48affe8379955f, type: 3}
   max_waits_per_frame: 0.25

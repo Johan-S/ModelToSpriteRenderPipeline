@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   export_name: Ultra Heavy Greatsword
   body: {fileID: 11400000, guid: 4b57d65f1f3308e4aa79735195f00a04, type: 2}
-  animation_type: Sword&Shield
+  animation_type: 2Handed-Slash

@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -408,4 +407,6 @@ public class AnimationWrap {
    public int frame;
 
    public AnimationTypeObject animation_type_object;
+
+   public Quaternion apply_rotation;
 }
