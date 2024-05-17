@@ -4295,11 +4295,11 @@ PrefabInstance:
     - target: {fileID: 2300002, guid: f449b80cf74c05d4abd1fb4622f552f3, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 67ac1002640369b4ea9688f29539585e, type: 2}
+      objectReference: {fileID: 2100000, guid: 4f64d2664d3c78d4c9baa76eb4a732a5, type: 2}
     - target: {fileID: 2300004, guid: f449b80cf74c05d4abd1fb4622f552f3, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 67ac1002640369b4ea9688f29539585e, type: 2}
+      objectReference: {fileID: 2100000, guid: 4f64d2664d3c78d4c9baa76eb4a732a5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

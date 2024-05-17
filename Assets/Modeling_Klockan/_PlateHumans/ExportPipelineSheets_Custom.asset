@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4f1f5a63e9e94d96a3f11e766831e5a5, type: 3}
-  m_Name: ExportPipelineSheets_MyC
+  m_Name: ExportPipelineSheets_Custom
   m_EditorClassIdentifier: 
   output_name: custom_sprites
   armor: {fileID: 5376613933743937246, guid: 68a48e6130aa43c3850699282d1457a1, type: 3}

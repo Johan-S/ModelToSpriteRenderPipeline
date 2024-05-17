@@ -2250,8 +2250,8 @@ Transform:
   m_GameObject: {fileID: 428795113345206843}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.0009104394, y: 0.0000000063002235, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.95, y: 0.95, z: 0.95}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 428795112679055230}
   - {fileID: 428795113828664833}
@@ -4295,11 +4295,11 @@ PrefabInstance:
     - target: {fileID: 2300002, guid: f449b80cf74c05d4abd1fb4622f552f3, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 67ac1002640369b4ea9688f29539585e, type: 2}
+      objectReference: {fileID: 2100000, guid: 4f64d2664d3c78d4c9baa76eb4a732a5, type: 2}
     - target: {fileID: 2300004, guid: f449b80cf74c05d4abd1fb4622f552f3, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 67ac1002640369b4ea9688f29539585e, type: 2}
+      objectReference: {fileID: 2100000, guid: 4f64d2664d3c78d4c9baa76eb4a732a5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

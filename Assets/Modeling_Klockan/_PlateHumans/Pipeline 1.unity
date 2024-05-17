@@ -360,7 +360,7 @@ MonoBehaviour:
   only_atlas_meta: 0
   write_files: 1
   prepend_to_sprite_name: 
-  sheets_pipeline_descriptor: {fileID: 11400000, guid: 13d77d9134acb1b4bbbc0ddf1cdc8697, type: 2}
+  sheets_pipeline_descriptor: {fileID: 11400000, guid: 08d618c3b6458004d8cfc9218e246bbb, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
   animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}
   animation_bundle_extra:
@@ -370,9 +370,9 @@ MonoBehaviour:
   atlas_sprites_per_row: 4
   export_to_folder: Gen_Debug
   override_units:
-  - {fileID: 11400000, guid: 81d5750ce08e9b1479df3d9cb87eb08b, type: 2}
-  - {fileID: 11400000, guid: 1446cf4a478ee9b409035654c3d4bf22, type: 2}
   - {fileID: 11400000, guid: eb4c2f4f8c5f6c64288d6ecd7d22613d, type: 2}
+  - {fileID: 11400000, guid: cf78751b0ace23047bae44d573a097d7, type: 2}
+  - {fileID: 11400000, guid: 1446cf4a478ee9b409035654c3d4bf22, type: 2}
   material: {fileID: 2100000, guid: 0d195eee3bd774243bc645641a269e5d, type: 2}
   model: {fileID: 746774659}
   sprite_capture_pipeline: {fileID: 420694997}
