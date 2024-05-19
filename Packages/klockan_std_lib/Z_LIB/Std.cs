@@ -9,6 +9,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
@@ -34,6 +35,14 @@ public class PrefAttribute : Attribute {
 
 public static class Std {
 
+   public static int Round(this float f) => Mathf.RoundToInt(f);
+   
+
+   public static T SetActive<T>(this T c, bool active) where T : Component {
+      c.gameObject.SetActive(active);
+      return c;
+   }
+   
    public static Vector2 Average(this IEnumerable<Vector2> p) {
       var res = new Vector2();
 
@@ -222,8 +231,15 @@ public static class Std {
 
    public static Vector2 Float(this Vector2Int p) => p;
 
+   public static ProfilerMarker Profiler<T>(string name) {
+      return new ProfilerMarker($"{typeof(T).Name }.{name}");
+   }
+
+   public static Vector3 ProjectTo(this Vector3 a, Vector3 axis) =>  a.Dot(axis) / axis.sqrMagnitude * axis;
+
    public static Vector2 ProjectTo(this Vector2 a, Vector2 axis) =>  a.Dot(axis) / axis.sqrMagnitude * axis;
 
+   public static float Dot(this Vector3 a, Vector3 b) => Vector3.Dot(a, b);
    public static float Dot(this Vector2 a, Vector2 b) => Vector2.Dot(a, b);
    public static int Dot(this Vector2Int a, Vector2Int b) => a.x * b.x + a.y * b.y;
 
@@ -243,6 +259,13 @@ public static class Std {
    public static IEnumerable<(int i, T value)> enumerate<T>(this IEnumerable<T> xs) {
       int i = 0;
       foreach (var x in xs) yield return (i++, x);
+   }
+   public static IEnumerable<int2> times(this int2 n) {
+      for (int i = 0; i < n.x; i++) {
+         for (int j = 0; j < n.y; j++) {
+            yield return (i, j);
+         }
+      }
    }
 
    public static IEnumerable<int2> times(this (int i, int j) n) {
@@ -318,11 +341,11 @@ public static class Std {
       return string.Join(sep, e);
    }
 
-   public static string join<T>(this IEnumerable<T> ie, string sep, Func<T, string> to_str = null) {
+   public static string join<T>(this IEnumerable<T> ie, string sep="", Func<T, string> to_str = null) {
       return sep.join(ie, to_str);
    }
 
-   public static T[] SubArray<T>(this T[] arr, int s, int e) {
+   public static T[] SubArray<T>(this IList<T> arr, int s, int e) {
       int n = e - s;
       var res = new T[n];
       for (int i = s; i < e; i++) {
@@ -356,6 +379,15 @@ public static class Std {
    }
 
    public static float AUDIO_SAMPLE_SIN_D;
+   public static KeyVal<string, string> SplitPair(this string s, string sep) {
+      var res = s.Trim().Split(sep, 2).Trim();
+
+      if (res.Length == 2) return new KeyVal<string, string>(res[0], res[1]);
+
+      if (res.Length == 1) return new KeyVal<string, string>(res[0], "");
+
+      return new KeyVal<string, string>("", "");
+   }
 
    public static string[] SplitE(this string s, string sep, int count) =>
       s.Trim().Split(sep, count, StringSplitOptions.RemoveEmptyEntries).Trim();
@@ -514,6 +546,16 @@ public static class Std {
       }
 
       return names;
+   }
+
+   public static string GetIndent(this string line, int tab_size=3) {
+
+      int i = 0;
+      while (i < line.Length && char.IsWhiteSpace(line[i])) {
+         i++;
+      }
+
+      return line.Substring(0, i).Replace("\t", new string(' ', tab_size));
    }
 
    public static string[] SplitLines(this string text, bool skip_empty = false) {

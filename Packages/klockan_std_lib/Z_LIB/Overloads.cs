@@ -385,6 +385,12 @@ public static class Overloads {
       return res;
    }
 
+   public static string WrapColor(this string s, Color c) {
+      
+      var res = $"<color=#{c.AsRGB_String()}>{s}</color>";
+      return res;
+   }
+
    public static string GoodColor(this string s) {
       return $"<color=#2f2>{s}</color>";
    }
@@ -596,6 +602,26 @@ public static class Overloads {
       return i / g * o;
    }
 
+   public static int Clamped(this int x, int min) {
+      if (x < min) return min;
+      return x;
+   }
+   public static int Clamped(this int x, int min, int max) {
+      if (x < min) return min;
+      if (x > max) return max;
+      return x;
+   }
+   public static float Clamped(this float x, float min) {
+      if (x < min) return min;
+      return x;
+   }
+   public static float Clamped(this float x, float min, float max) {
+      if (x < min) return min;
+      if (x > max) return max;
+      return x;
+   }
+
+   public static int UpperDiv(this int i, int o) => UpperDiv_TwoSides(i, o);
    public static int UpperDiv_TwoSides(this int i, int o) {
       int t = o < 0 ? -1 : 1;
       o = t * o;
@@ -1048,6 +1074,9 @@ public static class Overloads {
       c.a *= a;
       return c;
    }
+   public static Color LerpTo(this Color c, Color o, float f) {
+      return Color.Lerp(c, o, f);
+   }
    public static Color KeepAlpha(this Color c, Color a) {
       a.a = c.a;
       return a;
@@ -1293,6 +1322,23 @@ public static class Overloads {
       var mi = r.Clamp(a.min);
       var ma = r.Clamp(a.max);
       return new RectInt(mi, ma - mi + Vector2Int.one);
+   }
+
+   public static RectInt Include(this RectInt r, Vector2Int p) {
+      if (!r.Contains(p)) {
+         if (r.xMin > p.x) {
+            r.xMin = p.x;
+         } else if (r.xMax < p.x) {
+            r.xMax = p.x;
+         }
+
+         if (r.yMin > p.y) {
+            r.yMin = p.y;
+         } else if (r.yMax < p.y) {
+            r.yMax = p.y;
+         }
+      }
+      return r;
    }
 
    public static Rect Include(this Rect r, Vector2 p) {
@@ -1573,20 +1619,18 @@ public static class Overloads {
       return res;
    }
 
-   public static ListImplicit<T> Filter<T>(this ListImplicit<T> a, System.Predicate<T> p) {
+   public static void Filter<T>(this ListImplicit<T> a, System.Predicate<T> p) {
       int n = 0;
       for (int i = 0; i < a.Count; ++i) if (p(a[i])) a[n++] = a[i];
       a.RemoveRange(n, a.Count - n);
-      return a;
    }
-   public static ListImplicit<T> Filter<T>(this ListImplicit<T> a, System.Predicate<T> p, System.Action<T> on_remove) {
+   public static void Filter<T>(this ListImplicit<T> a, System.Predicate<T> p, System.Action<T> on_remove) {
       int n = 0;
       for (int i = 0; i < a.Count; ++i) {
          if (p(a[i])) a[n++] = a[i];
          else on_remove(a[i]);
       }
       a.RemoveRange(n, a.Count - n);
-      return a;
    }
 
    public static List<T> Filtered<T>(this List<T> a, System.Predicate<T> p) {
@@ -1716,12 +1760,6 @@ public static class Overloads {
       var res = new U[a.Count];
       int n = a.Count;
       for (int i = 0; i < n; ++i) res[i] = p(a[i]);
-      return res;
-   }
-   public static List<U> Map<T, U>(this List<T> a, System.Func<T, U> p) {
-      List<U> res = new List<U>();
-      res.Capacity = a.Count;
-      foreach (var x in a) res.Add(p(x));
       return res;
    }
    public static void Swap1<T>(this List<T> a, int at) {
