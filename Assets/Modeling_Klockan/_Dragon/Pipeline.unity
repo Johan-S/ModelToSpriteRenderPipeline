@@ -3173,7 +3173,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &263406949
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3298,7 +3298,7 @@ MonoBehaviour:
   only_atlas: 1
   only_atlas_meta: 0
   write_files: 1
-  prepend_to_sprite_name: 
+  prepend_to_sprite_name: _big
   sheets_pipeline_descriptor: {fileID: 11400000, guid: 8043f5a1ffba9e64dad74888a5fa0667, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
   animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}

@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1613684601616846, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
       propertyPath: m_Name
-      value: Unka Toon Variant
+      value: Model_Toon
       objectReference: {fileID: 0}
     - target: {fileID: 4702769174163554, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
       propertyPath: m_RootOrder
@@ -83,6 +83,38 @@ PrefabInstance:
     - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
       propertyPath: m_ReceiveShadows
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[2]
+      value: 70.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[4]
+      value: 67.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[7]
+      value: 61.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[9]
+      value: 66.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[12]
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[15]
+      value: 76.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[19]
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 137542414578760568, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[22]
+      value: 31.7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

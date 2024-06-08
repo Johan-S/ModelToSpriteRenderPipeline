@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1373522185105208, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
       propertyPath: m_Name
-      value: Dragon_Testmodel Variant
+      value: Model_Polyart
       objectReference: {fileID: 0}
     - target: {fileID: 4018240880767132, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2632,6 +2632,38 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 77689b181d36e0d44abd95bdcba0c0d4, type: 2}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[2]
+      value: 70.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[4]
+      value: 67.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[7]
+      value: 61.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[9]
+      value: 66.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[12]
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[15]
+      value: 76.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[19]
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_BlendShapeWeights.Array.data[22]
+      value: 31.7
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
