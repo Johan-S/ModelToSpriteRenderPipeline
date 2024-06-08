@@ -49,7 +49,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
    static List<GeneratedSpritesContainer> GetInstance() {
       if (_cache == null) {
          _cache = Resources.LoadAll<GeneratedSpritesContainer>("").ToList();
-         if (_cache.IsNullOrEmpty()) {
+         if (_cache.IsEmpty()) {
             Debug.LogError("Didn't found test_atlas meta file! Need GeneratedSpritesContainer to fetch sprites!");
             return null;
          }
@@ -60,7 +60,7 @@ public class GeneratedSpritesContainer : ScriptableObject {
       }
 
       foreach (var c in _cache) {
-         if (c.lookup.IsNullOrEmpty()) {
+         if (c.lookup.IsEmpty()) {
             c.SetSprites(c.sprites);
          }
       }

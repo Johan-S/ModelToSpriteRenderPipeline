@@ -381,7 +381,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
       var lazy = flow.lazy;
       if (htype == "Unit_ID") {
          var val = GameTypeCollection.ParseRows<DataTypes.UnitTypeClass>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
 
          if (!gear_data.units.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Unit: {val.GetType().Name}: {val.name}");
@@ -396,7 +396,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       if (htype == "Weapon_ID") {
          var val = GameTypeCollection.ParseRows<DataTypes.WeaponMelee>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.melee_weapons.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Weapon: {val.GetType().Name}: {val.name}");
             return;
@@ -407,7 +407,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       if (htype == "Armor_ID") {
          var val = GameTypeCollection.ParseRows<DataTypes.Armor>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.armors.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Armor: {val.GetType().Name}: {val.name}");
             return;
@@ -418,7 +418,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       if (htype == "Shield_ID") {
          var val = GameTypeCollection.ParseRows<DataTypes.Shield>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.shields.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Shield: {val.GetType().Name}: {val.name}");
             return;
@@ -429,7 +429,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       if (htype == "Helmet_ID") {
          var val = GameTypeCollection.ParseRows<DataTypes.Helmet>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.helmets.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Helmet: {val.GetType().Name}: {val.name}");
             return;
@@ -443,7 +443,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
          var used_row = row;
          used_row = AdjustRowValues(fn, hdrs, row);
          var val = GameTypeCollection.ParseRows<DataTypes.MagicSpell>(used_row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.magic_spells.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate Spell: {val.GetType().Name}: {val.name}");
             return;
@@ -454,7 +454,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
 
       if (htype == "SimpleSpell") {
          var val = GameTypeCollection.ParseRows<DataTypes.SimpleSpell>(row);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          if (!gear_data.simple_spells.AddOrIgnore(val)) {
             Debug.LogError($"Duplicate simple spell: {val.name}");
             return;
@@ -467,7 +467,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
          var kvs = row[^1].SplitPairs(",", "=");
 
          var val = GameTypeCollection.ParseRows<BattleData.UnitBuff>(row[..^1]);
-         if (val.name.IsNullOrEmpty()) return;
+         if (val.name.IsEmpty()) return;
          GameTypeCollection.SetFields(val, kvs);
          if (!gear_data.simple_buffs.AddOrIgnore(val)) {
             Debug.LogError($"Found duplicate SimpleBuff: {val.GetType().Name}: {val.name}");
@@ -494,7 +494,7 @@ public class EngineDataInit : MonoBehaviour, IEngineDataPart {
             string field = fields[j];
 
             var data = row[j].Trim();
-            if (data.IsNullOrEmpty()) continue;
+            if (data.IsEmpty()) continue;
 
             var key = (type, cat);
 

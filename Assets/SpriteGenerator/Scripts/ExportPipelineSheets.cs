@@ -41,7 +41,7 @@ public class ExportPipelineSheets : ScriptableObject {
             string field = fields[j];
 
             var data = row[j].Trim();
-            if (data.IsNullOrEmpty()) continue;
+            if (data.IsEmpty()) continue;
 
             var key = (type, cat);
 

@@ -180,13 +180,13 @@
       "url": "https://packages.unity.com"
     },
     "klockan_std_lib": {
-      "version": "file:klockan_std_lib",
+      "version": "file:../../NightfallRogue/Packages/klockan_std_lib",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {}
     },
     "nightfall_shared_lib": {
-      "version": "file:../Packages/../../NightfallRogue/Packages/NightfallShared",
+      "version": "file:../../NightfallRogue/Packages/NightfallShared",
       "depth": 0,
       "source": "local",
       "dependencies": {}

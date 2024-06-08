@@ -82,7 +82,7 @@ public static class DataTypes {
 
 
       public static DamageField ParseOld(string msg) {
-         if (msg.IsNullOrEmpty()) return null;
+         if (msg.IsEmpty()) return null;
          var parts = Regex.Split(msg, "[+]");
          var d = new DamageField();
          if (!int.TryParse(parts[0], out d.amount)) {
@@ -98,7 +98,7 @@ public static class DataTypes {
       }
 
       public static DamageField Parse(string msg) {
-         if (msg.IsNullOrEmpty()) return null;
+         if (msg.IsEmpty()) return null;
          var op = Regex.Match(msg, @"[-+]?\d+", RegexOptions.Compiled);
          int val = 0;
          if (op.Success) {
@@ -294,7 +294,7 @@ public static class DataTypes {
       public ResourceTuple[] costs;
 
       public static SpellCostField Parse(string data) {
-         if (data.IsNullOrEmpty()) return null;
+         if (data.IsEmpty()) return null;
          SpellCostField r = new SpellCostField();
 
          var vs = data.Split(",");
@@ -378,7 +378,7 @@ public static class DataTypes {
       string parsed_effect;
 
       string TooltipString() {
-         if (parsed_effect.IsNullOrEmpty()) {
+         if (parsed_effect.IsEmpty()) {
             var sp = Effect.SplitPairs(",", "=");
 
             var e = sp.join(", ", kv => $"{kv.v} {kv.k.ToTitleCase()}");

@@ -687,8 +687,8 @@ public class ExportPipeline : MonoBehaviour {
                ap.category = data.category;
 
 
-               if (ap.time_ms.IsNullOrEmpty() && data.auto_frames_per_s > 0 && clip) {
-                  if (data.auto_frames_per_s > 0 && data.capture_frame.IsNullOrEmpty()) {
+               if (ap.time_ms.IsEmpty() && data.auto_frames_per_s > 0 && clip) {
+                  if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
                      var len = clip.length;
 
                      var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
@@ -735,7 +735,7 @@ public class ExportPipeline : MonoBehaviour {
                continue;
             }
 
-            if (data.auto_frames_per_s > 0 && data.capture_frame.IsNullOrEmpty()) {
+            if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
                var len = clip.length;
 
                var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);

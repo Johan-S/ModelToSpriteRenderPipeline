@@ -133,7 +133,7 @@ public class EngineDataHolder : ScriptableObject {
 
    static Action<string, GameData.AnimationBundle> MakeBundleCallback(string atype, ADict adict, object debug_info) {
       return (cat, b) => {
-         if (b.sprites.IsNullOrEmpty()) {
+         if (b.sprites.IsEmpty()) {
             return;
          }
 
@@ -205,7 +205,7 @@ public class EngineDataHolder : ScriptableObject {
 
          bundle_callback = MakeBundleCallback(atype, adict, debug_info: (u.name, u.animation_class));
 
-         if (u.sprite_gen_name.IsNullOrEmpty()) {
+         if (u.sprite_gen_name.IsEmpty()) {
             u.FillGeneratedSprites((x, b) => UnitTypeObject.FillBundleMs(b));
          } else {
             u.FillGeneratedSprites(bundle_callback);
@@ -214,7 +214,7 @@ public class EngineDataHolder : ScriptableObject {
    }
 
    public void InitDataForPlay() {
-      Debug.Assert(base_type_ref.game_units.IsNullOrEmpty());
+      Debug.Assert(base_type_ref.game_units.IsEmpty());
       unit_dict = new();
 
       base_type_ref.units = new List<UnitTypeClass>();
@@ -250,7 +250,7 @@ public class EngineDataHolder : ScriptableObject {
       }
 
       foreach (var a in base_type_ref.animation_data) {
-         if (a.time_ms.IsNullOrEmpty()) {
+         if (a.time_ms.IsEmpty()) {
             Debug.Log($"Missing animation time for :{a}");
             continue;
          }

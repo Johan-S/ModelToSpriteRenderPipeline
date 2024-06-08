@@ -103,12 +103,12 @@ public class UnitTypeObject : ScriptableObject {
    public string sprite_gen_name;
 
    public static void FillBundleMs(GameData.AnimationBundle b) {
-      if (b.sprites.IsNullOrEmpty()) {
+      if (b.sprites.IsEmpty()) {
          Debug.Log($"Trying to fill empty bundle!");
          return;
       }
 
-      if (b.time_ms.IsNullOrEmpty()) {
+      if (b.time_ms.IsEmpty()) {
          throw new Exception($"Bad bundle, should always have MS!");
       } else {
          Debug.Assert(b.sprites.Length == b.time_ms.Length);

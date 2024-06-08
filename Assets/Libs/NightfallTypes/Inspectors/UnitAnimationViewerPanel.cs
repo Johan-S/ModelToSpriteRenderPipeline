@@ -35,7 +35,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
       cur = u;
 
       bundles = u.animation_sprites.GetAllAnimations()
-         .Where(x => x.Item2 != null && !x.Item2.sprites.IsNullOrEmpty())
+         .Where(x => x.Item2 != null && !x.Item2.sprites.IsEmpty())
          .ToArray();
 
 
