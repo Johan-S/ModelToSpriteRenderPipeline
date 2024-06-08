@@ -3,6 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class SceneSubsystemWindow : EditorWindow {
    [MenuItem("Nightfall/Scene Subsystem")]
@@ -35,19 +36,58 @@ public class SceneSubsystemWindow : EditorWindow {
 
    public SceneSubsystem subsystem;
    public Editor editor;
+   public bool had_editor;
+
+   bool IsRemoved(Object o) {
+      return !o;
+   }
+
+   bool RemoveDesstroyedEditor() {
+      
+      if (editor is not null) {
+         
+         
+         if (IsRemoved(editor.serializedObject.targetObject)) {
+            // Debug.Log("Destroyed!");
+            editor = null;
+            return true;
+         }
+      } else {
+         if (had_editor) {
+            // Debug.Log("Dropped editor!");
+            had_editor = editor;
+            return true;
+         }
+      }
+
+      had_editor = editor;
+      return false;
+   }
 
    void OnEnable() {
       is_open = true;
       Refresh();
+      this.autoRepaintOnSceneChange = true;
    }
 
    void OnDisable() {
       is_open = false;
    }
 
-   void Update() {
-      if (SceneSubsystem.dirty) {
-         if (Refresh()) {
+   void FastUpdate() {
+      bool rd = RemoveDesstroyedEditor();
+      if (SceneSubsystem.dirty || rd) {
+         if (Refresh() || rd) {
+            // Debug.Log("repaint!");
+            this.Repaint();
+         }
+      }
+   }
+
+   void Update_slow() {
+      bool rd = RemoveDesstroyedEditor();
+      if (SceneSubsystem.dirty || rd) {
+         if (Refresh() || rd) {
             this.Repaint();
          }
       }
@@ -56,11 +96,7 @@ public class SceneSubsystemWindow : EditorWindow {
    bool Refresh() {
       SceneSubsystem.dirty = false;
 
-      if (editor is not null) {
-         if (!editor.serializedObject.targetObject) {
-            editor = null;
-         }
-      }
+      RemoveDesstroyedEditor();
 
       if (subsystem && subsystem.isActiveAndEnabled && subsystem.gameObject.scene.IsValid() &&
           subsystem.gameObject.scene == EditorSceneManager.GetActiveScene()) {
@@ -69,6 +105,7 @@ public class SceneSubsystemWindow : EditorWindow {
             editor = Editor.CreateEditor(subsystem);
             // Debug.Log("But recreate editor!");
          }
+         had_editor = editor;
 
          return false;
       }
@@ -83,23 +120,33 @@ public class SceneSubsystemWindow : EditorWindow {
          editor = null;
       }
 
+      had_editor = editor;
+
       // Debug.Log("Refresh");
       return true;
    }
-
    private void OnGUI() {
       in_window = true;
       try {
-         if (editor is not null) {
-            if (!editor.serializedObject.targetObject) {
-               Debug.Log("Destroyed!");
-               // Refresh();
-            }
-         }
 
-         if (SceneSubsystem.dirty) {
+         if (SceneSubsystem.dirty || RemoveDesstroyedEditor()) {
             Refresh();
          }
+
+         if (editor == null) {
+
+            var asc = EditorSceneManager.GetActiveScene();
+
+            if (GUILayout.Button($"Create Scene Subsystem in {asc.name}")) {
+
+               var go = new GameObject("SceneSubsystem");
+               var s = go.AddComponent<SceneSubsystem>();
+
+               Undo.RegisterCreatedObjectUndo(go, "Created " + go.name);
+            }
+            return;
+         }
+
 
          if (editor) editor.OnInspectorGUI();
       }
