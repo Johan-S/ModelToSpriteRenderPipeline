@@ -193,6 +193,15 @@
         "klockan_std_lib": ""
       }
     },
+    "nightfall_sprites": {
+      "version": "file:../../NightfallRogue/Packages/nightfall_sprites",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "klockan_std_lib": "",
+        "nightfall_shared_lib": ""
+      }
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

@@ -5,9 +5,13 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Events;
 
 [DefaultExecutionOrder(20)]
 public class ExportPipeline : MonoBehaviour {
+   public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
+
+
    [Header("Debug Helpers")] public SimpleUnitTypeObject load_unit_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
@@ -48,6 +52,7 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       InitSheets();
+      if (to_visit) AnnotatedUI.Visit(to_visit, this).alwaysRevisit = true;
    }
 
    SimpleUnitTypeObject cur_loaded;
@@ -78,6 +83,7 @@ public class ExportPipeline : MonoBehaviour {
    public void ExecuteMyPipeline() {
       if (executed) return;
 
+      executed = true;
       sprite_capture_pipeline.exporting = true;
 
       IEnumerator SubPl() {
@@ -131,9 +137,8 @@ public class ExportPipeline : MonoBehaviour {
 
 
    int _ResultHolderTicker;
+
    public SpriteCaptureResultHolder NewResultHolder(string name) {
-
-
       var a = new GameObject(name).AddComponent<SpriteCaptureResultHolder>();
       a.transform.parent = dummy_holder.transform;
       a.transform.position = new Vector3((_ResultHolderTicker % 10) * 2 + 10, _ResultHolderTicker / 10);
@@ -148,22 +153,6 @@ public class ExportPipeline : MonoBehaviour {
       return $"{prepend_to_sprite_name}{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
-   void FinalizeMetaFile() {
-      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
-
-      var mf = $"{export_to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
-      File.WriteAllText(mf, meta_rows.join("\n"));
-
-      // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
-   }
-
-
-   void FillMetaOnly() {
-      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
-
-      File.WriteAllText($"{export_to_folder}/atlas_meta.txt", meta_rows.join("\n"));
-   }
-
 
    public void ShowUnitViewer() {
       if (export_tex_tot == null) {
@@ -171,19 +160,54 @@ public class ExportPipeline : MonoBehaviour {
          return;
       }
 
-      OpenUnitViewer(export_tex_tot);
+      OpenUnitViewer();
    }
 
    public UnitViewer unit_viewer_prefab;
 
    UnitViewer unit_viewer_running;
 
-   void OpenUnitViewer(Texture2D export_tex) {
-      if (unit_viewer_running) return;
+
+   public Action start_gen {
+      get {
+         if (executed) return null;
+         return () => {
+
+            this.ExecuteMyPipeline();
+         };
+      }
+   }
+
+   public Action view_sprites;
+   
+   public Action export_files_action;
+   public Action write_files_action;
+
+   public UnityEvent onPipelineDone;
+   void OnDone() {
+      onPipelineDone?.Invoke();
+      write_files_action = () => {
+         write_files_action = null;
+         WriteFiles(export_to_folder);
+
+      };
+      export_files_action = () => {
+         export_files_action = null;
+         WriteFiles(defalt_export_dir);
+
+      };
+      view_sprites = () => {
+         OpenUnitViewer();
+
+      };
+   }
+
+   void OpenUnitViewer() {
+      if (unit_viewer_running || !export_tex_tot) return;
 
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      GeneratedSpritesContainer.SetExtra(export_tex, meta_rows.join("\n"), prepend_to_name: "");
+      GeneratedSpritesContainer.SetExtra(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
 
 
       var ans = GetDirectAnimationsParsed().ToList();
@@ -192,14 +216,15 @@ public class ExportPipeline : MonoBehaviour {
 
 
       UnitViewer.UnitTypeDetails ParseUntP(ParsedUnit u) {
+         string full_name = $"{prepend_to_sprite_name}{u.out_name}";
          var r = new UnitViewer.UnitTypeDetails();
 
          r.unit = new GameData.UnitType();
          r.unit.name = u.raw_name;
-         r.unit.sprite = GeneratedSpritesContainer.Get(u.out_name).idle_sprite;
+         r.unit.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
          r.unit.animation_sprites =
-            DataParsing.GetAnimationSprites(u.out_name, ans, u.animation_type,
-               GeneratedSpritesContainer.Get(u.out_name));
+            DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
+               GeneratedSpritesContainer.Get(full_name));
          r.unit.stats = new();
 
          return r;
@@ -287,7 +312,6 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       if (mirror) {
-         
          for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                LoadBuff(j, i);
@@ -296,7 +320,6 @@ public class ExportPipeline : MonoBehaviour {
             }
          }
       } else {
-         
          for (int i = 0; i < h; i++) {
             for (int j = 0; j < w; j++) {
                LoadBuff(j, i);
@@ -390,16 +413,18 @@ public class ExportPipeline : MonoBehaviour {
 
 
    void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat) {
-
+      var model = sprite_capture_pipeline.model;
+      
       if (pu.model_body.mirror_render) {
-
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
          model.transform.localRotation = Quaternion.Euler(mrot);
       }
+
       if (an.animation_type_object != null && an.animation_type_object.looping_root) {
          sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
       }
+
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
       var FileOutput = GetFileOutput(pu.out_name, an.category, an.frame);
@@ -437,7 +462,8 @@ public class ExportPipeline : MonoBehaviour {
 
       sprite_capture_pipeline.RunPipeline();
 
-      CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput, mirror: pu.model_body.mirror_render);
+      CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
+         mirror: pu.model_body.mirror_render);
 
 
       if (an.animation_type_object != null) {
@@ -667,7 +693,6 @@ public class ExportPipeline : MonoBehaviour {
       var allclips = Resources.LoadAll<AnimationBundle>("");
 
       foreach (var clips in allclips) {
-         
          var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
 
          var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
@@ -679,7 +704,8 @@ public class ExportPipeline : MonoBehaviour {
             p.name = g.Key;
 
             foreach (var data in g) {
-               AnimationClip clip = data.clip_ref ? data.clip_ref : clips.animation_clips.Find(x => x.name == data.clip);
+               AnimationClip clip =
+                  data.clip_ref ? data.clip_ref : clips.animation_clips.Find(x => x.name == data.clip);
                var ap = new GameTypeCollection.AnimationParsed();
 
                ap.clip = data.clip_name;
@@ -821,7 +847,8 @@ public class ExportPipeline : MonoBehaviour {
 
 
    GameObject PrepModelObject(ParsedUnit u) {
-      GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ?? Resources.Load<GameObject>($"BaseModels/{u.model_name}");
+      GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ??
+                                Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
 
       sprite_capture_pipeline.model.model_offset = u.model_body.body_category.model_offset;
@@ -1051,7 +1078,6 @@ public class ExportPipeline : MonoBehaviour {
 
          // Debug.Log($"Mods: {model_types.join(", ", x => x.name)}");
          foreach (var mt in model_types) {
-
             var init = MakeModelData(mt);
          }
       }
@@ -1066,7 +1092,6 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    public BodyModelData MakeModelData(ModelBodyCategory mt) {
-      
       if (!model_mappings.TryGetValue(mt.model_root_prefab.name, out var res)) {
          res = new BodyModelData();
          res.name = mt.model_root_prefab.name;
@@ -1074,7 +1099,7 @@ public class ExportPipeline : MonoBehaviour {
          res.body_category = mt;
 
          // res.skins_to_transform["Body_Armor"] = "";
-   
+
          // res.slot_to_transform["Main_Hand"] = "";
          model_mappings[res.name] = res;
          model_mapping_by_body_type[mt.bodyTypeName] = res;
@@ -1097,6 +1122,9 @@ public class ExportPipeline : MonoBehaviour {
 
    public Dictionary<string, BodyModelData> model_mappings;
    public Dictionary<string, AnimationSet> animation_sets;
+
+   public RectTransform to_visit;
+
 
    IEnumerator RunPipeline() {
       time_benchmark = new();
@@ -1123,9 +1151,12 @@ public class ExportPipeline : MonoBehaviour {
             }
          }
 
-         FinalizeMetaFile();
          if (progress_text) {
             progress_text.transform.parent.gameObject.SetActive(false);
+         }
+
+         if (write_files) {
+            WriteMetaFile(export_to_folder);
          }
 
          yield break;
@@ -1149,11 +1180,9 @@ public class ExportPipeline : MonoBehaviour {
 
       var full_time = time_benchmark.LogTimes(out_sprite_count);
 
-      var rb = export_tex_tot.EncodeToPNG();
 
       if (write_files) {
-         File.WriteAllBytes($"{export_to_folder}/{sheets_pipeline_descriptor.output_name}.png", rb);
-         FinalizeMetaFile();
+         WriteFiles(export_to_folder);
       }
 
 
@@ -1163,7 +1192,36 @@ public class ExportPipeline : MonoBehaviour {
 
       CompleteJingle();
       dummy_holder.gameObject.SetActive(true);
+
+      OnDone();
    }
+
+
+   public void WriteMetaFile(string to_folder) {
+      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
+
+      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
+      File.WriteAllText(mf, meta_rows.join("\n"));
+
+      // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
+   }
+
+   public void WriteTexturefile(string to_folder) {
+      var rb = export_tex_tot.EncodeToPNG();
+      File.WriteAllBytes($"{to_folder}/{sheets_pipeline_descriptor.output_name}.png", rb);
+      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
+
+      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
+      File.WriteAllText(mf, meta_rows.join("\n"));
+
+      // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
+   }
+
+   public void WriteFiles(string to_folder) {
+      if (!only_atlas_meta) WriteTexturefile(to_folder);
+      WriteMetaFile(to_folder);
+   }
+
 
    public void OpenOutputFolder() {
 #if UNITY_EDITOR

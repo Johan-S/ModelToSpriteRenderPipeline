@@ -14,6 +14,7 @@
     "com.unity.timeline": "1.7.2",
     "com.unity.ugui": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.1.10",
+    "nightfall_sprites": "file:../../NightfallRogue/Packages/nightfall_sprites",
     "klockan_std_lib": "file:../../NightfallRogue/Packages/klockan_std_lib",
     "nightfall_shared_lib": "file:../../NightfallRogue/Packages/NightfallShared",
     "com.unity.modules.ai": "1.0.0",
