@@ -189,7 +189,9 @@
       "version": "file:../../NightfallRogue/Packages/NightfallShared",
       "depth": 0,
       "source": "local",
-      "dependencies": {}
+      "dependencies": {
+        "klockan_std_lib": ""
+      }
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

@@ -7,5 +7,6 @@ ScriptedImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-  script: {fileID: 11500000, guid: 7a81d8838ba849f7aab139a499c7bd3d, type: 3}
+  script: {fileID: 11500000, guid: 9cd8b7d1e8f61a84a9b208a07582e8f1, type: 3}
   atlas: {fileID: 2800000, guid: cd0a1cab464219c498b836143e001856, type: 3}
+  prepend_to_name: 

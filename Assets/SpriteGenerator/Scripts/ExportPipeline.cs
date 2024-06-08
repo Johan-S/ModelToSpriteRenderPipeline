@@ -183,7 +183,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      GeneratedSpritesContainer.SetExtra(export_tex, meta_rows.join("\n"));
+      GeneratedSpritesContainer.SetExtra(export_tex, meta_rows.join("\n"), prepend_to_name: "");
 
 
       var ans = GetDirectAnimationsParsed().ToList();
