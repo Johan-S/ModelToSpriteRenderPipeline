@@ -11,6 +11,7 @@ public class SimpleUnitTypeObject : ScriptableObject, Named, IUnitTypeForRender 
 
    public string ExportName => Unit_Name;
    public ModelBodyCategory ModelBody => null;
+   public Material MaterialOverride { get; }
    public string ModelBodyName => Anatomy;
    
    string IUnitTypeForRender.AnimationType => AnimationType;

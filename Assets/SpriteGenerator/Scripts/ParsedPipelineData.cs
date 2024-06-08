@@ -233,8 +233,13 @@ public class ParsedPipelineData {
          foreach (var u in extra_units) {
 
             var model_data = pipeline.MakeModelData(u.ModelBody);
+
             
             var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
+            
+            if (u.MaterialOverride) {
+               pu.material = u.MaterialOverride;
+            }
 
             units.Add(pu);
          }     
@@ -256,6 +261,8 @@ public class ParsedPipelineData {
       pu.animation_type = an_type;
       pu.raw_name = name;
       pu.model_name = pipeline.defaultRenderModelName;
+
+      pu.material = model_body.material;
 
       pu.model_body = model_body;
       pu.model_name = model_body.name;
@@ -350,7 +357,7 @@ public class ParsedUnit {
    public string out_name;
    public string model_name;
 
-   public Material material => model_body.body_category?.material;
+   public Material material;
    public BodyModelData model_body;
 
    public bool no_gear => model_body.body_category.no_gear;
@@ -387,6 +394,8 @@ public class BodyModelData {
    public Dictionary<string, string> slot_to_transform = new();
    public Dictionary<string, string> skins_to_transform = new();
 
+   public Material material;
+   public bool mirror_render;
    public ModelBodyCategory body_category;
 }
 

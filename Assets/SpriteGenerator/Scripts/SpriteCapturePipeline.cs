@@ -32,7 +32,11 @@ public class SpriteCapturePipeline : MonoBehaviour {
    void Awake() {
       front_depth_shader = Shader.Find("Unlit/DepthForward");
       back_depth_shader = Shader.Find("Unlit/DepthBackward");
+
+      other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
    }
+
+   ModelHandle[] other_models = Array.Empty<ModelHandle>();
 
 
    public bool exporting;
@@ -52,10 +56,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public Action GetMoveBackFunk() {
       
-      var pos_before_root = model.transform.position;
+      var pos_before_root = model.transform.localPosition;
       var rot_before = model.transform.localRotation;
       return () => {
-         model.transform.position = pos_before_root;
+         model.transform.localPosition = pos_before_root;
          model.transform.localRotation = rot_before;
       }; 
    }
@@ -108,6 +112,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public void RunPipeline() {
       InitTextures();
+      foreach (var om in other_models) {
+         om.SetActive(false);
+      }
       time_benchmark?.Begin();
 
       if (outline_parts) {
@@ -137,6 +144,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
       
       
       time_benchmark?.Lap("Black Outline");
+      foreach (var om in other_models) {
+         om.SetActive(true);
+      }
    }
 
    float MapShadingHeight(float h) {

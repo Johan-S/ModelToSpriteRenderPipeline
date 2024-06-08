@@ -224,7 +224,7 @@ public class ExportPipeline : MonoBehaviour {
       unit_viewer_running.SetUnits(gu);
    }
 
-   void CopyAndDownsampleTo(Texture2D src, Texture2D dst, string FileOutput) {
+   void CopyAndDownsampleTo(Texture2D src, Texture2D dst, string FileOutput, bool mirror) {
       var cols = src.GetPixels();
 
       if (dst.width == src.width && dst.height == src.height) {
@@ -286,14 +286,26 @@ public class ExportPipeline : MonoBehaviour {
          return res;
       }
 
+      if (mirror) {
+         
+         for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+               LoadBuff(j, i);
 
-      for (int i = 0; i < h; i++) {
-         for (int j = 0; j < w; j++) {
-            LoadBuff(j, i);
+               res[w - 1 - j + i * w] = MergeColors(buff);
+            }
+         }
+      } else {
+         
+         for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+               LoadBuff(j, i);
 
-            res[j + i * w] = MergeColors(buff);
+               res[j + i * w] = MergeColors(buff);
+            }
          }
       }
+
 
       dst.SetPixels(res);
       dst.Apply();
@@ -378,6 +390,16 @@ public class ExportPipeline : MonoBehaviour {
 
 
    void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat) {
+
+      if (pu.model_body.mirror_render) {
+
+         var mrot = model.transform.localRotation.eulerAngles;
+         mrot.y *= -1;
+         model.transform.localRotation = Quaternion.Euler(mrot);
+      }
+      if (an.animation_type_object != null && an.animation_type_object.looping_root) {
+         sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
+      }
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
       var FileOutput = GetFileOutput(pu.out_name, an.category, an.frame);
@@ -400,7 +422,6 @@ public class ExportPipeline : MonoBehaviour {
       if (an.animation_type_object) {
          model.transform.localPosition += an.animation_type_object.model_root_pos;
          sprite_capture_pipeline.model.render_obj.transform.localRotation = an.animation_type_object.model_root_rot;
-         
       } else {
          sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
       }
@@ -416,7 +437,7 @@ public class ExportPipeline : MonoBehaviour {
 
       sprite_capture_pipeline.RunPipeline();
 
-      CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput);
+      CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput, mirror: pu.model_body.mirror_render);
 
 
       if (an.animation_type_object != null) {
@@ -505,12 +526,7 @@ public class ExportPipeline : MonoBehaviour {
 
       foreach (AnimationWrap an in pu.animations) {
          var mb = sprite_capture_pipeline.GetMoveBackFunk();
-         if (an.animation_type_object != null && an.animation_type_object.looping_root) {
-            sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
-            RunOutputImpl(pu, an, res_mat);
-         } else {
-            RunOutputImpl(pu, an, res_mat);
-         }
+         RunOutputImpl(pu, an, res_mat);
 
          mb();
 
@@ -1062,6 +1078,10 @@ public class ExportPipeline : MonoBehaviour {
          // res.slot_to_transform["Main_Hand"] = "";
          model_mappings[res.name] = res;
          model_mapping_by_body_type[mt.bodyTypeName] = res;
+         res.material = mt.material;
+         res.mirror_render = mt.mirror_render;
+      } else {
+         if (!res.material) res.material = mt.material;
       }
 
       res.body_category ??= mt;

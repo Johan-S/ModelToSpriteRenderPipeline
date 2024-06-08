@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public interface IUnitTypeForRender {
 
 
@@ -7,6 +9,10 @@ public interface IUnitTypeForRender {
    }
 
    public string AnimationType {
+      get;
+   }
+
+   Material MaterialOverride {
       get;
    }
 

@@ -18,4 +18,6 @@ public class ModelBodyCategory : ScriptableObject {
 
 
    public float relative_model_height_for_shading;
+
+   public bool mirror_render;
 }
