@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f1f5a63e9e94d96a3f11e766831e5a5, type: 3}
   m_Name: ExportPipelineSheets_Dragon
   m_EditorClassIdentifier: 
-  output_name: dragon_sprites
+  output_name: dragon_sprites_big
   armor: {fileID: 5376613933743937246, guid: 68a48e6130aa43c3850699282d1457a1, type: 3}
   helmet: {fileID: 5376613933743937246, guid: 8d0c166c65035fa4daa3ee0b28dac335, type: 3}
   shield: {fileID: 5376613933743937246, guid: b8f14de5f387d1948aaa9e3bf8f336f1, type: 3}

@@ -51,11 +51,11 @@ public class SceneSubsystem : MonoBehaviour {
    }
 
    void OnEnable() {
-      dirty = true;
+      MakeDirty();
    }
 
    void OnDisable() {
-      dirty = true;
+      MakeDirty();
    }
 
    // Start is called before the first frame update

@@ -23,6 +23,8 @@ public class AlwaysExecTarget : MonoBehaviour {
 
    double throttle = -1;
 
+#if UNITY_EDITOR
+
    void RunMe() {
       if (!alwaysEcecute) return;
 
@@ -35,14 +37,26 @@ public class AlwaysExecTarget : MonoBehaviour {
          onEditorUpdate.Invoke();
       }
    }
-
-#if UNITY_EDITOR
    void OnEnable() {
       EditorApplication.update += RunMe;
    }
 
    void OnDisable() {
       EditorApplication.update -= RunMe;
+   }
+   #else
+   
+   void RunMe() {
+      if (!alwaysEcecute) return;
+
+      if (Application.isPlaying) return;
+
+      var rt = Time.realtimeSinceStartupAsDouble;
+
+      if (rt > throttle + 0.02f) {
+         throttle = rt;
+         onEditorUpdate.Invoke();
+      }
    }
 #endif
 }
