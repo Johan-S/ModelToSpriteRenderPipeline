@@ -397,6 +397,14 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
+      if (an.animation_type_object) {
+         model.transform.localPosition += an.animation_type_object.model_root_pos;
+         sprite_capture_pipeline.model.render_obj.transform.localRotation = an.animation_type_object.model_root_rot;
+         
+      } else {
+         sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
+      }
+
       sprite_capture_pipeline.relative_model_height_for_shading = 1;
 
       if (pu.model_body.body_category) {
@@ -496,13 +504,15 @@ public class ExportPipeline : MonoBehaviour {
 
 
       foreach (AnimationWrap an in pu.animations) {
+         var mb = sprite_capture_pipeline.GetMoveBackFunk();
          if (an.animation_type_object != null && an.animation_type_object.looping_root) {
-            var move_back = sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
+            sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
             RunOutputImpl(pu, an, res_mat);
-            move_back();
          } else {
             RunOutputImpl(pu, an, res_mat);
          }
+
+         mb();
 
 
          if (rt + max_waits_per_frame > Time.realtimeSinceStartupAsDouble) {
@@ -653,10 +663,10 @@ public class ExportPipeline : MonoBehaviour {
             p.name = g.Key;
 
             foreach (var data in g) {
-               AnimationClip clip = clips.animation_clips.Find(x => x.name == data.clip);
+               AnimationClip clip = data.clip_ref ? data.clip_ref : clips.animation_clips.Find(x => x.name == data.clip);
                var ap = new GameTypeCollection.AnimationParsed();
 
-               ap.clip = data.clip;
+               ap.clip = data.clip_name;
                ap.animation_type = data.animation_type;
                ap.category = data.category;
 
@@ -703,9 +713,9 @@ public class ExportPipeline : MonoBehaviour {
          p.name = g.Key;
 
          foreach (var data in g) {
-            AnimationClip clip = GetAnimationClip(data.clip);
+            AnimationClip clip = GetAnimationClip(data);
             if (clip == null) {
-               Debug.LogError($"Missing clip: {data.clip}");
+               Debug.LogError($"Missing clip: {data.clip_name} for animation {data.name}");
                continue;
             }
 
@@ -719,11 +729,11 @@ public class ExportPipeline : MonoBehaviour {
                for (int i = 1; i < frames; i++) {
                   float time = i * len / (frames - 1);
 
-                  p.res.Add(new(data.clip, clip, data.category, Mathf.FloorToInt(time * 60), data));
+                  p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data));
                }
             } else {
                foreach (var fr in data.capture_frame) {
-                  p.res.Add(new(data.clip, clip, data.category, fr, data));
+                  p.res.Add(new(data.clip_name, clip, data.category, fr, data));
                }
             }
          }
@@ -752,7 +762,7 @@ public class ExportPipeline : MonoBehaviour {
             if (sheets_pipeline_descriptor.animation_good.TryGetValue((anim, c), out var data)) {
                AnimationClip clip = GetAnimationClip(data.clip);
                if (clip == null) {
-                  Debug.LogError($"Missing clip: {data.clip}");
+                  Debug.LogError($"Missing clip: {data.clip} for PARSED animation {data.animation_type}");
                   continue;
                }
 
@@ -784,6 +794,11 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       return clip;
+   }
+
+   AnimationClip GetAnimationClip(AnimationTypeObject animation) {
+      if (animation.clip_ref) return animation.clip_ref;
+      return GetAnimationClip(animation.clip);
    }
 
    [SerializeField] public Transform dummy_holder;

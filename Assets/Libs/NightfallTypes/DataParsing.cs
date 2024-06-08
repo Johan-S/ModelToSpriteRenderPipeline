@@ -20,18 +20,23 @@ public static class DataParsing {
       animation_class = ANIMATION_SUBSTITUTE.Get(animation_class, animation_class);
       var acl = parsed_animations.Where(x => x.animation_type == animation_class).ToList();
 
+      var ad = maybe_cat.sprites.GroupBy(x => x.animation_category).ToDictionary(x => x.Key, x => x.ToArray());
+
       var animation_sprites = new GameData.UnitAnimationSprites();
       if (acl.Count == 0) {
          Debug.LogError($"Missing animation class {animation_class} for {SpriteRefName}");
       } else {
          foreach (var (name, am) in animation_sprites.GetAllAnimations()) {
             var cl = acl.Find(x => x.category == name);
-            if (cl == null) continue;
-            var sprites = maybe_cat.sprites.Where(x => x.animation_category == name).ToArray();
-
-            if (sprites.Length == 0) {
+            if (cl == null) {
+               ad.Remove(name);
                continue;
             }
+
+            if (!ad.TryGetValue(name, out var sprites)) {
+               continue;
+            }
+            ad.Remove(name);
 
 
             am.sprites = sprites.map(x => x.sprite);
@@ -56,6 +61,11 @@ public static class DataParsing {
 
             am.animation_duration_ms = am.time_ms.Sum();
          }
+      }
+
+      if (ad.Count > 0) {
+         Debug.LogError(
+            $"Failed to parse {ad.Count} animations for unit {maybe_cat.unit_name}: {ad.join(", ", x => $"'{x.Key}'")}");
       }
 
       return animation_sprites;

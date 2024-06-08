@@ -27,10 +27,21 @@ public class ModelHandle : MonoBehaviour {
       return m;
    }
 
-   static void SampleAnimation(GameObject go, float time, AnimationClip clip) {
+   void SampleAnimation(GameObject go, float time, AnimationClip clip) {
+
+      var last_pos = go.transform.localPosition;
+      var last_rot = go.transform.localRotation;
+      
       go.SetActive(false);
       clip.SampleAnimation(go, time);
       go.SetActive(true);
+      last_root_motion = go.transform.localPosition;
+      last_root_rotation = go.transform.localRotation;
+      if (negate_root_motion) {
+         go.transform.localPosition = last_pos;
+         go.transform.localRotation = last_rot;
+      }
+      
    }
 
    public void SetAnimationNow_Float(AnimationClip clip, float x) {
@@ -65,6 +76,11 @@ public class ModelHandle : MonoBehaviour {
    public Material back_depth_material;
 
    Animator model_root;
+
+   public bool negate_root_motion;
+
+   public Vector3 last_root_motion;
+   public Quaternion last_root_rotation;
 
 
    public GameObject render_obj => model_root.gameObject;
@@ -126,7 +142,6 @@ public class ModelHandle : MonoBehaviour {
 
             animation_time = animation_t * animation_clip.length;
          }
-
 
          SampleAnimation(render_obj, animation_time, animation_clip);
       }

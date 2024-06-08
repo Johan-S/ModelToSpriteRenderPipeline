@@ -290,9 +290,22 @@ public static partial class GameData {
 
 
       [Stat("BlockBreak")] public AnimationBundle block_break_animation = new();
+      
+      [Stat("BlockReact")] public AnimationBundle block_react = new();
+      
+      [Stat("Stunned")] public AnimationBundle stunned = new();
+      
+      [Stat("Hover")] public AnimationBundle hover = new();
+
+      public Dictionary<string, AnimationBundle> extra_animations = new();
+
       public IEnumerable<(string name, AnimationBundle am)> GetAllAnimations() {
          foreach (var st in StatsAnnotations.DefaultStats(this)) {
             yield return (st.name.Replace(" ", ""), (AnimationBundle)st.val);
+         }
+
+         foreach (var (k, v) in extra_animations) {
+            yield return (k, v);
          }
       }
 

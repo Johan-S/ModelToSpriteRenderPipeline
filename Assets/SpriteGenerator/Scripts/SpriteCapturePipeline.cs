@@ -49,9 +49,20 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    [Range(0, 3)]
    public float relative_model_height_for_shading = 1;
+
+   public Action GetMoveBackFunk() {
+      
+      var pos_before_root = model.transform.position;
+      var rot_before = model.transform.localRotation;
+      return () => {
+         model.transform.position = pos_before_root;
+         model.transform.localRotation = rot_before;
+      }; 
+   }
+   
    public Action HandleLoopingRootMotion(AnimationClip clip, float t) {
-      
-      
+
+      var mb = GetMoveBackFunk();
       model.SetAnimationNow_Float(clip, 0);
 
       var pstart = model.render_obj.transform.position;
@@ -69,9 +80,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       var pos_before_root = model.transform.position;
 
       model.transform.position = pos_before_root + dt;
-      return () => {
-         model.transform.position = pos_before_root;
-      }; 
+      return mb;
    }
 
    public void ResetPos() {
