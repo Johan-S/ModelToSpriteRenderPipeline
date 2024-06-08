@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1373522185105208, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
       propertyPath: m_Name
-      value: Dragon_Testmodel
+      value: Dragon_Testmodel Variant
       objectReference: {fileID: 0}
     - target: {fileID: 4018240880767132, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2624,6 +2624,14 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 137236375710360112, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 77689b181d36e0d44abd95bdcba0c0d4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

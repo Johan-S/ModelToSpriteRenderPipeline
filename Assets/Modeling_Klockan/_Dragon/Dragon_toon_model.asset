@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b131216d89a4c5f83eba6c6e5a8b4cf, type: 3}
-  m_Name: Dragon_Test_model
+  m_Name: Dragon_toon_model
   m_EditorClassIdentifier: 
-  model_root_prefab: {fileID: 9096241626434868201, guid: a3fa4d3ed8138e34f8a8679e0726a6a2, type: 3}
-  material: {fileID: 2100000, guid: 77689b181d36e0d44abd95bdcba0c0d4, type: 2}
+  model_root_prefab: {fileID: 113191909307377217, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
+  material: {fileID: 2100000, guid: e907c866f4c4d3b40b63895b8a870532, type: 2}
   bodyTypeName: Dragon_Test
   animationTypeName: Dragon
   no_gear: 1

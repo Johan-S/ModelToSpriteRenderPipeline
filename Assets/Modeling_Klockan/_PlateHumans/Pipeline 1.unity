@@ -820,6 +820,9 @@ MonoBehaviour:
   raw_color_material: {fileID: 2100000, guid: 676ccee694016294ba661d4065b88714, type: 2}
   forward_depth_material: {fileID: 2100000, guid: 9dcddea1781578541bc9962dcaad405a, type: 2}
   back_depth_material: {fileID: 2100000, guid: 03f64548388f0214db4ee477b19aa2b0, type: 2}
+  negate_root_motion: 0
+  last_root_motion: {x: 0, y: 0, z: 0}
+  last_root_rotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1 &842504992
 GameObject:
   m_ObjectHideFlags: 0
@@ -1461,14 +1464,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1493323217}
-  m_LocalRotation: {x: 0.01736682, y: 3.900623e-10, z: 0.019585965, w: 0.99965733}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.429, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 1.99, y: 0.039, z: 2.246}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1493323221
 MonoBehaviour:
   m_ObjectHideFlags: 0

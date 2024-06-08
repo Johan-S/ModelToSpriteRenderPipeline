@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc43b0e2ef134c1b8e1314b60ddeb281, type: 3}
-  m_Name: Dragon_Test
+  m_Name: Dragon_Test_Yellow
   m_EditorClassIdentifier: 
-  export_name: Dragon_Test
+  export_name: Dragon_Test_Yellow
   body: {fileID: 11400000, guid: a08e79d7059569e46a65eb092c533123, type: 2}
   animation_type: Dragon
-  material: {fileID: 2100000, guid: 713acf8e5b6c052429f34c58e75a7468, type: 2}
+  material: {fileID: 2100000, guid: fd9b99eeea830c04ba7bafaa9f46686a, type: 2}
