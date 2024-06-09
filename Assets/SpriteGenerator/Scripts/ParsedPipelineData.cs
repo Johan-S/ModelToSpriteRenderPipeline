@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Shared;
 using UnityEngine;
 using TMPro;
 using static ExportPipeline;
@@ -374,6 +375,8 @@ public class ParsedUnit {
    public int idle_animation_id;
 
    public Color? theme_color;
+
+   public GeneratedSpritesContainer.UnitCats result;
 }
 
 public class ParsedPart {

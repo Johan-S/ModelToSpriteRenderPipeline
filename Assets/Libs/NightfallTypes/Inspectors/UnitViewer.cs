@@ -179,6 +179,16 @@ public class UnitViewer : MonoBehaviour {
 
    bool init_done;
 
+   public void AddUnit(UnitTypeDetails u) {
+      if (units == null) {
+         SetUnits(new[] { u });
+         return;
+      }
+      var g = units.ConstructNewElement(u);
+      units.elements.Add(g);
+      AnnotatedUI.MarkDirty_UI(transform);
+   }
+
 
    public void SetUnits(IEnumerable<UnitTypeDetails> units_to_view) {
       units = SelectUtils.MakeSelectClass(units_to_view.ToList(), can_click_selected: true, can_toggle_off: true,

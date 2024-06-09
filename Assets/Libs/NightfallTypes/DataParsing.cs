@@ -34,6 +34,7 @@ public static class DataParsing {
       }
       animation_class = ANIMATION_SUBSTITUTE.Get(animation_class, animation_class);
       var acl = parsed_animations.Where(x => x.animation_type == animation_class).ToList();
+      Debug.Log($"pa: {parsed_animations.Count}");
 
       var ad = maybe_cat.sprites.GroupBy(x => x.animation_category).ToDictionary(x => x.Key, x => x.ToArray());
 

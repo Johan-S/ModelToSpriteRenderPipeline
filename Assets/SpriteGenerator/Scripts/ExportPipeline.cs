@@ -12,10 +12,7 @@ public class ExportPipeline : MonoBehaviour {
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
-   [Header("Debug Helpers")]
-   
-
-   public bool export_when_done;
+   [Header("Debug Helpers")] public bool export_when_done;
    public SimpleUnitTypeObject load_unit_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
@@ -94,10 +91,10 @@ public class ExportPipeline : MonoBehaviour {
          yield return
             StartCoroutine(RunPipeline());
       }
+
       export_files_action = () => {
          export_when_done = true;
          export_files_action = null;
-
       };
 
       StartCoroutine(SubPl());
@@ -170,39 +167,31 @@ public class ExportPipeline : MonoBehaviour {
    public Action start_gen {
       get {
          if (executed) return null;
-         return () => {
-
-            this.ExecuteMyPipeline();
-         };
+         return () => { this.ExecuteMyPipeline(); };
       }
    }
 
-   public Action view_sprites;
-   
+   public Action view_sprites => () => { OpenUnitViewer(); };
+
    public Action export_files_action;
    public Action write_files_action;
 
    public UnityEvent onPipelineDone;
+
    void OnDone() {
       onPipelineDone?.Invoke();
       write_files_action = () => {
          write_files_action = null;
          WriteFiles(export_to_folder);
-
       };
       export_files_action = () => {
          export_when_done = false;
          export_files_action = null;
          WriteFiles(defalt_export_dir);
-
       };
       if (export_when_done) {
          export_files_action();
       }
-      view_sprites = () => {
-         OpenUnitViewer();
-
-      };
    }
 
 
@@ -215,49 +204,98 @@ public class ExportPipeline : MonoBehaviour {
       OpenUnitViewer();
    }
 
+   List<GameTypeCollection.AnimationParsed> _direct_ans;
+
+   List<GameTypeCollection.AnimationParsed> animations_parsed {
+      get {
+         if (_direct_ans.IsEmpty()) {
+            _direct_ans = GetDirectAnimationsParsed().ToList();
+
+            _direct_ans.AddRange(sheets_pipeline_descriptor.animation_arr.Flatten());
+         }
+
+         return _direct_ans;
+      }
+   }
+
+   List<GeneratedSpritesContainer.UnitCats> genned_unit_cats = new();
+
+   UnitViewer.UnitTypeDetails ParseUntP2(ParsedUnit u, GeneratedSpritesContainer.UnitCats cats) {
+      string full_name = $"{prepend_to_sprite_name}{u.out_name}";
+      var r = new UnitViewer.UnitTypeDetails();
+
+      r.name = u.raw_name;
+      r.sprite = cats.idle_sprite;
+      Debug.Log($"Cat sprite: {cats.unit_name}, {u.out_name}, {prepend_to_sprite_name}: {cats.idle_sprite.name}");
+      r.animation_sprites =
+         DataParsing.GetAnimationSprites(full_name, animations_parsed, u.animation_type,
+            cats);
+
+      return r;
+   }
+
    void OpenUnitViewer() {
-      if (unit_viewer_running || !export_tex_tot) return;
+      if (unit_viewer_running) return;
 
-      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
+      {
+         export_tex_tot.Apply();
+         var catzip = parsed_pipeline_data.units.Zip(unit_cats_list).map(x => ParseUntP2(x.Item1, x.Item2));
 
-      var c = GeneratedSpritesContainer.MakeFromData(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
+         unit_viewer_running = Instantiate(unit_viewer_prefab);
+
+         IEnumerator CloseAfterEsc() {
+            yield return null;
+            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Escape));
+            Destroy(unit_viewer_running.gameObject);
+         }
+
+         StartCoroutine(CloseAfterEsc());
 
 
-      var ans = GetDirectAnimationsParsed().ToList();
-
-      ans.AddRange(sheets_pipeline_descriptor.animation_arr.Flatten());
-
-
-      UnitViewer.UnitTypeDetails ParseUntP(ParsedUnit u) {
-         string full_name = $"{prepend_to_sprite_name}{u.out_name}";
-         var r = new UnitViewer.UnitTypeDetails();
-
-         r.name = u.raw_name;
-         r.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
-         r.animation_sprites = 
-            DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
-               c.Get(full_name));
-
-         return r;
+         unit_viewer_running.SetUnits(catzip);
+         return;
       }
 
-      var gu = parsed_pipeline_data.units.map(ParseUntP);
+      if (!export_tex_tot) return;
+
+      {
+         var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
+
+         var c = GeneratedSpritesContainer.MakeFromRawData(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
+
+         var ans = animations_parsed;
 
 
-      EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
+         UnitViewer.UnitTypeDetails ParseUntP(ParsedUnit u) {
+            return null;
+            string full_name = $"{prepend_to_sprite_name}{u.out_name}";
+            var r = new UnitViewer.UnitTypeDetails();
 
-      unit_viewer_running = Instantiate(unit_viewer_prefab);
+            r.name = u.raw_name;
+            r.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
+            r.animation_sprites =
+               DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
+                  c.Get(full_name));
 
-      IEnumerator CloseAfterEsc() {
-         yield return null;
-         yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Escape));
-         Destroy(unit_viewer_running.gameObject);
+            return r;
+         }
+
+
+         // var gu = parsed_pipeline_data.units.map(ParseUntP);
+
+
+         EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
+
+         unit_viewer_running = Instantiate(unit_viewer_prefab);
+
+         IEnumerator CloseAfterEsc() {
+            yield return null;
+            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Escape));
+            Destroy(unit_viewer_running.gameObject);
+         }
+
+         StartCoroutine(CloseAfterEsc());
       }
-
-      StartCoroutine(CloseAfterEsc());
-
-
-      unit_viewer_running.SetUnits(gu);
    }
 
    void CopyAndDownsampleTo(Texture2D src, Texture2D dst, string FileOutput, bool mirror) {
@@ -375,6 +413,8 @@ public class ExportPipeline : MonoBehaviour {
       return rect;
    }
 
+   public List<Sprite> tot_sprites = new();
+
    void DumpExport(Color[] res, string FileOutput) {
       ei++;
 
@@ -384,6 +424,11 @@ public class ExportPipeline : MonoBehaviour {
       export_tex_tot.SetPixels(rect.x, rect.y, rect.width, rect.height,
          res);
 
+      Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
+      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{prepend_to_sprite_name}{FileOutput}", rect,
+         new Vector2(0.5f, 0.15f));
+
+      tot_sprites.Add(spr);
 
       UpdateProgress();
    }
@@ -504,6 +549,7 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
+
    public Vector2 GetAdjustedSpritePivot(Vector2 original_pivot, Vector3 model_offset, Vector2 cap_size) {
       Vector3 original_world_pos = original_pivot * cap_size;
 
@@ -545,10 +591,13 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    public float max_waits_per_frame = 0.35f;
+   public float max_waits_per_frame_viewer_open = 0.05f;
 
    [NonSerialized] double rt;
 
    IEnumerable RunOutput_Parsed(ParsedUnit pu) {
+      int sprites_in = tot_sprites.Count;
+
       var folder = export_to_folder;
       if (!Directory.Exists(folder)) {
          Directory.CreateDirectory(folder);
@@ -569,7 +618,8 @@ public class ExportPipeline : MonoBehaviour {
          mb();
 
 
-         if (rt + max_waits_per_frame > Time.realtimeSinceStartupAsDouble) {
+         if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
+             Time.realtimeSinceStartupAsDouble) {
             continue;
          }
 
@@ -581,6 +631,25 @@ public class ExportPipeline : MonoBehaviour {
          var holder = NewResultHolder($"_ UNIT {pu.out_name}");
 
          holder.used_material = res_mat;
+      }
+
+      var sc = GeneratedSpritesContainer.GetUnitCats(tot_sprites.SubArray(sprites_in, tot_sprites.Count));
+
+      Debug.Assert(sc.Count == 1, $"Singe unit should get since unit cats, but got: {sc.Count} ");
+
+      GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
+      PushNewRes(pu, cat);
+   }
+
+   List<GeneratedSpritesContainer.UnitCats> unit_cats_list = new();
+
+   void PushNewRes(ParsedUnit pu, GeneratedSpritesContainer.UnitCats cat) {
+      unit_cats_list.Add(cat);
+      pu.result = cat;
+
+      if (unit_viewer_running) {
+         export_tex_tot.Apply();
+         unit_viewer_running.AddUnit(ParseUntP2(pu, pu.result));
       }
    }
 
@@ -705,9 +774,9 @@ public class ExportPipeline : MonoBehaviour {
       var allclips = Resources.LoadAll<AnimationBundle>("");
 
       Dictionary<string, AnimationClip> clips = allclips.FlatMap(x => x.animation_clips).ToDictionary(x => x.name);
-      
+
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
-      
+
       var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
 
       foreach (var g in groups) {
