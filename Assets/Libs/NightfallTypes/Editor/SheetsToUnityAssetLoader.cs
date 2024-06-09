@@ -9,214 +9,9 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
-[ScriptedImporter(1, "sheets")]
+[ScriptedImporter(1, "sheets", importQueueOffset: 100)]
 public class SheetsToUnityAssetLoader : ScriptedImporter {
-
-   bool NightfallHeaderRow(string[] row) {
-      var name = row[0];
-      if (name == "Unit_Number") return true;
-      return name.EndsWith("_ID");
-   }
    
-
-   // [CustomEditor(typeof(SheetsToUnityAssetLoader))]
-   public class MyEdit : ScriptedImporterEditor {
-
-      public override void OnEnable() {
-         base.OnEnable();
-         
-         var t = (SheetsToUnityAssetLoader)target;
-
-         var file_data = File.ReadAllText(t.assetPath);
-
-         var rows = file_data.SplitLines();
-
-         var rowd = EngineDataInit.ParseGenericSheetRows(rows).ToArray();
-         column_count = 0;
-         htype_name = "UnknownType";
-         header_data = "";
-         if (rowd.IsNonEmpty()) {
-            htype = rowd[0].htype;
-            column_count = rowd[0].hdrs?.Length ?? rowd[0].row.Length;
-
-            htype_name = htype?.Split("_")?.Get(0) ?? "UnknownType";
-
-            old_row_count = rows.Length;
-            header_data = GetHeaderText();
-         }
-      }
-      string header_data;
-
-      public static IEnumerable<string> GetHeaderRows(IEnumerable<string> rows) {
-         string[] header = null;
-         string htype = "";
-         foreach (var row_string in rows) {
-            if (row_string.Trim().Length == 0) {
-               yield return row_string;
-               continue;
-            }
-            if (row_string.FastStartsWith("#")) {
-               if (row_string.StartsWith("#hdr\t", out var hdr_row)) {
-                  header = hdr_row.Trim().Split("\t").Trim();
-                  yield return row_string;
-                  continue;
-               }
-
-               htype = row_string.Substring(1).Trim();
-               header = null;
-               yield return row_string;
-               continue;
-            }
-
-            var row = row_string.Split("\t").Trim();
-
-
-            if (EngineDataInit.NightfallHeaderRow(row)) {
-               var old_htype = htype;
-               htype = row[0].Replace("_Number", "_ID").Replace(" ", "_");
-               // header = row;
-               var new_header = row_string.Trim().Split("\t").Trim();
-               if (htype == old_htype && htype == "Animation_Type") {
-                  header = header.Zip(new_header, (s, t) => $"{s}\t{t}").ToArray();
-
-               } else {
-                  header = new_header;
-               }
-               
-               yield return row_string;
-               continue;
-            }
-            yield break;
-         }
-      }
-
-      int header_row_count;
-
-      string GetHeaderText() {
-         
-         var t = (SheetsToUnityAssetLoader)target;
-
-         var file_data = File.ReadAllText(t.assetPath);
-
-         var hdr_rows = GetHeaderRows(file_data.SplitLines());
-
-         header_row_count = hdr_rows.Count();
-
-         return hdr_rows.join("\n") + "\n";
-      }
-
-      string htype_name;
-
-      string htype;
-      int column_count;
-
-      Texture2D bg;
-
-      string cdata;
-
-      bool sheet_data;
-
-      string[][] rows;
-
-      void ParseCopyData(string cdata) {
-         text_to_write = null;
-         sheet_data = false;
-         rows = null;
-         
-         if (cdata.Trim().Length == 0) return;
-
-
-         var tab_lines = cdata.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
-
-
-         string[][] rowsp = tab_lines.map(x => x.Split("\t"));
-
-
-         int h = rowsp.Length;
-         int w = rowsp[0].Length;
-         
-         if (rowsp.Any(x => x.Length != w)) return;
-         
-         if (w < 2) return;
-
-
-         rows = rowsp;
-
-         sheet_data = true;
-         
-         
-         var cr = rows.map(x => x.join("\t")).ToList();
-         text_to_write = "\n" + cr.join("\n") + "\n";
-
-      }
-
-      string text_to_write;
-
-      Font cur_font;
-
-      public string old_full_file_data;
-
-      int old_row_count;
-
-      public override void OnInspectorGUI() {
-         base.OnInspectorGUI();
-         
-         EditorGUILayout.LabelField($"Detected Sheet Type: {htype_name}, with {column_count} columns");
-
-         var t = (SheetsToUnityAssetLoader)target;
-
-         var clip = GUIUtility.systemCopyBuffer;
-         if (clip != cdata) {
-            cur_font = GUI.skin.font;
-            cdata = clip;
-
-            ParseCopyData(cdata);
-         }
-
-         bool right_format = sheet_data && rows[0].Length == column_count;
-         
-         EditorGUI.BeginDisabledGroup(!right_format);
-
-         /*
-         if (GUILayout.Button($"Append Clipboard Data with {rows?.Length} rows", GUILayout.Height(30))) {
-            old_full_file_data = File.ReadAllText(t.assetPath);
-            File.AppendAllText(t.assetPath, text_to_write);
-         }
-         */
-         if (GUILayout.Button($"Replace {old_row_count - header_row_count}  With {rows?.Length} Clipboard Data", GUILayout.Height(30))) {
-
-            
-            File.WriteAllText(t.assetPath, header_data + text_to_write);
-            
-            AssetDatabase.Refresh();
-
-            old_row_count = (header_data + text_to_write).Where(x => x == '\n').Count - header_row_count;
-
-         }
-         
-         EditorGUI.EndDisabledGroup();
-
-         if (sheet_data) {
-
-            if (!right_format) {
-               
-               EditorGUILayout.HelpBox(new ($"Found data with {rows[0].Length} columns, but {htype_name} has {column_count} columns!"), MessageType.Warning);
-            } else {
-               
-               EditorGUILayout.HelpBox(new ($"Found data fiting {htype_name} with {column_count} columns!"), MessageType.Info);
-            }
-
-            float labe_h = (rows.Length - 1) * (cur_font.lineHeight + 1) +
-                           EditorGUIUtility.singleLineHeight;
-            EditorGUILayout.LabelField($"Detected sheet data, {rows[0].Length} x {rows.Length}");
-            
-            
-            EditorGUILayout.LabelField(cdata, GUILayout.Height(labe_h));
-         } else {
-            EditorGUILayout.HelpBox(new ("Copy Data from Google Sheets to start!"), MessageType.Info);
-         }
-      }
-   }
  
    public override void OnImportAsset(AssetImportContext ctx) {
       
@@ -233,14 +28,15 @@ public class SheetsToUnityAssetLoader : ScriptedImporter {
       
       var rows = data.SplitLines(skip_empty:true);
  
-      var fl = new LoadDataFlow();
+      var fl = new DataParsing.LoadDataFlow();
       
-      EngineDataInit.AddGenericSheetRows(fl, rows);
+      DataParsing.AddGenericSheetRows(fl, rows);
 
       fl.lazy.ForEach(x => x(fl.gear_data));
 
       var d = fl.gear_data;
-      
+
+      int spell_i = 0;
       var spo = d.magic_spells.map(sp => {
          var sa = new SpellTypeObject();
          Std.CopyShallowDuckTyped(sp, sa);
