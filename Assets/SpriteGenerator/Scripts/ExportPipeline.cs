@@ -226,7 +226,6 @@ public class ExportPipeline : MonoBehaviour {
 
       r.name = u.raw_name;
       r.sprite = cats.idle_sprite;
-      Debug.Log($"Cat sprite: {cats.unit_name}, {u.out_name}, {prepend_to_sprite_name}: {cats.idle_sprite.name}");
       r.animation_sprites =
          DataParsing.GetAnimationSprites(full_name, animations_parsed, u.animation_type,
             cats);
@@ -254,47 +253,6 @@ public class ExportPipeline : MonoBehaviour {
 
          unit_viewer_running.SetUnits(catzip);
          return;
-      }
-
-      if (!export_tex_tot) return;
-
-      {
-         var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
-
-         var c = GeneratedSpritesContainer.MakeFromRawData(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
-
-         var ans = animations_parsed;
-
-
-         UnitViewer.UnitTypeDetails ParseUntP(ParsedUnit u) {
-            return null;
-            string full_name = $"{prepend_to_sprite_name}{u.out_name}";
-            var r = new UnitViewer.UnitTypeDetails();
-
-            r.name = u.raw_name;
-            r.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
-            r.animation_sprites =
-               DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
-                  c.Get(full_name));
-
-            return r;
-         }
-
-
-         // var gu = parsed_pipeline_data.units.map(ParseUntP);
-
-
-         EngineDataInit.SetEngineSheets(sheets_pipeline_descriptor);
-
-         unit_viewer_running = Instantiate(unit_viewer_prefab);
-
-         IEnumerator CloseAfterEsc() {
-            yield return null;
-            yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.Escape));
-            Destroy(unit_viewer_running.gameObject);
-         }
-
-         StartCoroutine(CloseAfterEsc());
       }
    }
 
