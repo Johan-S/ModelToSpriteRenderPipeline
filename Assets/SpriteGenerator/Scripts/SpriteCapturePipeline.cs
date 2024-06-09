@@ -309,33 +309,4 @@ public class SpriteCapturePipeline : MonoBehaviour {
       if (exporting) return;
       RunPipeline();
    }
-#if UNITY_EDITOR
-   static class EditWreap
-   {
-      static double last_editor_time;
-      static double last_ms;
-      [UnityEditor.InitializeOnLoadMethod]
-      static void Onl() {
-         static void MySleep()
-         {
-            double lt = UnityEditor.EditorApplication.timeSinceStartup;
-
-            last_ms = ((lt - last_editor_time) * 1000);
-            int ms = (int)last_ms;
-
-
-            if (ms < 5 && Application.isPlaying)
-            {
-               System.Threading.Thread.Sleep(8 - ms);
-            }
-
-            last_editor_time = UnityEditor.EditorApplication.timeSinceStartup;
-         
-         }
-
-         UnityEditor.EditorApplication.update -= MySleep;
-         UnityEditor.EditorApplication.update += MySleep;
-      }
-   }
-#endif
 }
