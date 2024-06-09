@@ -253,7 +253,7 @@ public class ParsedPipelineData {
    ParsedUnit CreateParsedUnit(string an_type, string name, BodyModelData model_body) {
       
       
-      var atype = DataParsing.NormalizeAnimationName(an_type);
+      var atype = SharedUtils.NormalizeAnimationName(an_type);
       if (atype.Trim().Length == 0) {
          Debug.LogError($"Skipping {name} due to lacking animation.");
          return null;

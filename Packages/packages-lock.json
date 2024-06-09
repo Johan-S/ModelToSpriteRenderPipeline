@@ -179,6 +179,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "external_assets": {
+      "version": "file:external_assets",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "klockan_std_lib": {
       "version": "file:../../NightfallRogue/Packages/klockan_std_lib",
       "depth": 0,

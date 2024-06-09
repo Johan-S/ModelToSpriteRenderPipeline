@@ -3293,13 +3293,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  export_when_done: 0
+  export_when_done: 1
   load_unit_on_play: {fileID: 0}
   idle_only: 0
   only_atlas: 1
   only_atlas_meta: 0
   write_files: 0
   prepend_to_sprite_name: _big
+  append_to_atlas_name: _big
   sheets_pipeline_descriptor: {fileID: 11400000, guid: 8043f5a1ffba9e64dad74888a5fa0667, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
   animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}
@@ -3501,15 +3502,15 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746774659}
-  m_LocalRotation: {x: 0, y: 0.86602545, z: 0, w: 0.49999994}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1097754714}
-  m_Father: {fileID: 0}
-  m_RootOrder: 8
-  m_LocalEulerAnglesHint: {x: 0, y: 120, z: 0}
+  m_Father: {fileID: 1736835988}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!114 &746774661
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3890,19 +3891,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 56298807488138027, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9991667
+      value: 0.9991668
       objectReference: {fileID: 0}
     - target: {fileID: 56298807488138027, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.0038983077
+      value: -0.003898308
       objectReference: {fileID: 0}
     - target: {fileID: 56298807488138027, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.02909069
+      value: -0.029090691
       objectReference: {fileID: 0}
     - target: {fileID: 56298807488138027, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.028360289
+      value: -0.02836029
       objectReference: {fileID: 0}
     - target: {fileID: 56323189580237841, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4202,7 +4203,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 56448873082542641, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.01294757
+      value: -0.0129475705
       objectReference: {fileID: 0}
     - target: {fileID: 56448873082542641, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.y
@@ -4210,7 +4211,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 56448873082542641, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.017877765
+      value: 0.017877767
       objectReference: {fileID: 0}
     - target: {fileID: 56462541644129007, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4426,7 +4427,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 56505452725541133, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.0054133423
+      value: -0.0054133427
       objectReference: {fileID: 0}
     - target: {fileID: 56505452725541133, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.y
@@ -4434,7 +4435,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 56505452725541133, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0.06825837
+      value: 0.068258375
       objectReference: {fileID: 0}
     - target: {fileID: 56511488484040271, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5906,7 +5907,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 60398653819095559, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.0033004317
+      value: -0.0033004319
       objectReference: {fileID: 0}
     - target: {fileID: 60398653819095559, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.y
@@ -5914,7 +5915,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 60398653819095559, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.015070602
+      value: -0.015070603
       objectReference: {fileID: 0}
     - target: {fileID: 60404750075580939, guid: 17c43bf09d827514dbb9f7523ef888f4, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6930,6 +6931,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c109d20e41296243bd439e19eab0b34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1736835987
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1736835988}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1736835988
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1736835987}
+  m_LocalRotation: {x: -0.258819, y: 0, z: 0, w: 0.9659259}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 746774660}
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: -30, y: 0, z: 0}
 --- !u!1 &1874524772
 GameObject:
   m_ObjectHideFlags: 0
@@ -7206,6 +7239,7 @@ MonoBehaviour:
   only_atlas_meta: 0
   write_files: 1
   prepend_to_sprite_name: 
+  append_to_atlas_name: 
   sheets_pipeline_descriptor: {fileID: 11400000, guid: 8043f5a1ffba9e64dad74888a5fa0667, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
   animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}

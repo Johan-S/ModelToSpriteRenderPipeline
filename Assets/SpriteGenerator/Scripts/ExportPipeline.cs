@@ -24,6 +24,7 @@ public class ExportPipeline : MonoBehaviour {
    public bool write_files = true;
 
    public string prepend_to_sprite_name;
+   public string append_to_atlas_name;
 
    [Header("Export Pipeline Description")]
    public ExportPipelineSheets sheets_pipeline_descriptor;
@@ -227,7 +228,7 @@ public class ExportPipeline : MonoBehaviour {
       r.name = cats.unit_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         DataParsing.GetAnimationSprites(cats.unit_name, animations_parsed, pu.animation_type,
+         Sprites.GetAnimationSprites(cats.unit_name, animations_parsed, pu.animation_type,
             cats);
 
       return r;
@@ -717,7 +718,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    public static string GetExportUnitName(string orig_name) {
-      return DataParsing.GetExportUnitName(orig_name);
+      return Sprites.GetExportUnitName(orig_name);
    }
 
    public class AnimationSet {
@@ -734,7 +735,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
 
-      var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
+      var groups = anim_objs.GroupBy(x => SharedUtils.NormalizeAnimationName(x.animation_type));
 
       foreach (var g in groups) {
          var p = new AnimationSet();
@@ -1090,7 +1091,7 @@ public class ExportPipeline : MonoBehaviour {
 
       animation_sets = GetanimationSets();
 
-      foreach (var ap in DataParsing.ANIMATION_SUBSTITUTE) {
+      foreach (var ap in SharedUtils.ANIMATION_SUBSTITUTE) {
          if (!animation_sets.ContainsKey(ap.Key)) {
             animation_sets[ap.Key] = animation_sets[ap.Value];
             // Debug.Log($"Missing animation Poleaxe");
@@ -1238,7 +1239,7 @@ public class ExportPipeline : MonoBehaviour {
    public void WriteMetaFile(string to_folder) {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
+      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}{append_to_atlas_name}.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
 
       // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
@@ -1246,13 +1247,8 @@ public class ExportPipeline : MonoBehaviour {
 
    public void WriteTexturefile(string to_folder) {
       var rb = export_tex_tot.EncodeToPNG();
-      File.WriteAllBytes($"{to_folder}/{sheets_pipeline_descriptor.output_name}.png", rb);
+      File.WriteAllBytes($"{to_folder}/{sheets_pipeline_descriptor.output_name}{append_to_atlas_name}.png", rb);
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
-
-      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}.spritemeta";
-      File.WriteAllText(mf, meta_rows.join("\n"));
-
-      // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
    }
 
    public void WriteFiles(string to_folder) {

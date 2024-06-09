@@ -8,6 +8,12 @@
 /[Uu]ser[Ss]ettings/
 /.vscode/
 
+/Packages/external_assets/*
+
+
+!/Packages/external_assets/package.json
+!/Packages/external_assets/package.json.meta
+
 /.idea/
 /WinBuild/
 
