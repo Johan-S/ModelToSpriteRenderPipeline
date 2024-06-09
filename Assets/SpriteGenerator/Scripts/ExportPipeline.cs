@@ -1222,6 +1222,7 @@ public class ExportPipeline : MonoBehaviour {
       WriteMetaFile(to_folder);
    }
 
+   public Action open_output_folder => OpenOutputFolder;
 
    public void OpenOutputFolder() {
 #if UNITY_EDITOR
