@@ -6,6 +6,7 @@ using UnityEditor.AssetImporters;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Shared;
 using UnityEditor;
 using Object = UnityEngine.Object;
 
@@ -87,6 +88,7 @@ public class SheetsToUnityAssetLoader : ScriptedImporter {
       var animations = d.parsed_animations.map(sp => {
          var sa = new AnimationTypeObject();
          Std.CopyShallowDuckTyped(sp, sa);
+         sa.auto_frames_per_s = sa.auto_frames_per_s;
          sa.name = $"{sa.animation_type}__{sa.category}";
          return sa;
       });

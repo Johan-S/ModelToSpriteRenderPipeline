@@ -90,7 +90,7 @@ public class EngineDataHolder : ScriptableObject {
 
             if (sprites.Length != am.time_ms.Length) {
                if (cl.auto_frames_per_s > 0) {
-                  am.time_ms = sprites.map(x => 1000 / cl.auto_frames_per_s);
+                  am.time_ms = sprites.map(x => Mathf.RoundToInt(1000 / cl.auto_frames_per_s));
                } else {
                   Debug.LogError($"Wrong capture frame: {unit} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
                }

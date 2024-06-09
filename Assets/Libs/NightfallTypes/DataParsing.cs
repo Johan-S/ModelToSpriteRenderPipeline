@@ -28,11 +28,6 @@ public static class DataParsing {
    public static Shared.UnitAnimationSprites GetAnimationSprites(string SpriteRefName,
       List<GameTypeCollection.AnimationParsed> parsed_animations, string animation_class,
       GeneratedSpritesContainer.UnitCats maybe_cat) {
-      if (maybe_cat.idle_sprite && maybe_cat.sprites.Count == 1) {
-         return GetIdleSpriteOnlyBundle(maybe_cat.idle_sprite);
-
-      }
-      animation_class = ANIMATION_SUBSTITUTE.Get(animation_class, animation_class);
       var acl = parsed_animations.Where(x => x.animation_type == animation_class).ToList();
 
       var ad = maybe_cat.sprites.GroupBy(x => x.animation_category).ToDictionary(x => x.Key, x => x.ToArray());
@@ -60,10 +55,10 @@ public static class DataParsing {
 
             if (sprites.Length != am.time_ms.Length) {
                if (cl.auto_frames_per_s > 0) {
-                  am.time_ms = sprites.map(x => 1000 / cl.auto_frames_per_s);
+                  am.time_ms = sprites.map(x => Mathf.RoundToInt(1000 / cl.auto_frames_per_s));
                } else {
                   Debug.LogError(
-                     $"Wrong capture frame: {SpriteRefName} - {name} : {sprites.Length} != {cl.capture_frame.Length}\nauto frames for {name}: {cl.auto_frames_per_s}");
+                     $"Wrong capture frame: {SpriteRefName} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
                }
             }
 
