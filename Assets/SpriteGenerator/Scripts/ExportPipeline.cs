@@ -221,13 +221,13 @@ public class ExportPipeline : MonoBehaviour {
 
    List<GeneratedSpritesContainer.UnitCats> genned_unit_cats = new();
 
-   UnitViewer.UnitTypeDetails ParseUntP2(GeneratedSpritesContainer.UnitCats cats) {
+   UnitViewer.UnitTypeDetails ParseUntP2(ParsedUnit pu, GeneratedSpritesContainer.UnitCats cats) {
       var r = new UnitViewer.UnitTypeDetails();
 
       r.name = cats.unit_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         DataParsing.GetAnimationSprites(cats.unit_name, animations_parsed, null,
+         DataParsing.GetAnimationSprites(cats.unit_name, animations_parsed, pu.animation_type,
             cats);
 
       return r;
@@ -238,7 +238,7 @@ public class ExportPipeline : MonoBehaviour {
 
       {
          export_tex_tot.Apply();
-         var catzip = unit_cats_list.map(ParseUntP2);
+         var catzip = parsed_pipeline_data.units.Map(x => ParseUntP2(x, x.result));
 
          unit_viewer_running = Instantiate(unit_viewer_prefab);
 
@@ -607,7 +607,7 @@ public class ExportPipeline : MonoBehaviour {
 
       if (unit_viewer_running) {
          export_tex_tot.Apply();
-         unit_viewer_running.AddUnit(ParseUntP2(pu.result));
+         unit_viewer_running.AddUnit(ParseUntP2(pu, pu.result));
       }
    }
 

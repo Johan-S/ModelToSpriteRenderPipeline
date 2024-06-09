@@ -412,6 +412,7 @@ public class AnimationWrap {
       this.frame = frame;
       this.animation_type_object = animation_type_object;
    }
+   
 
 
    public string name;

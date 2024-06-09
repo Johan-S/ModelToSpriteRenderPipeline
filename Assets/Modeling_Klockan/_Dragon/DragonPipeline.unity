@@ -3293,11 +3293,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  export_when_done: 0
   load_unit_on_play: {fileID: 0}
   idle_only: 0
   only_atlas: 1
   only_atlas_meta: 0
-  write_files: 1
+  write_files: 0
   prepend_to_sprite_name: _big
   sheets_pipeline_descriptor: {fileID: 11400000, guid: 8043f5a1ffba9e64dad74888a5fa0667, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
@@ -3328,7 +3329,9 @@ MonoBehaviour:
   onPipelineDone:
     m_PersistentCalls:
       m_Calls: []
+  tot_sprites: []
   max_waits_per_frame: 0.25
+  max_waits_per_frame_viewer_open: 0.05
   dummy_holder: {fileID: 0}
   to_visit: {fileID: 2054751393}
 --- !u!4 &417803481
@@ -7196,6 +7199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  export_when_done: 0
   load_unit_on_play: {fileID: 0}
   idle_only: 0
   only_atlas: 1
@@ -7231,7 +7235,9 @@ MonoBehaviour:
   onPipelineDone:
     m_PersistentCalls:
       m_Calls: []
+  tot_sprites: []
   max_waits_per_frame: 0.25
+  max_waits_per_frame_viewer_open: 0.05
   dummy_holder: {fileID: 0}
   to_visit: {fileID: 0}
 --- !u!4 &2028060906

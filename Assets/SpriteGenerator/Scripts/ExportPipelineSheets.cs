@@ -29,7 +29,6 @@ public class ExportPipelineSheets : ScriptableObject {
       List<Shared.AnimationParsed> arr = new();
 
       var rows = animations.text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
-      Debug.Log($"rows: {rows.join("\n")}");
       var cats = rows[0].Split("\t");
       var fields = rows[1].Split("\t");
 
