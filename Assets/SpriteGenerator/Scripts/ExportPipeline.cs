@@ -1228,10 +1228,10 @@ public class ExportPipeline : MonoBehaviour {
          progress_text.transform.parent.gameObject.SetActive(false);
       }
 
-      CompleteJingle();
       dummy_holder.gameObject.SetActive(true);
 
       OnDone();
+      CompleteJingle();
    }
 
 
