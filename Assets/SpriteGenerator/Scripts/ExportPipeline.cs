@@ -90,9 +90,16 @@ public class ExportPipeline : MonoBehaviour {
          yield return
             StartCoroutine(RunPipeline());
       }
+      export_files_action = () => {
+         export_when_done = true;
+         export_files_action = null;
+
+      };
 
       StartCoroutine(SubPl());
    }
+
+   bool export_when_done;
 
    public class TimeBenchmark {
       Dictionary<string, double> times = new();
@@ -192,10 +199,14 @@ public class ExportPipeline : MonoBehaviour {
 
       };
       export_files_action = () => {
+         export_when_done = false;
          export_files_action = null;
          WriteFiles(defalt_export_dir);
 
       };
+      if (export_when_done) {
+         export_files_action();
+      }
       view_sprites = () => {
          OpenUnitViewer();
 
