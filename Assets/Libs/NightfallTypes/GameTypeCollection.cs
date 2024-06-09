@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using static GameData.DamageFlags;
+using static Shared.DamageFlags;
 
 public static class DataTypes {
 
@@ -35,7 +35,7 @@ public static class DataTypes {
       }
    }
 
-   public static (GameData.DamageFlags flag, string key)[] flag_key_map = {
+   public static (Shared.DamageFlags flag, string key)[] flag_key_map = {
       (ArmorNegating, "AN"),
       (ArmorPiercing, "AP"),
       (Fire, "F"),
@@ -51,10 +51,10 @@ public static class DataTypes {
       (Holy, "H"),
    };
 
-   static GameData.DamageFlags ParseDamageFlagSymbol(string s) {
+   static Shared.DamageFlags ParseDamageFlagSymbol(string s) {
       var f = flag_key_map.Find(x => x.key.Equals(s, StringComparison.InvariantCultureIgnoreCase));
       if (f.flag == default) {
-         if (Enum.TryParse(s, out GameData.DamageFlags res)) {
+         if (Enum.TryParse(s, out Shared.DamageFlags res)) {
             return res;
          }
          Debug.LogError(context_msg + $"Failed to parse DamageFlags: '{s}'");
@@ -65,7 +65,7 @@ public static class DataTypes {
 
    [Serializable]
    public class DamageField {
-      public GameData.DamageFlags flags;
+      public Shared.DamageFlags flags;
 
 
       public int amount;
@@ -990,7 +990,7 @@ public class GameTypeCollection {
       public int[] capture_frame;
       public int[] time_ms;
 
-      public int auto_frames_per_s = 0;
+      public float auto_frames_per_s = 0;
 
       public AnimationParsed(string animation_type, string category) {
          this.animation_type = animation_type;

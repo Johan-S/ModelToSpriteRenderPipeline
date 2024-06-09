@@ -133,16 +133,16 @@ public static partial class BattleData {
       public int melee_damage;
       public int melee_damage_adj => melee_damage + strength_bonus;
 
-      public GameData.DamageFlags melee_flags;
+      public Shared.DamageFlags melee_flags;
 
       public int ranged_damage;
-      public GameData.DamageFlags ranged_flags;
+      public Shared.DamageFlags ranged_flags;
 
       public int ranged_range;
 
-      public bool ranged_ap => default != (ranged_flags & GameData.DamageFlags.ArmorPiercing);
+      public bool ranged_ap => default != (ranged_flags & Shared.DamageFlags.ArmorPiercing);
 
-      public int slow_reload => ((int)ranged_flags >> (int)GameData.DamageFlags.SlowReload1) & 3;
+      public int slow_reload => ((int)ranged_flags >> (int)Shared.DamageFlags.SlowReload1) & 3;
 
       public int reloading;
 

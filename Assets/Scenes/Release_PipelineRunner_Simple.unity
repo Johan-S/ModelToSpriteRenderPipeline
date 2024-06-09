@@ -354,6 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  export_when_done: 0
   load_unit_on_play: {fileID: 558734403567846002, guid: 42a9cea554fc5c1418bcb6b3306dca4c, type: 3}
   idle_only: 0
   only_atlas: 1
@@ -376,8 +377,13 @@ MonoBehaviour:
   defaultRenderModelName: Heavy Infantry
   executed: 0
   unit_viewer_prefab: {fileID: 3063332255528249544, guid: cf66ae4dd0d0f094db48affe8379955f, type: 3}
+  onPipelineDone:
+    m_PersistentCalls:
+      m_Calls: []
+  tot_sprites: []
   max_waits_per_frame: 0.25
   dummy_holder: {fileID: 0}
+  to_visit: {fileID: 0}
 --- !u!4 &417803481
 Transform:
   m_ObjectHideFlags: 0
@@ -816,6 +822,9 @@ MonoBehaviour:
   raw_color_material: {fileID: 2100000, guid: 676ccee694016294ba661d4065b88714, type: 2}
   forward_depth_material: {fileID: 2100000, guid: 9dcddea1781578541bc9962dcaad405a, type: 2}
   back_depth_material: {fileID: 2100000, guid: 03f64548388f0214db4ee477b19aa2b0, type: 2}
+  negate_root_motion: 0
+  last_root_motion: {x: 0, y: 0, z: 0}
+  last_root_rotation: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1001 &797986898
 PrefabInstance:
   m_ObjectHideFlags: 0

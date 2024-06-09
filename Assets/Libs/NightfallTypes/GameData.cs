@@ -14,7 +14,8 @@ public interface Copyable {
 public static partial class GameData {
    public static void TransferFieldData<T>(T from_o, T to_o) => Std.CopyFieldsTo(from_o, to_o);
 
-   public static void TransferFieldData(object from_o, object to_o, bool deep = true) => Std.CopyFieldsTo(from_o, to_o, deep);
+   public static void TransferFieldData(object from_o, object to_o, bool deep = true) =>
+      Std.CopyFieldsTo(from_o, to_o, deep);
 
 
    public static void ParseUnitToUnityObject(UnitType from_o, UnitTypeObject to_o) {
@@ -27,6 +28,7 @@ public static partial class GameData {
       to_o.sprite_ref = from_o.sprite;
       to_o.magic_paths = from_o.magic_paths.ToArray();
    }
+
    public static void TransferParseUnit(UnitTypeObject from_o, DataTypes.UnitTypeClass uclass, UnitType res) {
       res.name = from_o.name;
 
@@ -66,8 +68,8 @@ public static partial class GameData {
       public int Defense;
       public int Precision;
       public int Population_Cost;
-      
-      
+
+
       public Sprite icon_sprite;
 
       public float animation_scale = 1;
@@ -84,7 +86,7 @@ public static partial class GameData {
       public Helmet helmet;
       public WeaponMelee primary_weapon;
       public WeaponMelee secondary_weapon;
-      
+
       public WeaponMelee innate_primary;
       public WeaponMelee innate_secondary;
 
@@ -99,6 +101,7 @@ public static partial class GameData {
 
 
       public MagicPathList magic_paths;
+
       public override string ToString() {
          return $"UnitType<{name}>";
       }
@@ -130,14 +133,14 @@ public static partial class GameData {
 
       [Stat] public int melee_damage;
 
-      public DamageFlags melee_flags;
+      public Shared.DamageFlags melee_flags;
 
       [Header("Range")] [Stat(ignore_zero = true)]
       public int ranged_damage;
 
       [Stat(ignore_zero = true)] public int ranged_range;
 
-      public DamageFlags ranged_flags;
+      public Shared.DamageFlags ranged_flags;
 
       [Header("Cost")] [Stat(ignore_zero = true)]
       public int gold_cost = 3;
@@ -152,32 +155,6 @@ public static partial class GameData {
       public Copyable DeepCopy() {
          return Copy();
       }
-   }
-
-   [Flags]
-   public enum DamageFlags {
-      None = 0,
-      ArmorPiercing = 1 << 0,
-      Blunt = 1 << 1,
-      Piercing = 1 << 2,
-      Slashing = 1 << 3,
-
-      SlowReload1 = 1 << 4,
-      SlowReload2 = 1 << 5,
-
-      Knockback = 1 << 6,
-      Trample = 1 << 7,
-      JudoThrow = 1 << 8,
-      ArmorNegating = 1 << 9,
-      Magic = 1 << 10,
-      Fire = 1 << 11,
-      Poison = 1 << 12,
-      Death = 1 << 12,
-      Shock = 1 << 13,
-      Attack = 1 << 14,
-      RandomElement = 1 << 15,
-      Healing = 1 << 16,
-      Holy = 1 << 17,
    }
 
    public static IEnumerable<(string name, T data)> GetAllStats<T>(object o) {

@@ -26,46 +26,33 @@ public class EngineDataHolder : ScriptableObject {
 
    [Serializable]
    public class BaseTypes {
-
-
       public int dummy_field;
-      [NonSerialized]
-      public List<GameData.UnitType> game_units = new();
+      [NonSerialized] public List<GameData.UnitType> game_units = new();
 
-      [HideInInspector, SerializeReference]
-      public List<WeaponMelee> weapon_melees = new();
-   
-      [HideInInspector, SerializeReference]
-      public List<Armor> armors = new();
-      [HideInInspector, SerializeReference]
-      public List<Helmet> helmets = new();
-      [HideInInspector, SerializeReference]
-      public List<UnitTypeClass> units = new();
-      [HideInInspector, SerializeReference]
-      public List<Shield> shields = new();
-      
-      [HideInInspector, SerializeReference]
-      public List<MagicSpell> spells = new();
-      
-      [HideInInspector, SerializeReference]
-      public List<SimpleSpell> simple_spells = new();
-      
-      
-      [HideInInspector, SerializeReference]
-      public List<BattleData.UnitBuff> simple_buff = new();
+      [HideInInspector, SerializeReference] public List<WeaponMelee> weapon_melees = new();
+
+      [HideInInspector, SerializeReference] public List<Armor> armors = new();
+      [HideInInspector, SerializeReference] public List<Helmet> helmets = new();
+      [HideInInspector, SerializeReference] public List<UnitTypeClass> units = new();
+      [HideInInspector, SerializeReference] public List<Shield> shields = new();
+
+      [HideInInspector, SerializeReference] public List<MagicSpell> spells = new();
+
+      [HideInInspector, SerializeReference] public List<SimpleSpell> simple_spells = new();
+
+
+      [HideInInspector, SerializeReference] public List<BattleData.UnitBuff> simple_buff = new();
 
 
       [HideInInspector] public List<GameTypeCollection.AnimationParsed> animation_data = new();
 
       [HideInInspector] public ADict adict;
-      
-      
+
+
       public Shared.UnitAnimationSprites GetAnimationSprites(string unit, string animation_class) {
-      
-      
          var acl = animation_data.Where(x => x.animation_type == animation_class).ToList();
 
-      
+
          var maybe_cat = Sprites.GetUnitCats(unit);
 
          var animation_sprites = new Shared.UnitAnimationSprites();
@@ -78,12 +65,10 @@ public class EngineDataHolder : ScriptableObject {
             }
 
 
-
-
             am.sprites = sprites.map(x => x.sprite);
             am.time_ms = cl.time_ms.Copy();
             if (sprites.Length == 1) {
-               am.time_ms = new []{am.time_ms.Sum()};
+               am.time_ms = new[] { am.time_ms.Sum() };
             } else {
                Debug.Assert(sprites.Length == cl.capture_frame.Length);
             }
@@ -92,18 +77,17 @@ public class EngineDataHolder : ScriptableObject {
                if (cl.auto_frames_per_s > 0) {
                   am.time_ms = sprites.map(x => Mathf.RoundToInt(1000 / cl.auto_frames_per_s));
                } else {
-                  Debug.LogError($"Wrong capture frame: {unit} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+                  Debug.LogError(
+                     $"Wrong capture frame: {unit} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
                }
             }
 
-                  
 
             am.animation_duration_ms = am.time_ms.Sum();
          }
 
          return animation_sprites;
       }
-
    }
 
    public GameTypeCollection gear_data;
@@ -114,8 +98,7 @@ public class EngineDataHolder : ScriptableObject {
    public BaseTypes base_types = new();
 
 
-   [CanBeNull]
-   static HashSet<string> log_limit_cache;
+   [CanBeNull] static HashSet<string> log_limit_cache;
 
    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
    static void ReplaceLogCache() {
@@ -169,11 +152,9 @@ public class EngineDataHolder : ScriptableObject {
          }
       };
    }
-   
 
 
    public void FillanimationsFor(UnitTypeObject u) {
-      
       u.animations = base_type_ref.GetAnimationSprites(u.sprite_gen_name, u.animation_class);
 
       u.sprite_ref = Sprites.GetUnitCats(u.sprite_gen_name).idle_sprite;
@@ -181,7 +162,6 @@ public class EngineDataHolder : ScriptableObject {
       var adict = base_type_ref.adict;
 
       {
-         
          foreach (var an in u.AllAnimations()) {
             if (an) {
                if (an.sprites.Exists(x => !x)) {
@@ -269,7 +249,7 @@ public class EngineDataHolder : ScriptableObject {
 
       foreach (var u in unit_types) {
          FillanimationsFor(u);
-         
+
 
          if (!u.sprite_ref) {
             u.sprite_ref = dummy_sprite;
@@ -283,6 +263,7 @@ public class EngineDataHolder : ScriptableObject {
 
          if (replaced > 0) miss_name ??= u.name;
       }
+
       foreach (var ut in unit_types) {
          var gt = ut.game_data_impl = GameData.ParseUnit(ut, gear_data.units.Get(ut.name));
 
