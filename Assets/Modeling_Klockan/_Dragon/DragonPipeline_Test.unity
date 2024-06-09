@@ -383,7 +383,9 @@ MonoBehaviour:
   onPipelineDone:
     m_PersistentCalls:
       m_Calls: []
+  tot_sprites: []
   max_waits_per_frame: 0.25
+  max_waits_per_frame_viewer_open: 0.05
   dummy_holder: {fileID: 0}
   to_visit: {fileID: 1275165421}
 --- !u!4 &417803481

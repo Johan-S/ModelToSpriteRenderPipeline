@@ -32,7 +32,6 @@ public class UnitAnimationViewerPanel : UISubComponent {
    Shared.UnitAnimationSprites cur;
 
    public void SetSprites(Shared.UnitAnimationSprites animation_sprites) {
-      
       tick = 0;
       cur = animation_sprites;
 
@@ -43,8 +42,6 @@ public class UnitAnimationViewerPanel : UISubComponent {
 
       for (int i = 0; i < bundles.Length; i++) {
          if (images.Count == i) Register(Instantiate(prefab, panel));
-
-         UnitTypeObject.FillBundleMs(bundles[i].anim);
 
 
          var p = images[i].transform.parent;
@@ -57,9 +54,6 @@ public class UnitAnimationViewerPanel : UISubComponent {
       }
 
       UpdateAnimationState();
-   }
-   public void SetUnit(GameData.UnitType u) {
-      SetSprites(u.animation_sprites);
    }
 
    void UpdateAnimationState() {
@@ -93,17 +87,8 @@ public class UnitAnimationViewerPanel : UISubComponent {
          gameObject.SetActive(true);
          SetSprites(sprites);
          return;
+      }
 
-      }
-      if (o is UnitTypeObject ut) o = GameData.ParseUnit(ut, null);
-      
-      if (o is GameData.UnitType tt) {
-         if (tt.animation_sprites != cur) {
-            SetUnit(tt);
-            gameObject.SetActive(true);
-         }
-      } else {
-         gameObject.SetActive(false);
-      }
+      gameObject.SetActive(false);
    }
 }

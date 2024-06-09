@@ -67,8 +67,6 @@ public static class Data {
    }
 
    static GeneratedSpritesContainer.UnitCats GetResourceSprite(string name) {
-      
-
       var res = Resources.LoadAll<Sprite>("" + name.Substring(2));
 
       var r = new GeneratedSpritesContainer.UnitCats();
@@ -78,46 +76,26 @@ public static class Data {
       r.idle_sprite = res.Find(x => x.name.Contains("idle"));
       r.icon_sprite = res.Find(x => x.name.Contains("icon")) ?? r.idle_sprite;
 
-      r.sprites.Add(new (){
-         unit_name = name,
-         animation_category = "Idle",
+      r.sprites.Add(new(name, "Idle", 0) {
          sprite = r.idle_sprite,
       });
 
-      foreach (var att in res.filter(x => x.name.StartsWith("Attack")).Sorted(x => x.name)) {
-         
-         r.sprites.Add(new (){
-            unit_name = name,
-            animation_category = "Attack1",
+      int frames_per = 10;
+
+      foreach (var (i, att) in res.filter(x => x.name.StartsWith("Attack1")).Sorted(x => x.name).enumerate()) {
+         r.sprites.Add(new(name, "Attack1", i * frames_per) {
             sprite = att,
          });
       }
-      foreach (var att in res.filter(x => x.name.StartsWith("Walk")).Sorted(x => x.name)) {
+
+      foreach (var (i, att) in res.filter(x => x.name.StartsWith("Walk")).Sorted(x => x.name).enumerate()) {
          // Debug.Log($"atto {name}: {att.name}");
-         r.sprites.Add(new (){
-            unit_name = name,
-            animation_category = "Walk",
+         r.sprites.Add(new(name, "Walk", i * frames_per) {
             sprite = att,
          });
       }
-      
-      
+
 
       return r;
-
-   }
-
-
-   public static Sprite GetAltResourceSprite(SimpleUnitTypeObject u_s) {
-
-      if (u_s.Unit_Name.StartsWith("r/")) {
-         
-         var maybe_cat = GetResourceSprite(u_s.Unit_Name);
-
-         return maybe_cat.idle_sprite;
-      }
-
-      return null;
-
    }
 }

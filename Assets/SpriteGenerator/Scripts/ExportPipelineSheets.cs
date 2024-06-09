@@ -23,12 +23,13 @@ public class ExportPipelineSheets : ScriptableObject {
    public TextAsset[] multi_sheet_do_not_set;
 
 
-   public (GameTypeCollection.AnimationParsed[] arr, Dictionary<(string, string), GameTypeCollection.AnimationParsed> dict) GetGoodAnims () {
-      Dictionary<(string, string), GameTypeCollection.AnimationParsed> res = new();
+   public (Shared.AnimationParsed[] arr, Dictionary<(string, string), Shared.AnimationParsed> dict) GetGoodAnims () {
+      Dictionary<(string, string), Shared.AnimationParsed> res = new();
 
-      List<GameTypeCollection.AnimationParsed> arr = new();
+      List<Shared.AnimationParsed> arr = new();
 
       var rows = animations.text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
+      Debug.Log($"rows: {rows.join("\n")}");
       var cats = rows[0].Split("\t");
       var fields = rows[1].Split("\t");
 
@@ -80,10 +81,10 @@ public class ExportPipelineSheets : ScriptableObject {
       return res;
    }
 
-   public Dictionary<(string, string), GameTypeCollection.AnimationParsed> animation_good;
+   public Dictionary<(string, string), Shared.AnimationParsed> animation_good;
 
    [NonSerialized]
-   public GameTypeCollection.AnimationParsed[] animation_arr;
+   public Shared.AnimationParsed[] animation_arr;
 
    public Dictionary<string, Dictionary<string, string>> unit_data;
    public Dictionary<string, Dictionary<string, string>> shield_data;

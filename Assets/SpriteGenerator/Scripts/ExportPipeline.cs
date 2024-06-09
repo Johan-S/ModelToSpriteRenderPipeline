@@ -14,7 +14,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    [Header("Debug Helpers")] public bool export_when_done;
-   public SimpleUnitTypeObject load_unit_on_play;
+   public UnitTypeForRender load_unit_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
    public bool only_atlas;
@@ -57,7 +57,7 @@ public class ExportPipeline : MonoBehaviour {
       if (to_visit) AnnotatedUI.Visit(to_visit, this).alwaysRevisit = true;
    }
 
-   SimpleUnitTypeObject cur_loaded;
+   UnitTypeForRender cur_loaded;
 
    void Update() {
       if (sprite_capture_pipeline.exporting) {
@@ -205,9 +205,9 @@ public class ExportPipeline : MonoBehaviour {
       OpenUnitViewer();
    }
 
-   List<GameTypeCollection.AnimationParsed> _direct_ans;
+   List<Shared.AnimationParsed> _direct_ans;
 
-   List<GameTypeCollection.AnimationParsed> animations_parsed {
+   List<Shared.AnimationParsed> animations_parsed {
       get {
          if (_direct_ans.IsEmpty()) {
             _direct_ans = GetDirectAnimationsParsed().ToList();
@@ -221,14 +221,13 @@ public class ExportPipeline : MonoBehaviour {
 
    List<GeneratedSpritesContainer.UnitCats> genned_unit_cats = new();
 
-   UnitViewer.UnitTypeDetails ParseUntP2(ParsedUnit u, GeneratedSpritesContainer.UnitCats cats) {
-      string full_name = $"{prepend_to_sprite_name}{u.out_name}";
+   UnitViewer.UnitTypeDetails ParseUntP2(GeneratedSpritesContainer.UnitCats cats) {
       var r = new UnitViewer.UnitTypeDetails();
 
-      r.name = u.raw_name;
+      r.name = cats.unit_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         DataParsing.GetAnimationSprites(full_name, animations_parsed, u.animation_type,
+         DataParsing.GetAnimationSprites(cats.unit_name, animations_parsed, null,
             cats);
 
       return r;
@@ -239,7 +238,7 @@ public class ExportPipeline : MonoBehaviour {
 
       {
          export_tex_tot.Apply();
-         var catzip = parsed_pipeline_data.units.Zip(unit_cats_list).map(x => ParseUntP2(x.Item1, x.Item2));
+         var catzip = unit_cats_list.map(ParseUntP2);
 
          unit_viewer_running = Instantiate(unit_viewer_prefab);
 
@@ -608,7 +607,7 @@ public class ExportPipeline : MonoBehaviour {
 
       if (unit_viewer_running) {
          export_tex_tot.Apply();
-         unit_viewer_running.AddUnit(ParseUntP2(pu, pu.result));
+         unit_viewer_running.AddUnit(ParseUntP2(pu.result));
       }
    }
 
@@ -728,8 +727,7 @@ public class ExportPipeline : MonoBehaviour {
    }
 
 
-   public static
-      IEnumerable<GameTypeCollection.AnimationParsed> GetDirectAnimationsParsed() {
+   public static IEnumerable<Shared.AnimationParsed> GetDirectAnimationsParsed() {
       var allclips = Resources.LoadAll<AnimationBundle>("");
 
       Dictionary<string, AnimationClip> clips = allclips.FlatMap(x => x.animation_clips).ToDictionary(x => x.name);
@@ -746,7 +744,7 @@ public class ExportPipeline : MonoBehaviour {
          foreach (var data in g) {
             AnimationClip clip =
                data.clip_ref ? data.clip_ref : clips.Get(data.clip);
-            var ap = new GameTypeCollection.AnimationParsed();
+            var ap = new Shared.AnimationParsed();
 
             ap.clip = data.clip_name;
             ap.animation_type = data.animation_type;
