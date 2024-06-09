@@ -14,9 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animation_type: Horse
   category: Walk
-  clip: H_Trot
+  clip_ref: {fileID: 7400000, guid: 3a1f4f77fd9229b4db7113b113200d99, type: 3}
   auto_frames_per_s: 6
   capture_frame: 
   time_ms: 
   looping_root: 1
   model_offsetmodel_offset: {x: 0, y: 0, z: 0}
+  model_root_pos: {x: 0, y: 0, z: 0}
+  model_root_rot: {x: 0, y: 0, z: 0, w: 0}
+  clip: H_Trot
+  mirror_render: 0

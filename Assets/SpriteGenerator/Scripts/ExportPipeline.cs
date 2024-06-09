@@ -220,7 +220,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      GeneratedSpritesContainer.SetExtra(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
+      var c = GeneratedSpritesContainer.MakeFromData(export_tex_tot, meta_rows.join("\n"), prepend_to_name: "");
 
 
       var ans = GetDirectAnimationsParsed().ToList();
@@ -235,9 +235,9 @@ public class ExportPipeline : MonoBehaviour {
          r.unit = new GameData.UnitType();
          r.unit.name = u.raw_name;
          r.unit.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
-         r.unit.animation_sprites =
+         r.unit.animation_sprites = 
             DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
-               GeneratedSpritesContainer.Get(full_name));
+               c.Get(full_name));
          r.unit.stats = new();
 
          return r;
@@ -725,6 +725,7 @@ public class ExportPipeline : MonoBehaviour {
                ap.clip = data.clip_name;
                ap.animation_type = data.animation_type;
                ap.category = data.category;
+               ap.auto_frames_per_s = data.auto_frames_per_s;
 
 
                if (ap.time_ms.IsEmpty() && data.auto_frames_per_s > 0 && clip) {

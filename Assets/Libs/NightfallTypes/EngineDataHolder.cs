@@ -60,7 +60,7 @@ public class EngineDataHolder : ScriptableObject {
       [HideInInspector] public ADict adict;
       
       
-      public GameData.UnitAnimationSprites GetAnimationSprites(string unit, string animation_class) {
+      public Shared.UnitAnimationSprites GetAnimationSprites(string unit, string animation_class) {
       
       
          var acl = animation_data.Where(x => x.animation_type == animation_class).ToList();
@@ -68,7 +68,7 @@ public class EngineDataHolder : ScriptableObject {
       
          var maybe_cat = Sprites.GetUnitCats(unit);
 
-         var animation_sprites = new GameData.UnitAnimationSprites();
+         var animation_sprites = new Shared.UnitAnimationSprites();
          foreach (var (name, am) in animation_sprites.GetAllAnimations()) {
             var cl = acl.Find(x => x.category == name);
             if (cl == null) continue;
@@ -131,7 +131,7 @@ public class EngineDataHolder : ScriptableObject {
       return "[" + s.join(",") + "]";
    }
 
-   static Action<string, GameData.AnimationBundle> MakeBundleCallback(string atype, ADict adict, object debug_info) {
+   static Action<string, Shared.AnimationBundle> MakeBundleCallback(string atype, ADict adict, object debug_info) {
       return (cat, b) => {
          if (b.sprites.IsEmpty()) {
             return;
@@ -200,7 +200,7 @@ public class EngineDataHolder : ScriptableObject {
          }
 
 
-         Action<string, GameData.AnimationBundle> bundle_callback;
+         Action<string, Shared.AnimationBundle> bundle_callback;
 
 
          bundle_callback = MakeBundleCallback(atype, adict, debug_info: (u.name, u.animation_class));

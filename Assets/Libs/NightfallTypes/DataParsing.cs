@@ -14,15 +14,30 @@ public static class DataParsing {
 
    public static string NormalizeAnimationName(string name) => name.Replace('&', '_');
 
-   public static GameData.UnitAnimationSprites GetAnimationSprites(string SpriteRefName,
+   public static Shared.UnitAnimationSprites GetIdleSpriteOnlyBundle(Sprite spr) {
+
+      return new Shared.UnitAnimationSprites() {
+         idle_animation = new () {
+            animation_duration_ms = 100,
+            
+            sprites = new []{spr},
+            time_ms = new[]{100},
+         },
+      };
+   }
+   public static Shared.UnitAnimationSprites GetAnimationSprites(string SpriteRefName,
       List<GameTypeCollection.AnimationParsed> parsed_animations, string animation_class,
       GeneratedSpritesContainer.UnitCats maybe_cat) {
+      if (maybe_cat.idle_sprite && maybe_cat.sprites.Count == 1) {
+         return GetIdleSpriteOnlyBundle(maybe_cat.idle_sprite);
+
+      }
       animation_class = ANIMATION_SUBSTITUTE.Get(animation_class, animation_class);
       var acl = parsed_animations.Where(x => x.animation_type == animation_class).ToList();
 
       var ad = maybe_cat.sprites.GroupBy(x => x.animation_category).ToDictionary(x => x.Key, x => x.ToArray());
 
-      var animation_sprites = new GameData.UnitAnimationSprites();
+      var animation_sprites = new Shared.UnitAnimationSprites();
       if (acl.Count == 0) {
          Debug.LogError($"Missing animation class {animation_class} for {SpriteRefName}");
       } else {
@@ -41,11 +56,6 @@ public static class DataParsing {
 
             am.sprites = sprites.map(x => x.sprite);
             am.time_ms = cl.time_ms.Copy();
-            if (sprites.Length == 1) {
-               am.time_ms = new[] { am.time_ms.Sum() };
-            } else {
-               Debug.Assert(sprites.Length == cl.capture_frame.Length);
-            }
 
 
             if (sprites.Length != am.time_ms.Length) {
@@ -53,7 +63,7 @@ public static class DataParsing {
                   am.time_ms = sprites.map(x => 1000 / cl.auto_frames_per_s);
                } else {
                   Debug.LogError(
-                     $"Wrong capture frame: {SpriteRefName} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+                     $"Wrong capture frame: {SpriteRefName} - {name} : {sprites.Length} != {cl.capture_frame.Length}\nauto frames for {name}: {cl.auto_frames_per_s}");
                }
             }
 

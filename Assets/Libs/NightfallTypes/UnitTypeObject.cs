@@ -98,11 +98,11 @@ public class UnitTypeObject : ScriptableObject {
    public Sprite sprite_ref;
 
 
-   public GameData.UnitAnimationSprites animations;
+   public Shared.UnitAnimationSprites animations;
    
    public string sprite_gen_name;
 
-   public static void FillBundleMs(GameData.AnimationBundle b) {
+   public static void FillBundleMs(Shared.AnimationBundle b) {
       if (b.sprites.IsEmpty()) {
          Debug.Log($"Trying to fill empty bundle!");
          return;
@@ -119,7 +119,7 @@ public class UnitTypeObject : ScriptableObject {
 
    int cur_load_id;
 
-   public void FillGeneratedSprites(Action<string, GameData.AnimationBundle> bundle_callback) {
+   public void FillGeneratedSprites(Action<string, Shared.AnimationBundle> bundle_callback) {
       // if (cur_load_id == Std.LoadId) return;
       cur_load_id = Std.LoadId;
 
@@ -133,7 +133,7 @@ public class UnitTypeObject : ScriptableObject {
       // throw new Exception($"Don't load sprites here!");
    }
 
-   public IEnumerable<GameData.AnimationBundle> AllAnimations() {
+   public IEnumerable<Shared.AnimationBundle> AllAnimations() {
 
       foreach (var (n, a) in animations.GetAllAnimations()) {
          yield return a;

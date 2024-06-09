@@ -12,30 +12,10 @@ public interface Copyable {
 
 
 public static partial class GameData {
-   public static void TransferFieldData<T>(T from_o, T to_o) {
-      var t = typeof(T);
-      var fs = t.GetFields();
-      foreach (var f in fs) {
-         if (f.IsStatic) continue;
-         var o = f.GetValue(from_o);
-         if (o is Copyable cp) o = cp.DeepCopy();
-         f.SetValue(to_o, o);
-      }
-   }
+   public static void TransferFieldData<T>(T from_o, T to_o) => Std.CopyFieldsTo(from_o, to_o);
 
-   public static void TransferFieldData(object from_o, object to_o, bool deep=true) {
-      var t = to_o.GetType();
-      foreach (var o in Std.GetFields(from_o)) {
-         var v = o.val;
+   public static void TransferFieldData(object from_o, object to_o, bool deep = true) => Std.CopyFieldsTo(from_o, to_o, deep);
 
-         var fi = t.GetField(o.name);
-         if (fi == null) continue;
-         if (fi.FieldType.IsInstanceOfType(v)) {
-            if (deep && v is Copyable cp) v = cp.DeepCopy();
-            fi.SetValue(to_o, v);
-         }
-      }
-   }
 
    public static void ParseUnitToUnityObject(UnitType from_o, UnitTypeObject to_o) {
       to_o.name = from_o.name;
@@ -115,7 +95,7 @@ public static partial class GameData {
 
       public bool commander;
 
-      public UnitAnimationSprites animation_sprites;
+      public Shared.UnitAnimationSprites animation_sprites;
 
 
       public MagicPathList magic_paths;
@@ -204,125 +184,5 @@ public static partial class GameData {
       foreach (var kv in StatsAnnotations.DefaultStats(o)) {
          if (kv.val is T) yield return (kv.name, (T)kv.val);
       }
-   }
-
-
-   [Serializable]
-   public class AnimationBundle  {
-
-      public static implicit operator bool(AnimationBundle b) => b != null && b.sprites.IsNonEmpty();
-      public AnimationBundle() {
-      }
-
-
-      public int animation_duration_ms = 1000 / 3;
-
-      public Sprite[] sprites;
-      public int[] time_ms;
-
-      public AnimationBundle(Sprite[] sprites, int[] time_ms) {
-         this.animation_duration_ms = time_ms.Sum();
-         this.sprites = sprites;
-         this.time_ms = time_ms;
-      }
-
-      public AnimationBundle(int animation_duration_ms, Sprite[] sprites, int[] time_ms) {
-         this.animation_duration_ms = animation_duration_ms;
-         this.sprites = sprites;
-         this.time_ms = time_ms;
-      }
-
-      public int GetRendLarge(int ms) {
-         int l = ms / animation_duration_ms;
-
-         return GetRend(ms % animation_duration_ms) + l * sprites.Length;
-      }
-
-      public int GetRend(int ms) {
-
-         ms %= animation_duration_ms;
-         for (int j = 0; j < time_ms.Length; j++) {
-            ms -= time_ms[j];
-            if (ms < 0) return j;
-         }
-
-         return time_ms.Length - 1;
-      }
-
-      public AnimationBundle ShallowCopy() {
-         return (AnimationBundle)MemberwiseClone();
-      }
-
-      public AnimationBundle Copy() {
-         return new(animation_duration_ms, sprites?.Copy(), time_ms?.Copy());
-      }
-   }
-
-
-   [Serializable]
-   public class UnitAnimationSprites : Copyable {
-
-      public string GetLogStr() {
-         return GetAllAnimations().join(", ", x => $"{x.name}, {x.am?.sprites?.Length} {x.am.sprites.Count(t => t)} ,");
-      }
-      
-      [Stat("Idle")] public AnimationBundle idle_animation = new();
-      
-      [Stat("Attack1")] public AnimationBundle attack_animation = new();
-
-      [Stat("Attack2")] public AnimationBundle attack_animation_2 = new();
-      [Stat("Ranged1")] public AnimationBundle attack_ranged_animation_1 = new();
-
-      [Stat("Block")] public AnimationBundle on_hit_animation = new();
-
-
-      [Stat("Walk")] public AnimationBundle walk_animation = new();
-      [Stat("Run")] public AnimationBundle run_animation = new();
-
-      [Stat("Fall")] public AnimationBundle knockback_animation = new();
-      [Stat("Knockdown")] public AnimationBundle knockdown_animation = new();
-      [Stat("Special1")] public AnimationBundle cast_ability_animation = new();
-
-      [Stat("Death")] public AnimationBundle death_animation = new();
-
-
-      [Stat("Standup")] public AnimationBundle standup_animation = new();
-
-
-      [Stat("BlockBreak")] public AnimationBundle block_break_animation = new();
-      
-      [Stat("BlockReact")] public AnimationBundle block_react = new();
-      
-      [Stat("Stunned")] public AnimationBundle stunned = new();
-      
-      [Stat("Hover")] public AnimationBundle hover = new();
-
-      public Dictionary<string, AnimationBundle> extra_animations = new();
-
-      public IEnumerable<(string name, AnimationBundle am)> GetAllAnimations() {
-         foreach (var st in StatsAnnotations.DefaultStats(this)) {
-            yield return (st.name.Replace(" ", ""), (AnimationBundle)st.val);
-         }
-
-         foreach (var (k, v) in extra_animations) {
-            yield return (k, v);
-         }
-      }
-
-      public void Set(string name, AnimationBundle b) {
-         Stat.Set(this, name, b);
-      }
-
-      public UnitAnimationSprites Copy() {
-         var res = new UnitAnimationSprites();
-
-         TransferFieldData(this, res);
-         return res;
-      }
-
-      public Copyable DeepCopy() {
-         return Copy();
-      }
-
    }
 }

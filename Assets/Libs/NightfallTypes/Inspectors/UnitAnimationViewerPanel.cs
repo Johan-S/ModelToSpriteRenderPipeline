@@ -21,7 +21,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
    float tick = 0;
 
 
-   (string name, GameData.AnimationBundle anim)[] bundles;
+   (string name, Shared.AnimationBundle anim)[] bundles;
 
    List<Image> images = new();
 
@@ -73,7 +73,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
       prefab.SetActive(false);
       Register(prefab);
 
-      bundles = Array.Empty<(string, GameData.AnimationBundle)>();
+      bundles = Array.Empty<(string, Shared.AnimationBundle)>();
       UpdateAnimationState();
    }
 
