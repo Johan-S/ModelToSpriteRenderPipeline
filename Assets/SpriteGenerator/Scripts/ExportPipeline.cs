@@ -12,7 +12,11 @@ public class ExportPipeline : MonoBehaviour {
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
-   [Header("Debug Helpers")] public SimpleUnitTypeObject load_unit_on_play;
+   [Header("Debug Helpers")]
+   
+
+   public bool export_when_done;
+   public SimpleUnitTypeObject load_unit_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
    public bool only_atlas;
@@ -98,8 +102,6 @@ public class ExportPipeline : MonoBehaviour {
 
       StartCoroutine(SubPl());
    }
-
-   bool export_when_done;
 
    public class TimeBenchmark {
       Dictionary<string, double> times = new();
@@ -425,8 +427,9 @@ public class ExportPipeline : MonoBehaviour {
 
    void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat) {
       var model = sprite_capture_pipeline.model;
-      
-      if (pu.model_body.mirror_render) {
+      bool mirror = pu.model_body.mirror_render;
+      if (an.animation_type_object && an.animation_type_object.mirror_render) mirror = !mirror;
+      if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
          model.transform.localRotation = Quaternion.Euler(mrot);
@@ -474,7 +477,7 @@ public class ExportPipeline : MonoBehaviour {
       sprite_capture_pipeline.RunPipeline();
 
       CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
-         mirror: pu.model_body.mirror_render);
+         mirror: mirror);
 
 
       if (an.animation_type_object != null) {

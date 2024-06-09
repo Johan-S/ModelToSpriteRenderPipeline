@@ -27,4 +27,6 @@ public class AnimationTypeObject : ScriptableObject {
    [Header("Old clip ref")]
 
    public string clip;
+
+   public bool mirror_render;
 }
