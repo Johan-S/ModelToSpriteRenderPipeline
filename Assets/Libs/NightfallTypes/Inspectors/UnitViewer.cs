@@ -54,15 +54,31 @@ public class UnitViewer : MonoBehaviour {
    }
 
    public class UnitTypeDetails {
+      public UnitTypeDetails(GameData.UnitType unit) {
+         this.unit = unit;
+         type = unit;
+         corner_msg = $"<color=#4f4>{unit.stats.gold_cost}</color>\n{unit.stats.resource_cost}";
+         sprite = unit.sprite;
+         name = unit.name;
+         animation_sprites = unit.animation_sprites;
+      }
+
+      public UnitTypeDetails() {
+         
+      }
+
+      public string name;
+
       public GameData.UnitType unit;
 
-      public GameData.UnitType type => unit;
-      public string corner_msg => $"<color=#4f4>{unit.stats.gold_cost}</color>\n{unit.stats.resource_cost}";
-      public Sprite sprite => unit.sprite;
+      public GameData.UnitType type;
+      public string corner_msg;
+      public Sprite sprite;
+      public Shared.UnitAnimationSprites animation_sprites;
 
       public AnnotatedUI.ColoredSprite sized_sprite => new AnnotatedUI.ColoredSpriteImpl {
-         sprite = unit.sprite,
-         size = unit.sprite.rect.size / unit.sprite.pixelsPerUnit * 64,
+         sprite = sprite,
+         size = sprite.rect.size / sprite.pixelsPerUnit * 64,
       };
 
       public IEnumerable<KeyVal> base_stats {
@@ -148,9 +164,21 @@ public class UnitViewer : MonoBehaviour {
       }
    }
 
+   public static UnitTypeDetails FromUnitSprites(Shared.UnitSprites sprites) {
+      return new() {
+         name = sprites.name,
+         corner_msg = sprites.name,
+         sprite = sprites.sprite,
+         animation_sprites = sprites.animation_sprites,
+      };
+   }
+
+   public static UnitTypeDetails FromUnit(GameData.UnitType unit) {
+      return new(unit);
+   }
+
    bool init_done;
-   
-   
+
 
    public void SetUnits(IEnumerable<UnitTypeDetails> units_to_view) {
       units = SelectUtils.MakeSelectClass(units_to_view.ToList(), can_click_selected: true, can_toggle_off: true,
@@ -171,7 +199,7 @@ public class UnitViewer : MonoBehaviour {
    void Start() {
       if (!init_done) {
          var ul = gear_data.game_units.Where(x => include_no_sprites || x.sprite);
-         SetUnits(ul.Select(x => new UnitTypeDetails { unit = x })
+         SetUnits(ul.Select(FromUnit)
             .ToList());
       }
    }
@@ -184,4 +212,5 @@ public class UnitViewer : MonoBehaviour {
          if (b) b.onClick.Invoke();
       }
    }
+   
 }

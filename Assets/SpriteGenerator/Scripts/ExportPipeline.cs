@@ -162,16 +162,6 @@ public class ExportPipeline : MonoBehaviour {
       return $"{prepend_to_sprite_name}{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
-
-   public void ShowUnitViewer() {
-      if (export_tex_tot == null) {
-         Debug.Log("Run pipeline first!");
-         return;
-      }
-
-      OpenUnitViewer();
-   }
-
    public UnitViewer unit_viewer_prefab;
 
    UnitViewer unit_viewer_running;
@@ -215,6 +205,16 @@ public class ExportPipeline : MonoBehaviour {
       };
    }
 
+
+   public void ShowUnitViewer() {
+      if (export_tex_tot == null) {
+         Debug.Log("Run pipeline first!");
+         return;
+      }
+
+      OpenUnitViewer();
+   }
+
    void OpenUnitViewer() {
       if (unit_viewer_running || !export_tex_tot) return;
 
@@ -232,13 +232,11 @@ public class ExportPipeline : MonoBehaviour {
          string full_name = $"{prepend_to_sprite_name}{u.out_name}";
          var r = new UnitViewer.UnitTypeDetails();
 
-         r.unit = new GameData.UnitType();
-         r.unit.name = u.raw_name;
-         r.unit.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
-         r.unit.animation_sprites = 
+         r.name = u.raw_name;
+         r.sprite = GeneratedSpritesContainer.Get(full_name).idle_sprite;
+         r.animation_sprites = 
             DataParsing.GetAnimationSprites(full_name, ans, u.animation_type,
                c.Get(full_name));
-         r.unit.stats = new();
 
          return r;
       }
@@ -706,54 +704,53 @@ public class ExportPipeline : MonoBehaviour {
       IEnumerable<GameTypeCollection.AnimationParsed> GetDirectAnimationsParsed() {
       var allclips = Resources.LoadAll<AnimationBundle>("");
 
-      foreach (var clips in allclips) {
-         var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
+      Dictionary<string, AnimationClip> clips = allclips.FlatMap(x => x.animation_clips).ToDictionary(x => x.name);
+      
+      var anim_objs = Resources.LoadAll<AnimationTypeObject>("DirectAnims/");
+      
+      var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
 
-         var groups = anim_objs.GroupBy(x => DataParsing.NormalizeAnimationName(x.animation_type));
+      foreach (var g in groups) {
+         var p = new AnimationSet();
+
+         p.name = g.Key;
+
+         foreach (var data in g) {
+            AnimationClip clip =
+               data.clip_ref ? data.clip_ref : clips.Get(data.clip);
+            var ap = new GameTypeCollection.AnimationParsed();
+
+            ap.clip = data.clip_name;
+            ap.animation_type = data.animation_type;
+            ap.category = data.category;
+            ap.auto_frames_per_s = data.auto_frames_per_s;
 
 
-         foreach (var g in groups) {
-            var p = new AnimationSet();
+            if (ap.time_ms.IsEmpty() && data.auto_frames_per_s > 0 && clip) {
+               if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
+                  var len = clip.length;
 
-            p.name = g.Key;
+                  var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
 
-            foreach (var data in g) {
-               AnimationClip clip =
-                  data.clip_ref ? data.clip_ref : clips.animation_clips.Find(x => x.name == data.clip);
-               var ap = new GameTypeCollection.AnimationParsed();
+                  if (frames < 2) frames = 2;
 
-               ap.clip = data.clip_name;
-               ap.animation_type = data.animation_type;
-               ap.category = data.category;
-               ap.auto_frames_per_s = data.auto_frames_per_s;
+                  ap.time_ms = new int[frames - 1];
+                  ap.capture_frame = new int[frames - 1];
 
+                  for (int i = 1; i < frames; i++) {
+                     float time = i * len / (frames - 1);
+                     float dt = time - (i - 1) * len / (frames - 1);
 
-               if (ap.time_ms.IsEmpty() && data.auto_frames_per_s > 0 && clip) {
-                  if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
-                     var len = clip.length;
-
-                     var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
-
-                     if (frames < 2) frames = 2;
-
-                     ap.time_ms = new int[frames - 1];
-                     ap.capture_frame = new int[frames - 1];
-
-                     for (int i = 1; i < frames; i++) {
-                        float time = i * len / (frames - 1);
-                        float dt = time - (i - 1) * len / (frames - 1);
-
-                        ap.time_ms[i - 1] = Mathf.RoundToInt(dt * 1000);
-                        ap.capture_frame[i - 1] = Mathf.FloorToInt(time * 60);
-                     }
+                     ap.time_ms[i - 1] = Mathf.RoundToInt(dt * 1000);
+                     ap.capture_frame[i - 1] = Mathf.FloorToInt(time * 60);
                   }
-               } else {
-                  ap.time_ms = data.time_ms;
-                  ap.capture_frame = data.capture_frame;
                }
-
-               yield return ap;
+            } else {
+               ap.time_ms = data.time_ms;
+               ap.capture_frame = data.capture_frame;
             }
+
+            yield return ap;
          }
       }
    }

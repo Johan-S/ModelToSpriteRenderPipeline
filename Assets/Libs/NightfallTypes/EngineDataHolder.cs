@@ -244,7 +244,9 @@ public class EngineDataHolder : ScriptableObject {
          }
       }
 
-      foreach (var a in ExportPipeline.GetDirectAnimationsParsed()) {
+      var anims_parsed = ExportPipeline.GetDirectAnimationsParsed().ToList();
+
+      foreach (var a in anims_parsed) {
          base_type_ref.animation_data.Add(a);
          // Debug.Log($"{a.animation_type}, {a.category}");
       }

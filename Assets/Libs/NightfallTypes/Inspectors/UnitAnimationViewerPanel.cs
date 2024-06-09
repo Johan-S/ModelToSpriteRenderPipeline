@@ -29,12 +29,14 @@ public class UnitAnimationViewerPanel : UISubComponent {
       images.Add(o.GetComponentsInChildren<Image>(true).Where(x => !x.name.FastStartsWith("skip_")).Skip(1).First());
    }
 
-   GameData.UnitType cur;
-   public void SetUnit(GameData.UnitType u) {
-      tick = 0;
-      cur = u;
+   Shared.UnitAnimationSprites cur;
 
-      bundles = u.animation_sprites.GetAllAnimations()
+   public void SetSprites(Shared.UnitAnimationSprites animation_sprites) {
+      
+      tick = 0;
+      cur = animation_sprites;
+
+      bundles = animation_sprites.GetAllAnimations()
          .Where(x => x.Item2 != null && !x.Item2.sprites.IsEmpty())
          .ToArray();
 
@@ -55,6 +57,9 @@ public class UnitAnimationViewerPanel : UISubComponent {
       }
 
       UpdateAnimationState();
+   }
+   public void SetUnit(GameData.UnitType u) {
+      SetSprites(u.animation_sprites);
    }
 
    void UpdateAnimationState() {
@@ -84,10 +89,16 @@ public class UnitAnimationViewerPanel : UISubComponent {
    }
 
    public override void SetValue(object o) {
+      if (o is Shared.UnitAnimationSprites sprites) {
+         gameObject.SetActive(true);
+         SetSprites(sprites);
+         return;
+
+      }
       if (o is UnitTypeObject ut) o = GameData.ParseUnit(ut, null);
       
       if (o is GameData.UnitType tt) {
-         if (tt != cur) {
+         if (tt.animation_sprites != cur) {
             SetUnit(tt);
             gameObject.SetActive(true);
          }
