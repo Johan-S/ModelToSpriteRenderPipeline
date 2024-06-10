@@ -23,9 +23,9 @@ namespace NightfallEditor {
 
       public bool auto_run;
 
+      public bool full_auto;
       public bool auto_start_on_play;
       public bool auto_export;
-      public bool auto_exit_playmode;
 
 
       public ExportPipeline pipeline;
@@ -35,13 +35,16 @@ namespace NightfallEditor {
       }
 
       void OnPlaymodeChange(PlayModeStateChange change) {
+         if (change is PlayModeStateChange.EnteredEditMode) {
+            full_auto = false;
+         }
          if (change is PlayModeStateChange.EnteredPlayMode) {
-            if (auto_run && pipeline.isActiveAndEnabled) {
+            if ((auto_run || full_auto) && pipeline.isActiveAndEnabled) {
                pipeline.onPipelineDone.AddListener(() => {
-                  pipeline.export_files_action?.Invoke();
+                  if (full_auto) pipeline.export_files_action?.Invoke();
                });
                pipeline.omExportDone.AddListener(() => {
-                  if (auto_exit_playmode) {
+                  if (full_auto) {
                      MainObject.DelayCall(1, () => {
                         EditorApplication.ExitPlaymode();
                      });
@@ -72,7 +75,16 @@ namespace NightfallEditor {
          }
 
          auto_run = EditorGUILayout.Toggle("Auto", auto_run);
-         auto_exit_playmode = EditorGUILayout.Toggle("auto_exit_playmode", auto_exit_playmode);
+
+         using (new EditorGUI.DisabledScope(pipeline == null)) {
+            if (GUILayout.Button("Run full pipeline Export")) {
+               full_auto = true;
+               if (!EditorApplication.isPlaying) {
+                  EditorApplication.EnterPlaymode();
+               }
+               EditorApplication.isPaused = false;
+            }
+         }
       }
    }
 }
