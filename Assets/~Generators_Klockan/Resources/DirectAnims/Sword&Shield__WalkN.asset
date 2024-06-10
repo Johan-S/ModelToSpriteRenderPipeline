@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 488ebbaf21720a5428d539d9041cea26, type: 3}
   m_Name: Sword&Shield__WalkN
   m_EditorClassIdentifier: 
-  animation_type: Dragon
+  animation_type: Sword&Shield
   category: WalkN
   clip_ref: {fileID: 7400000, guid: ea428d35e3a57464a81bc7cfa0625c10, type: 2}
   auto_frames_per_s: 6
