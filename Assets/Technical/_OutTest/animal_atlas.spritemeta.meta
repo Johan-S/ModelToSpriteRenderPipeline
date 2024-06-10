@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 405e8e297a622904286960e598bef4a6
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 9cd8b7d1e8f61a84a9b208a07582e8f1, type: 3}
+  atlas: {fileID: 2800000, guid: f0f8e283953abd546b3328132a880175, type: 3}
+  prepend_to_name: 

@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Release_PipelineRunner.unity
+    path: Assets/Generators_Lucid/Release_PipelineRunner.unity
     guid: 349290b3243d1164fac5a7716aeac5b8
   m_configObjects: {}
