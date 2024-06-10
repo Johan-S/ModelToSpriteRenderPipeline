@@ -37,12 +37,14 @@ namespace NightfallEditor {
       void OnPlaymodeChange(PlayModeStateChange change) {
          if (change is PlayModeStateChange.EnteredPlayMode) {
             if (auto_run && pipeline.isActiveAndEnabled) {
-               pipeline.onPipelineDone.AddListener(() => { });
+               pipeline.onPipelineDone.AddListener(() => {
+                  pipeline.export_files_action?.Invoke();
+               });
                pipeline.omExportDone.AddListener(() => {
                   if (auto_exit_playmode) {
-                     EditorApplication.delayCall += () => {
+                     MainObject.DelayCall(1, () => {
                         EditorApplication.ExitPlaymode();
-                     };
+                     });
                   }
                });
 
