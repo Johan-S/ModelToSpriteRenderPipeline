@@ -39,7 +39,7 @@ namespace NightfallEditor {
             if (auto_run && pipeline.isActiveAndEnabled) {
                pipeline.onPipelineDone.AddListener(() => { });
                pipeline.omExportDone.AddListener(() => {
-                  if (auto_run) {
+                  if (auto_exit_playmode) {
                      EditorApplication.delayCall += () => {
                         EditorApplication.ExitPlaymode();
                      };
@@ -70,6 +70,7 @@ namespace NightfallEditor {
          }
 
          auto_run = EditorGUILayout.Toggle("Auto", auto_run);
+         auto_exit_playmode = EditorGUILayout.Toggle("auto_exit_playmode", auto_exit_playmode);
       }
    }
 }

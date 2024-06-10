@@ -41,7 +41,10 @@ public class ExportPipeline : MonoBehaviour {
    public string export_to_folder = "Gen";
 
 
-   [Header("Unit Filter")] public UnitTypeForRender[] override_units;
+   [Header("Unit Filter")]
+   
+   public UnitTypeForRender[] override_units;
+
    [Header("Bindings")] public Material material;
 
    public GameObject model;
