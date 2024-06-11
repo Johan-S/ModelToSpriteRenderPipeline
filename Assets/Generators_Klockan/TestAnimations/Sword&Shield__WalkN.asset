@@ -21,6 +21,6 @@ MonoBehaviour:
   looping_root: 1
   model_offsetmodel_offset: {x: 0, y: 0, z: 0}
   model_root_pos: {x: 0, y: 0, z: 0}
-  model_root_rot: {x: 0, y: 0.70710677, z: 0, w: 0.70710677}
+  model_root_rot: {x: 0, y: -0.70710677, z: 0, w: 0.70710677}
   clip: KnightWalkS
   mirror_render: 0

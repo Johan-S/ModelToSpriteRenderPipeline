@@ -868,7 +868,11 @@ public class ExportPipeline : MonoBehaviour {
       var direct_anims = GetDirectAnimationSets().ToList();
 
       foreach (var p in direct_anims) {
-         res[p.name] = p;
+         if (res.TryGetValue(p.name, out var cur)) {
+            cur.res.AddRange(p.res);
+         } else {
+            res[p.name] = p;
+         }
       }
 
       return res;

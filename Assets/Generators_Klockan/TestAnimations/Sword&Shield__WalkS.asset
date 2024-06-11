@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 488ebbaf21720a5428d539d9041cea26, type: 3}
-  m_Name: Sword&Shield__WalkNE
+  m_Name: Sword&Shield__WalkS
   m_EditorClassIdentifier: 
   animation_type: Sword&Shield
-  category: WalkNE
+  category: WalkS
   clip_ref: {fileID: 7400000, guid: ea428d35e3a57464a81bc7cfa0625c10, type: 2}
   auto_frames_per_s: 6
   capture_frame: 00000000070000000e000000150000001c000000230000002a000000
@@ -21,6 +21,6 @@ MonoBehaviour:
   looping_root: 1
   model_offsetmodel_offset: {x: 0, y: 0, z: 0}
   model_root_pos: {x: 0, y: 0, z: 0}
-  model_root_rot: {x: 0, y: 0.38268346, z: 0, w: 0.9238795}
+  model_root_rot: {x: 0, y: -0.70710677, z: 0, w: -0.70710677}
   clip: KnightWalkS
   mirror_render: 0
