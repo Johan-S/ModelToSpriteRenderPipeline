@@ -233,10 +233,10 @@ public class ExportPipeline : MonoBehaviour {
    UnitViewer.UnitTypeDetails ParseUntP2(ParsedUnit pu, GeneratedSpritesContainer.UnitCats cats) {
       var r = new UnitViewer.UnitTypeDetails();
 
-      r.name = cats.unit_name;
+      r.name = pu.out_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         Sprites.GetAnimationSprites(cats.unit_name, animations_parsed, pu.animation_type,
+         Sprites.GetAnimationSprites(pu.out_name, animations_parsed, pu.animation_type,
             cats);
 
       return r;
