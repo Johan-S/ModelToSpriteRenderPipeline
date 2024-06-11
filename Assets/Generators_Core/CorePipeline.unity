@@ -360,7 +360,7 @@ MonoBehaviour:
   write_files: 0
   prepend_to_sprite_name: 
   append_to_atlas_name: 
-  sheets_pipeline_descriptor: {fileID: 11400000, guid: 65629498018618f419ec1a2966b120f5, type: 2}
+  sheets_pipeline_descriptor: {fileID: 11400000, guid: e8e80e363f02bb140851a617d6342781, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
   animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}
   animation_bundle_extra:
@@ -2093,7 +2093,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   model_offset: {x: 0, y: 0, z: 0}
   animation_t: 0.156
-  animation_clip: {fileID: 7400000, guid: f0fcdf6106444474daf35b5a5dad26d0, type: 3}
+  animation_clip: {fileID: 7400000, guid: 1222763b677cd78418c968c8707c94bf, type: 3}
   animation_speed: 0.953
   animation_time: 0.18720001
   animation_frame: 11
