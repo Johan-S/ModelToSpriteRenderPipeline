@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Technical_sheetsunits
   m_EditorClassIdentifier: 
   output_name: tech_sprites
-  armor: {fileID: 5376613933743937246, guid: 68a48e6130aa43c3850699282d1457a1, type: 3}
+  armor: {fileID: 5376613933743937246, guid: 99924857586dc8740b2053eeab3e3a65, type: 3}
   helmet: {fileID: 5376613933743937246, guid: 8d0c166c65035fa4daa3ee0b28dac335, type: 3}
   shield: {fileID: 5376613933743937246, guid: b8f14de5f387d1948aaa9e3bf8f336f1, type: 3}
   unit: {fileID: 5376613933743937246, guid: ef4c59a00f114db49869e5714a020b90, type: 3}
