@@ -41,6 +41,7 @@ public class AnimationManager : MonoBehaviour {
 
    Dictionary<string, AnimationSet> animation_sets;
 
+   public AnimationTypeObject[] override_animations;
    public AnimationBundle[] animation_bundles;
 
    public ExportPipelineSheets sheets_pipeline_descriptor;
@@ -62,17 +63,25 @@ public class AnimationManager : MonoBehaviour {
    }
 
    public IEnumerable<AnimationSet> GetDirectAnimationSets() {
+      var override_anims = override_animations;
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("");
 
-      var groups = anim_objs.GroupBy(x => x.animation_type.Replace("&", "_"));
+      var all_keys = override_anims.Concat(anim_objs).Select(x => x.animation_type.Replace("&", "_")).Distinct();
+      var ogroups = override_anims.ToKeyDict(x => x.animation_type.Replace("&", "_"));
+      var groups = anim_objs.ToKeyDict(x => x.animation_type.Replace("&", "_"));
 
 
-      foreach (var g in groups) {
+      foreach (var gk in all_keys) {
          var p = new AnimationSet();
 
-         p.name = g.Key;
+         var g = ogroups.Get(gk, new());
+         var override_cats = g.ToList().Select(x => x.category).ToHashSet();
+         var orig_g = groups.Get(gk, new()).Where(x => !override_cats.Contains(x.category));
 
-         foreach (var data in g) {
+         p.name = gk;
+
+
+         foreach (var data in g.Concat(orig_g)) {
             AnimationClip clip = GetAnimationClip(data);
             if (clip == null) {
                Debug.LogError($"Missing clip: {data.clip_name} for animation {data.name}");
