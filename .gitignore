@@ -8,11 +8,13 @@
 /[Uu]ser[Ss]ettings/
 /.vscode/
 
+
 /Packages/external_assets/*
 
 
 !/Packages/external_assets/package.json
 !/Packages/external_assets/package.json.meta
+
 
 /.idea/
 /WinBuild/
@@ -22,6 +24,10 @@
 
 /Assets/SpriteGenerator/_OutTest/
 /Assets/SpriteGenerator/_OutTest.meta
+
+/Assets/z_[Gg]enerated_[Ll]ocal/**
+/Assets/z_[Gg]enerated_[Ll]ocal.meta
+
 
 /.vs/
 

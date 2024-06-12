@@ -1,4 +1,5 @@
 ﻿using System;
+using Shared;
 using UnityEditor;
 using UnityEditor.Profiling.Memory.Experimental;
 using UnityEditor.SceneManagement;
@@ -73,6 +74,8 @@ namespace NightfallEditor {
 
             pipeline = (ExportPipeline)EditorGUILayout.ObjectField("Pipeline", pipeline, typeof(ExportPipeline));
          }
+         
+         EditorGUILayout.Separator();
 
          auto_run = EditorGUILayout.Toggle("Auto", auto_run);
 
@@ -85,6 +88,9 @@ namespace NightfallEditor {
                EditorApplication.isPaused = false;
             }
          }
+         
+         EditorGUILayout.Separator();
+         
       }
    }
 }
