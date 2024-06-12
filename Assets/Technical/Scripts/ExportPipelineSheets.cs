@@ -24,6 +24,7 @@ public class ExportPipelineSheets : ScriptableObject {
 
 
    public (Shared.AnimationParsed[] arr, Dictionary<(string, string), Shared.AnimationParsed> dict) GetGoodAnims () {
+      if (!animations) return (new Shared.AnimationParsed[0], new());
       Dictionary<(string, string), Shared.AnimationParsed> res = new();
 
       List<Shared.AnimationParsed> arr = new();
@@ -91,7 +92,7 @@ public class ExportPipelineSheets : ScriptableObject {
    public Dictionary<string, Dictionary<string, string>> helmet_data;
 
    public void InitData() {
-      if (animations) (animation_arr, animation_good) = GetGoodAnims();
+      (animation_arr, animation_good) = GetGoodAnims();
 
       unit_data = GetData(unit ? unit.text : "");
       shield_data = GetData(shield.text);

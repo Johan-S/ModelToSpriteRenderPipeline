@@ -352,7 +352,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  export_when_done: 1
+  export_when_done: 0
   load_unit_on_play: {fileID: 0}
   idle_only: 0
   only_atlas: 1
@@ -362,16 +362,11 @@ MonoBehaviour:
   append_to_atlas_name: 
   sheets_pipeline_descriptor: {fileID: 11400000, guid: e8e80e363f02bb140851a617d6342781, type: 2}
   parts_bundle: {fileID: 11400000, guid: f4ad9ad1169c6aa47ab00c397a735464, type: 2}
-  animation_bundle: {fileID: 11400000, guid: ee9facd8c29327b4cac3882015343adc, type: 2}
-  animation_bundle_extra:
-  - {fileID: 11400000, guid: 42bd59aa4f8433e419782e8240952825, type: 2}
-  - {fileID: 11400000, guid: 8605da77474d9164bbb69e899372648b, type: 2}
-  - {fileID: 11400000, guid: ab5ea13069f87da42ac12a1a64301545, type: 2}
   export_size: 128
   atlas_sprites_per_row: 4
   export_to_folder: Gen_Debug
   override_units: []
-  material: {fileID: 2100000, guid: 0d195eee3bd774243bc645641a269e5d, type: 2}
+  animation_manager: {fileID: 0}
   model: {fileID: 746774659}
   sprite_capture_pipeline: {fileID: 420694997}
   progress_text: {fileID: 1898128246}

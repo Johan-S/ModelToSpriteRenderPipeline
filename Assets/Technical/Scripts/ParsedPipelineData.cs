@@ -21,7 +21,6 @@ public class ParsedPipelineData {
    public ModelPartsBundle parts_bundle => pipeline.parts_bundle;
 
    readonly ExportPipeline pipeline;
-   Dictionary<string, AnimationSet> animation_sets => pipeline.animation_sets;
 
 
    public IList<IUnitTypeForRender> extra_units => pipeline.override_units;
@@ -36,12 +35,15 @@ public class ParsedPipelineData {
 
 
    Dictionary<string, ParsedArmor> armor_to_model_map = new();
+
    void init() {
       string[] GetRows(string text) {
          return text.SplitLines().Where(x => x.Trim().Length > 0).ToArray();
       }
 
-      var unit_rows = sheets_pipeline_descriptor.unit ? GetRows(sheets_pipeline_descriptor.unit?.text) : Array.Empty<string>();
+      var unit_rows = sheets_pipeline_descriptor.unit
+         ? GetRows(sheets_pipeline_descriptor.unit?.text)
+         : Array.Empty<string>();
       var shield_rows = GetRows(sheets_pipeline_descriptor.shield.text);
       var armor_rows = GetRows(sheets_pipeline_descriptor.armor.text);
       var helmet_rows = GetRows(sheets_pipeline_descriptor.helmet.text);
@@ -174,7 +176,6 @@ public class ParsedPipelineData {
                var pu = CreateParsedUnit(an_type, name, transo);
 
 
-
                {
                   var armor_name = vals["Armor"];
 
@@ -227,38 +228,33 @@ public class ParsedPipelineData {
                units.Add(pu);
             }
          }
-         
       }
-      
-      if (this.extra_units != null) {
-         
-         foreach (var u in extra_units) {
 
+      if (this.extra_units != null) {
+         foreach (var u in extra_units) {
             var model_data = pipeline.MakeModelData(u.ModelBody);
 
-            
+
             var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
-            
+
             if (u.MaterialOverride) {
                pu.material = u.MaterialOverride;
             }
 
             units.Add(pu);
-         }     
+         }
       }
 
       output_n = units.Sum(x => x.animations.Count);
    }
 
    ParsedUnit CreateParsedUnit(string an_type, string name, BodyModelData model_body) {
-      
-      
       var atype = SharedUtils.NormalizeAnimationName(an_type);
       if (atype.Trim().Length == 0) {
          Debug.LogError($"Skipping {name} due to lacking animation.");
          return null;
       }
-      
+
       ParsedUnit pu = new ParsedUnit();
       pu.animation_type = an_type;
       pu.raw_name = name;
@@ -278,7 +274,7 @@ public class ParsedPipelineData {
       pu.out_name = GetExportUnitName(name);
       // if (idle_only) atype = "Idle";
 
-      var animation_set = animation_sets[atype];
+      var animation_set = pipeline.animation_manager.GetAnimationSet(atype);
 
       var anims = animation_set.res;
       if (pipeline.idle_only) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
@@ -412,7 +408,6 @@ public class AnimationWrap {
       this.frame = frame;
       this.animation_type_object = animation_type_object;
    }
-   
 
 
    public string name;
@@ -423,4 +418,10 @@ public class AnimationWrap {
    public AnimationTypeObject animation_type_object;
 
    public Quaternion apply_rotation;
+}
+
+public class AnimationSet {
+   public string name;
+
+   public List<AnimationWrap> res = new();
 }

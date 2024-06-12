@@ -33,8 +33,6 @@ public class ExportPipeline : MonoBehaviour {
    public ExportPipelineSheets sheets_pipeline_descriptor;
 
    public ModelPartsBundle parts_bundle;
-   public AnimationBundle animation_bundle;
-   public AnimationBundle[] animation_bundle_extra;
    public int export_size = 64;
 
    public int atlas_sprites_per_row = 5;
@@ -45,7 +43,8 @@ public class ExportPipeline : MonoBehaviour {
    
    public UnitTypeForRender[] override_units;
 
-   [Header("Bindings")] public Material material;
+   [Header("Bindings")]
+   public AnimationManager animation_manager;
 
    public GameObject model;
 
@@ -729,117 +728,6 @@ public class ExportPipeline : MonoBehaviour {
       return Sprites.GetExportUnitName(orig_name);
    }
 
-   public class AnimationSet {
-      public string name;
-
-      public List<AnimationWrap> res = new();
-   }
-
-
-   public IEnumerable<AnimationSet> GetDirectAnimationSets() {
-      var anim_objs = Resources.LoadAll<AnimationTypeObject>("");
-
-      var groups = anim_objs.GroupBy(x => x.animation_type.Replace("&", "_"));
-
-
-      foreach (var g in groups) {
-         var p = new AnimationSet();
-
-         p.name = g.Key;
-
-         foreach (var data in g) {
-            AnimationClip clip = GetAnimationClip(data);
-            if (clip == null) {
-               Debug.LogError($"Missing clip: {data.clip_name} for animation {data.name}");
-               continue;
-            }
-
-            if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
-               var len = clip.length;
-
-               var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
-
-               if (frames < 2) frames = 2;
-
-               for (int i = 1; i < frames; i++) {
-                  float time = i * len / (frames - 1);
-
-                  p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data));
-               }
-            } else {
-               foreach (var fr in data.capture_frame) {
-                  p.res.Add(new(data.clip_name, clip, data.category, fr, data));
-               }
-            }
-         }
-
-
-         // Debug.Log($"an: {p.name}:\n\t{p.res.join("\n\t")}");
-
-
-         // Debug.Log($"Group {g.Key}: {g.ToList().join(", ", x => x.category)}");
-         yield return p;
-      }
-   }
-
-   Dictionary<string, AnimationSet> GetanimationSets() {
-      Dictionary<string, AnimationSet> res = new();
-      var arr = sheets_pipeline_descriptor.animation_arr;
-      var types = arr.Select(x => x.animation_type).Distinct();
-      var cats = arr.Select(x => x.category).Distinct();
-
-      foreach (var anim in types) {
-         var p = new AnimationSet {
-            name = anim.Replace("&", "_"),
-         };
-
-         foreach (var c in cats) {
-            if (sheets_pipeline_descriptor.animation_good.TryGetValue((anim, c), out var data)) {
-               AnimationClip clip = GetAnimationClip(data.clip);
-               if (clip == null) {
-                  Debug.LogError($"Missing clip: {data.clip} for PARSED animation {data.animation_type}");
-                  continue;
-               }
-
-               foreach (var fr in data.capture_frame) {
-                  p.res.Add(new(data.clip, clip, data.category, fr, null));
-               }
-            }
-         }
-
-         res[p.name] = p;
-      }
-
-
-      var direct_anims = GetDirectAnimationSets().ToList();
-
-      foreach (var p in direct_anims) {
-         if (res.TryGetValue(p.name, out var cur)) {
-            cur.res.AddRange(p.res);
-         } else {
-            res[p.name] = p;
-         }
-      }
-
-      return res;
-   }
-
-   AnimationClip GetAnimationClip(string animation_name) {
-      AnimationClip clip = animation_bundle.animation_clips.Find(x => x.name == animation_name);
-
-      foreach (var a in animation_bundle_extra) {
-         if (clip) break;
-         clip = a.animation_clips.Find(x => x.name == animation_name);
-      }
-
-      return clip;
-   }
-
-   AnimationClip GetAnimationClip(AnimationTypeObject animation) {
-      if (animation.clip_ref) return animation.clip_ref;
-      return GetAnimationClip(animation.clip);
-   }
-
    [SerializeField] public Transform dummy_holder;
 
 
@@ -1047,20 +935,13 @@ public class ExportPipeline : MonoBehaviour {
       sprite_gen_meta = new();
       model_mappings = new();
 
-      animation_sets = GetanimationSets();
+      if (!animation_manager) {
 
-      foreach (var ap in SharedUtils.ANIMATION_SUBSTITUTE) {
-         if (!animation_sets.ContainsKey(ap.Key)) {
-            animation_sets[ap.Key] = animation_sets[ap.Value];
-            // Debug.Log($"Missing animation Poleaxe");
-         }
+         var prefab = Resources.Load<AnimationManager>("AnimationManager");
+         animation_manager = Instantiate(prefab, transform);
       }
+      animation_manager.Init();
 
-
-      if (!animation_sets.ContainsKey("Crossbow")) {
-         // animation_sets["Crossbow"] = animation_sets["Brute"];
-         // Debug.Log($"Missing animation Crossbow");
-      }
 
       {
          var datas = new[] { MakeHeavyData(), MakeArcherDAta() };
@@ -1118,7 +999,6 @@ public class ExportPipeline : MonoBehaviour {
    public Dictionary<string, BodyModelData> model_mapping_by_body_type;
 
    public Dictionary<string, BodyModelData> model_mappings;
-   public Dictionary<string, AnimationSet> animation_sets;
 
    public RectTransform to_visit;
 
