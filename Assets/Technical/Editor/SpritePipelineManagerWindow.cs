@@ -35,9 +35,12 @@ namespace NightfallEditor {
       void Update() {
       }
 
+      
+
       void OnPlaymodeChange(PlayModeStateChange change) {
          if (change is PlayModeStateChange.EnteredEditMode) {
             full_auto = false;
+            ExportPipeline.export_override = false;
          }
          if (change is PlayModeStateChange.EnteredPlayMode) {
             if ((auto_run || full_auto) && pipeline.isActiveAndEnabled) {
@@ -59,10 +62,14 @@ namespace NightfallEditor {
 
       void OnEnable() {
          EditorApplication.playModeStateChanged += OnPlaymodeChange;
+         
+         ExportPipeline.export_override = full_auto;
       }
 
       void OnDisable() {
          EditorApplication.playModeStateChanged -= OnPlaymodeChange;
+         
+         ExportPipeline.export_override = false;
       }
 
       private void OnGUI() {

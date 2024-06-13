@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2448528820292781565
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7934820102240318301}
+  m_Layer: 20
+  m_Name: Mouth_Target
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7934820102240318301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2448528820292781565}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -0.32, y: -0.161, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9187155679659674201}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1001 &9182566675889976139
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2698,6 +2729,40 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4594686028232978, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7934820102240318301}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1373522185105208, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -3687566257483661008}
   m_SourcePrefab: {fileID: 100100000, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+--- !u!1 &9181685752267660403 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1373522185105208, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+  m_PrefabInstance: {fileID: 9182566675889976139}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-3687566257483661008
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9181685752267660403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96c24ace43690ad42b12b941efec5dd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Mouth: {fileID: 7934820102240318301}
+  Main_Hand: {fileID: 0}
+  Off_Hand_Shield: {fileID: 0}
+  Off_Hand: {fileID: 0}
+  NewHelmet: {fileID: 0}
+  renderers: []
+--- !u!4 &9187155679659674201 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4594686028232978, guid: cdd4e3a2332963c4396732c03fcd7597, type: 3}
+  m_PrefabInstance: {fileID: 9182566675889976139}
+  m_PrefabAsset: {fileID: 0}

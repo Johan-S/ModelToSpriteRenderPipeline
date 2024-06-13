@@ -1,5 +1,36 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1674642794073841492
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1147856878079341146}
+  m_Layer: 20
+  m_Name: Mouth_Target
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1147856878079341146
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674642794073841492}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: -0.32, y: -0.161, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 56707879989532871}
+  m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
 --- !u!1001 &55827049431562193
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -150,6 +181,40 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4259387392929558, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1147856878079341146}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1613684601616846, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: -5723578231408916400}
   m_SourcePrefab: {fileID: 100100000, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+--- !u!1 &55149050341395999 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1613684601616846, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+  m_PrefabInstance: {fileID: 55827049431562193}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &-5723578231408916400
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 55149050341395999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96c24ace43690ad42b12b941efec5dd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Mouth: {fileID: 1147856878079341146}
+  Main_Hand: {fileID: 0}
+  Off_Hand_Shield: {fileID: 0}
+  Off_Hand: {fileID: 0}
+  NewHelmet: {fileID: 0}
+  renderers: []
+--- !u!4 &56707879989532871 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4259387392929558, guid: e6d7ad8d9708f9d41a67500079c1a10f, type: 3}
+  m_PrefabInstance: {fileID: 55827049431562193}
+  m_PrefabAsset: {fileID: 0}

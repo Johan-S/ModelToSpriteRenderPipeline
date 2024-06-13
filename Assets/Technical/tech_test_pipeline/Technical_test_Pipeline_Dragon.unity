@@ -352,9 +352,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cfbdae2efa6ba6439950ed25a837653, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  export_when_done: 1
-  load_unit_on_play: {fileID: 11400000, guid: 85cec2336b623cb47a4f278cb2959c78, type: 2}
-  idle_only: 0
+  export_when_done: 0
+  load_unit_on_play: {fileID: 0}
+  idle_only: 1
   only_atlas: 1
   only_atlas_meta: 0
   write_files: 0
