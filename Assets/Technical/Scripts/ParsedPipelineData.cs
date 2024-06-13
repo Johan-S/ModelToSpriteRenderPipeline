@@ -217,10 +217,7 @@ public class ParsedPipelineData {
                         pu.slot_map[pu.model_body.slot_to_transform["Off_Hand"]] = w2;
                         pu.slot_map[pu.model_body.slot_to_transform["Off_Hand_Shield"]] = sh;
 
-                        if (pu.model_body.name != "Archer") {
-                           pu.slot_map[pu.model_body.slot_to_transform["NewHelmet"]] = helm;
-                        } else {
-                        }
+                        pu.slot_map[pu.model_body.slot_to_transform["NewHelmet"]] = helm;
                      }
                   }
                }
@@ -277,7 +274,8 @@ public class ParsedPipelineData {
       var animation_set = pipeline.animation_manager.GetAnimationSet(atype);
 
       var anims = animation_set.res;
-      if (pipeline.idle_only && !ExportPipeline.export_override) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
+      if (pipeline.idle_only && !ExportPipeline.export_override)
+         anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
 
 
       pu.animations.AddRange(anims);
