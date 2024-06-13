@@ -354,7 +354,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   export_when_done: 0
   load_unit_on_play: {fileID: 0}
-  idle_only: 1
+  idle_only: 0
   only_atlas: 1
   only_atlas_meta: 0
   write_files: 0
@@ -575,7 +575,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   model_offset: {x: 0, y: 0, z: 0}
   animation_t: 0.223
-  animation_clip: {fileID: 7400000, guid: 8c8803c773152304b82b5362d5749e35, type: 3}
+  animation_clip: {fileID: 7400012, guid: 315f056e61e9afc4181529acbb108b7c, type: 3}
   animation_speed: 0
   animation_time: 0.19360001
   animation_frame: 12
