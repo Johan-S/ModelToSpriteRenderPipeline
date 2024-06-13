@@ -20,6 +20,8 @@ public class ExportPipeline : MonoBehaviour {
    public UnitTypeForRender load_unit_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
+   public static bool export_override;
+
    public bool only_atlas;
 
    public bool only_atlas_meta;
@@ -735,6 +737,14 @@ public class ExportPipeline : MonoBehaviour {
       GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ??
                                 Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
+
+      var model_body = model_prefab.GetComponent<ModelBodyRoot>();
+
+
+
+      if (!model_body) {
+         Debug.Log($"missing body root for: {model_prefab.name}");
+      }
 
       sprite_capture_pipeline.model.model_offset = u.model_body.body_category.model_offset;
 

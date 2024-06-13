@@ -277,7 +277,7 @@ public class ParsedPipelineData {
       var animation_set = pipeline.animation_manager.GetAnimationSet(atype);
 
       var anims = animation_set.res;
-      if (pipeline.idle_only) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
+      if (pipeline.idle_only && !ExportPipeline.export_override) anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
 
 
       pu.animations.AddRange(anims);

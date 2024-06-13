@@ -82,6 +82,7 @@ namespace NightfallEditor {
          using (new EditorGUI.DisabledScope(pipeline == null)) {
             if (GUILayout.Button("Run full pipeline Export")) {
                full_auto = true;
+               ExportPipeline.export_override = true;
                if (!EditorApplication.isPlaying) {
                   EditorApplication.EnterPlaymode();
                }
