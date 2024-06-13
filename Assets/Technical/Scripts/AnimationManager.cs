@@ -8,8 +8,6 @@ using TMPro;
 using static ExportPipeline;
 
 public class AnimationManager : MonoBehaviour {
-   
-   
    public AnimationSet GetAnimationSet(string animation_type) {
       if (animation_sets == null) {
          Init();
@@ -17,13 +15,13 @@ public class AnimationManager : MonoBehaviour {
 
       return animation_sets.Get(animation_type);
    }
-   
-   
+
 
    public void Init() {
       if (sheets_pipeline_descriptor && sheets_pipeline_descriptor.animation_arr == null) {
          sheets_pipeline_descriptor.InitData();
       }
+
       animation_sets = GetanimationSets();
       foreach (var ap in SharedUtils.ANIMATION_SUBSTITUTE) {
          if (!animation_sets.ContainsKey(ap.Key)) {
