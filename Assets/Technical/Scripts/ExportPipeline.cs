@@ -703,7 +703,6 @@ public class ExportPipeline : MonoBehaviour {
       if (a.shader != atoon_mat.shader) {
          LogMissing($"Trying to mix toon and normal shaders: {context}, {a.name}");
          return material_map.Get(a.name, atoon_mat);
-         ;
       }
 
       return material_map.Get(a.name, a);

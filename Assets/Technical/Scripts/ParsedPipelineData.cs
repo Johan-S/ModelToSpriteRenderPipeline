@@ -334,7 +334,7 @@ public class ParsedPipelineData {
                rend.material = last_rmat;
             } else {
                last_mat = mat;
-               last_rmat = ApplyMaterialColor(colors, pipeline.MapMat(mat, name));
+               last_rmat = ApplyMaterialColor(colors, pipeline.MapMat(mat, ob_name));
                // Debug.Log($"Applied color to {tr.name}: {name}: {mat.name} {last_rmat.name}: {colors.join(", ")}");
                rend.material = last_rmat;
                rs.used_material = last_rmat;
