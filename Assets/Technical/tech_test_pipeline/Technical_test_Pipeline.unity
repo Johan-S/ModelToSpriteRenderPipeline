@@ -461,7 +461,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   export_when_done: 0
   load_unit_on_play: {fileID: 0}
-  idle_only: 1
+  idle_only: 0
   only_atlas: 1
   only_atlas_meta: 0
   write_files: 0

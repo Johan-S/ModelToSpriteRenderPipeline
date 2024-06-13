@@ -737,11 +737,11 @@ public class ExportPipeline : MonoBehaviour {
                                 Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
 
-      var model_body = model_prefab.GetComponent<ModelBodyRoot>();
+      var model_body_prefab = model_prefab.GetComponent<ModelBodyRoot>();
 
 
 
-      if (!model_body) {
+      if (!model_body_prefab) {
          Debug.Log($"missing body root for: {model_prefab.name}");
       }
 
@@ -762,12 +762,17 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       RunLoadout(model => {
-         var skinned_rend = model.GetComponentsInChildren<SkinnedMeshRenderer>()
-            .Where(x => x.transform.parent == model.transform).ToArray();
+         var model_body = model.GetComponent<ModelBodyRoot>();
+         if (!model_body) {
+            return;
+         }
+         var skinned_rend =model_body.renderers.Where(x => x.transform.parent == model.transform).ToArray();
 
          foreach (var kv in u.skin_map) {
-            var sk = skinned_rend.Find(x => x.name == kv.Key);
+            var sk_raw = skinned_rend.Find(x => x.name == kv.Key);
 
+            var sk = (SkinnedMeshRenderer)sk_raw;
+            
             if (!sk) {
                Debug.Log($"Didn't find slot {kv.Key} on model {model.name}");
                continue;
@@ -785,9 +790,19 @@ public class ExportPipeline : MonoBehaviour {
          }
 
          foreach (var kv in u.slot_map) {
-            var slot = model.GetComponentsInChildren<Transform>().Find(x => x.name == kv.Key);
+            Transform slot = null;
+
+            if (kv.Key is "Main_Hand") {
+               slot = model_body.Main_Hand;
+            } else if (kv.Key is "Off_Hand_Shield") {
+               slot = model_body.Off_Hand_Shield;
+            }else if (kv.Key is "Off_Hand") {
+               slot = model_body.Off_Hand;
+            }else if (kv.Key is "NewHelmet") {
+               slot = model_body.NewHelmet;
+            }
             if (!slot) {
-               Debug.LogError($"Missing slot {kv.Key}");
+               Debug.LogError($"Missing slot {kv.Key} for unit {u.out_name}, model: {u.model_name}");
                continue;
             }
 

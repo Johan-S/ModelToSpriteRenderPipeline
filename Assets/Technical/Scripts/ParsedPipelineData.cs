@@ -213,11 +213,11 @@ public class ParsedPipelineData {
                      var sh = vals["Shield"];
 
                      if (!pu.no_gear) {
-                        pu.slot_map[pu.model_body.slot_to_transform["Main_Hand"]] = w1;
-                        pu.slot_map[pu.model_body.slot_to_transform["Off_Hand"]] = w2;
-                        pu.slot_map[pu.model_body.slot_to_transform["Off_Hand_Shield"]] = sh;
+                        pu.slot_map["Main_Hand"] = w1;
+                        pu.slot_map["Off_Hand"] = w2;
+                        pu.slot_map["Off_Hand_Shield"] = sh;
 
-                        pu.slot_map[pu.model_body.slot_to_transform["NewHelmet"]] = helm;
+                        pu.slot_map["NewHelmet"] = helm;
                      }
                   }
                }
