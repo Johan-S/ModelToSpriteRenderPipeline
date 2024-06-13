@@ -859,13 +859,6 @@ public class ExportPipeline : MonoBehaviour {
       if (log_cache.Add(msg)) Debug.Log(msg);
    }
 
-   // Hello
-   void SetHeavyInfantryNames(int abc) {
-   }
-
-   void SetArcherNames() {
-   }
-
    BodyModelData MakeHeavyData() {
       var res = new BodyModelData();
       res.name = "Heavy Infantry";
