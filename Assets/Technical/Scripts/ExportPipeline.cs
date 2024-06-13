@@ -899,34 +899,6 @@ public class ExportPipeline : MonoBehaviour {
       return res;
    }
 
-   BodyModelData MakeArcherDAta() {
-      var res = new BodyModelData();
-      res.name = "Archer";
-      {
-         string[] skinned_names = {
-            "PT_Male_Armor_03_A_body",
-            "PT_Male_Armor_05_A_boots",
-            "PT_Male_Armor_01_A_cape",
-            "PT_Male_Armor_03_B_gauntlets",
-            "PT_Male_Armor_03_A_legs",
-            "PT_Male_Armor_hair_01",
-            "PT_Male_Armor_head_01",
-         };
-
-         res.skins_to_transform["Body_Armor"] = "PT_Male_Armor_03_A_body";
-         res.skins_to_transform["Leg_Armor"] = "PT_Male_Armor_03_A_legs";
-         res.skins_to_transform["Gauntlets"] = "PT_Male_Armor_03_B_gauntlets";
-         res.skins_to_transform["Boots"] = "PT_Male_Armor_05_A_boots";
-         res.skins_to_transform["Cape"] = "PT_Male_Armor_01_A_cape";
-
-         res.slot_to_transform["Main_Hand"] = "PT_Right_Hand_Weapon_slot";
-         res.slot_to_transform["Off_Hand"] = "PT_Left_Hand_Weapon_slot";
-         res.slot_to_transform["Off_Hand_Shield"] = "Shield";
-         res.slot_to_transform["NewHelmet"] = "HelmetAttachment";
-      }
-      return res;
-   }
-
 
    bool sheets_inited;
 
@@ -947,7 +919,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
       {
-         var datas = new[] { MakeHeavyData(), MakeArcherDAta() };
+         var datas = new[] { MakeHeavyData() };
 
          foreach (var x in datas) {
             model_mappings[x.name] = x;
