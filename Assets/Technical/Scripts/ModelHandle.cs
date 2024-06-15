@@ -6,7 +6,6 @@ using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
 
 [DefaultExecutionOrder(5)]
-[SelectionBase]
 public class ModelHandle : MonoBehaviour {
    public GameObject ResetModel(GameObject model, Action<GameObject> model_action) {
       if (!model) {
