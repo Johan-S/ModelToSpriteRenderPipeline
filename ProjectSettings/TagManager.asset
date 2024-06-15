@@ -13,6 +13,7 @@ TagManager:
   - Climb
   - Stair
   - WallRun
+  - ExportPipeline
   layers:
   - Default
   - TransparentFX

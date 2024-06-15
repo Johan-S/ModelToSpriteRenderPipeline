@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b131216d89a4c5f83eba6c6e5a8b4cf, type: 3}
+  m_Name: Bulky_Plated_Human_sh
+  m_EditorClassIdentifier: 
+  model_root_prefab: {fileID: 428795113345206840, guid: ed71368d8dbdf394694d66db61d9a1bd, type: 3}
+  material: {fileID: 2100000, guid: b6900f80de53c7e42bfb0c35335cf2a4, type: 2}
+  bodyTypeName: Bulky_Plated_Human_sh
+  animationTypeName: Sword&Shield
+  no_gear: 1
+  model_offset: {x: 0, y: 0, z: 0}

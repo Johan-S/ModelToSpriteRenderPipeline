@@ -1,0 +1,54 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+Texture2D<float4> ImageInput;
+Texture2D<float4> ImageMarker;
+
+
+Texture2D<float4> front_depth_texture;
+Texture2D<float4> back_depth_texture;
+
+
+float depth_margin;
+
+
+float DepthFromCol(float4 c) {
+   return c.g + c.b * (1.0 / 256);
+}
+
+float DiffArea(uint2 i, uint2 j) {
+
+   double di_f = DepthFromCol(front_depth_texture[i]);
+   double di_b = DepthFromCol(back_depth_texture[i]);
+
+   double dj_f = DepthFromCol(front_depth_texture[j]);
+   double dj_b = DepthFromCol(back_depth_texture[j]);
+
+
+   float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin) * (ImageMarker[i] == ImageMarker[j]);
+
+   return 1 - res;
+}
+
+[numthreads(8,8,1)]
+void CSMain(uint3 id : SV_DispatchThreadID) {
+   uint2 xy = id.xy;
+
+
+   uint2 d1 = uint2(id.x > 0, 0);
+   uint2 d2 = uint2(0, id.y > 0);
+
+
+   float res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
+
+
+   // TODO: insert actual code here!
+
+   float4 px = ImageInput[id.xy];
+
+   Result[id.xy] = float4(0, 0, 0, 1) * res + px * !res;
+}

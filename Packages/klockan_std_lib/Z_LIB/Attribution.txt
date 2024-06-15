@@ -1,5 +1,0 @@
-Sound effects obtained from https://www.zapsplat.com
-
-Hex Tiles from https://cuddlyclover.itch.io/fantasy-hex-tiles
-
-Monster sprites from https://opengameart.org/content/dungeon-crawl-32x32-tiles
