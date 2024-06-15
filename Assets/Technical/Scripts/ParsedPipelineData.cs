@@ -23,7 +23,7 @@ public class ParsedPipelineData {
    readonly ExportPipeline pipeline;
 
 
-   public IList<IUnitTypeForRender> extra_units => pipeline.override_units;
+   public IList<IUnitTypeForRender> extra_units => pipeline.extra_units_to_render;
 
 
    public ParsedPipelineData(ExportPipelineSheets sheets_pipeline_descriptor, ExportPipeline pipeline) {

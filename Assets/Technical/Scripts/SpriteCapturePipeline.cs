@@ -100,6 +100,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public void InitTextures() {
       if (result_rexture) return;
+      Debug.Log($"Init texture with size {size}");
       result_rexture = MakeTex();
       basic_shading_texture = MakeTex();
       marker_texture = MakeTex();

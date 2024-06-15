@@ -7,12 +7,28 @@ using Shared;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 [DefaultExecutionOrder(20)]
 public class ExportPipeline : MonoBehaviour {
    void OnValidate() {
       tag = "ExportPipeline";
    }
+   
+
+   [Header("Export Pipeline Description")]
+   public string export_sheet_name;
+   public ExportPipelineSheets sheets_pipeline_descriptor;
+   
+   [FormerlySerializedAs("override_units")] public UnitTypeForRender[] extra_units_to_render;
+   public int export_size = 64;
+
+   [Header("Exported Atlas Name")]
+   
+
+   public string prepend_to_sprite_name;
+   public string append_to_atlas_name;
+   
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
@@ -28,22 +44,16 @@ public class ExportPipeline : MonoBehaviour {
 
    public bool write_files = true;
 
-   public string prepend_to_sprite_name;
-   public string append_to_atlas_name;
+   public int capture_resulitoon_multiplier = 2;
 
-   [Header("Export Pipeline Description")]
-   public ExportPipelineSheets sheets_pipeline_descriptor;
-
+   [Header("Not very useful now")]
    public ModelPartsBundle parts_bundle;
-   public int export_size = 64;
 
    public int atlas_sprites_per_row = 5;
    public string export_to_folder = "Gen";
 
 
    [Header("Unit Filter")]
-   
-   public UnitTypeForRender[] override_units;
 
    [Header("Bindings")]
    public AnimationManager animation_manager;
@@ -55,6 +65,11 @@ public class ExportPipeline : MonoBehaviour {
    public TMP_Text progress_text;
 
    public string defaultRenderModelName = "Heavy Infantry";
+
+   void OnEnable() {
+      
+      sprite_capture_pipeline.size = export_size * capture_resulitoon_multiplier;
+   }
 
    void Start() {
       if (progress_text) {
@@ -1066,7 +1081,7 @@ public class ExportPipeline : MonoBehaviour {
    public void WriteMetaFile(string to_folder) {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      var mf = $"{to_folder}/{sheets_pipeline_descriptor.output_name}{append_to_atlas_name}.spritemeta";
+      var mf = $"{to_folder}/{export_sheet_name}{append_to_atlas_name}.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
 
       // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
@@ -1074,7 +1089,7 @@ public class ExportPipeline : MonoBehaviour {
 
    public void WriteTexturefile(string to_folder) {
       var rb = export_tex_tot.EncodeToPNG();
-      File.WriteAllBytes($"{to_folder}/{sheets_pipeline_descriptor.output_name}{append_to_atlas_name}.png", rb);
+      File.WriteAllBytes($"{to_folder}/{export_sheet_name}{append_to_atlas_name}.png", rb);
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
    }
 

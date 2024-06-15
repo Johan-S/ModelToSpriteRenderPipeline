@@ -3,11 +3,31 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using MalbersAnimations;
 using Shared;
 using TMPro;
 using static ExportPipeline;
 
+[DefaultExecutionOrder(-150)]
 public class AnimationManager : MonoBehaviour {
+   static AnimationManager instance;
+
+
+   [RuntimeInitializeOnLoadMethod]
+   static void ClearInstance() {
+      instance = null;
+   }
+
+   void OnEnable() {
+      if (instance) {
+         Debug.LogError($"Duplicate {this.GetType().Name}!");
+         Destroy(gameObject);
+         return;
+      }
+
+      instance = this;
+   }
+
    public AnimationSet GetAnimationSet(string animation_type) {
       if (animation_sets == null) {
          Init();
@@ -162,16 +182,45 @@ public class AnimationManager : MonoBehaviour {
    public static IEnumerable<Shared.AnimationParsed> GetDirectAnimationsParsed() {
       var allclips = Resources.LoadAll<AnimationBundle>("");
 
-      Dictionary<string, AnimationClip> clips = allclips.FlatMap(x => x.animation_clips).ToDictionary(x => x.name);
+      var clips = allclips.FlatMap(x => x.animation_clips).ToLookupListObj();
 
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("");
 
       var groups = anim_objs.GroupBy(x => SharedUtils.NormalizeAnimationName(x.animation_type));
 
+      bool TryFixMissingMs(AnimationTypeObject data, AnimationParsed ap) {
+         var clip = data.clip_ref;
+         if (!clip) {
+            clip = clips[data.clip_name];
+         }
+         
+         
+         if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty() && clip) {
+            var len = clip.length;
+
+            var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
+
+            if (frames < 2) frames = 2;
+
+            ap.time_ms = new int[frames - 1];
+            ap.capture_frame = new int[frames - 1];
+
+            for (int i = 1; i < frames; i++) {
+               float time = i * len / (frames - 1);
+               float dt = time - (i - 1) * len / (frames - 1);
+
+               ap.time_ms[i - 1] = Mathf.RoundToInt(dt * 1000);
+               ap.capture_frame[i - 1] = Mathf.FloorToInt(time * 60);
+            }
+
+            return true;
+         }
+
+         return false;
+      }
+
       foreach (var g in groups) {
-         foreach (var data in g) {
-            AnimationClip clip =
-               data.clip_ref ? data.clip_ref : clips.Get(data.clip);
+         foreach (AnimationTypeObject data in g) {
             var ap = new Shared.AnimationParsed();
 
             ap.clip = data.clip_name;
@@ -180,29 +229,17 @@ public class AnimationManager : MonoBehaviour {
             ap.auto_frames_per_s = data.auto_frames_per_s;
 
 
-            if (ap.time_ms.IsEmpty() && data.auto_frames_per_s > 0 && clip) {
-               if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
-                  var len = clip.length;
-
-                  var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
-
-                  if (frames < 2) frames = 2;
-
-                  ap.time_ms = new int[frames - 1];
-                  ap.capture_frame = new int[frames - 1];
-
-                  for (int i = 1; i < frames; i++) {
-                     float time = i * len / (frames - 1);
-                     float dt = time - (i - 1) * len / (frames - 1);
-
-                     ap.time_ms[i - 1] = Mathf.RoundToInt(dt * 1000);
-                     ap.capture_frame[i - 1] = Mathf.FloorToInt(time * 60);
-                  }
+            if (data.time_ms.IsEmpty()) {
+               if (!TryFixMissingMs(data, ap)) {
+                  Debug.Log($"Missing animation ms for: {data.name}, clips refered: {data.clip_name}!");
+                  var clio = clips[data.clip_name];
+                  Debug.Log($"Missing animation ms for: {data.name}, clips refered: {data.clip_name}! but found: {clio}");
                }
             } else {
                ap.time_ms = data.time_ms;
                ap.capture_frame = data.capture_frame;
             }
+
 
             yield return ap;
          }

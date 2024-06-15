@@ -76,7 +76,9 @@ namespace NightfallEditor {
          using (new DisabledScope()) {
             var o = GameObject.FindWithTag("ExportPipeline");
 
-            if (o) pipeline = o.GetComponent<ExportPipeline>();
+            if (o) {
+               pipeline = o.GetComponent<ExportPipeline>();
+            }
 
 
             pipeline = (ExportPipeline)EditorGUILayout.ObjectField("Pipeline", pipeline, typeof(ExportPipeline));
