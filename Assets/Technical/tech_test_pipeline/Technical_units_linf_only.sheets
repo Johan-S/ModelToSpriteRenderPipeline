@@ -1,0 +1,5 @@
+Unit_Number	Unit_Name	Faction	AnimationType	Template	Gold_Cost	Training_Cost	Resources_Cost	Population_Cost	Type	Weapon_Primary	Weapon_Secondary	Quiver Slot	Innate_Primary	Innate_Secondary	Shield	Helmet	Armor	Mount	Anatomy	Size	HP	Strength	M._Affinity	Resistence_(Expand_Later)	Nat_Protection	Attack	Defense	Precision	Combat_Speed	Enc	Morale	Cur_Age	Max_Age	Combat Speed	Abilities	Magic	Leadership	Theme Color	Weapon Main_Hand	Weapon Off_Hand	Body_Armor	Gauntlets	Helmet	Shield
+
+
+// Light Infantry (Pike)
+48	Light Infantry		Spearman	Human-Professional	10	20	23	10	Unit	Iron_Pike						Bronze_Half_Helm	Bronze_Chainmail		Humanoid	2	10	10	10	0	0	11	11	11	10	2	11	35	60						PT_Medieval_Pike_04_b		PT_Male_Armor_Ex1_body_12	PT_Male_Armor_Ex1_gauntlets_13		

@@ -234,6 +234,8 @@ public class ParsedPipelineData {
 
             var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
 
+            if (u.ShotTypes.NotEmpty()) pu.shot_types = u.ShotTypes;
+
             if (u.MaterialOverride) {
                pu.material = u.MaterialOverride;
             }
@@ -242,7 +244,7 @@ public class ParsedPipelineData {
          }
       }
 
-      output_n = units.Sum(x => x.animations.Count);
+      output_n = units.Sum(x => x.animations.Count * x.shot_types.Length);
    }
 
    ParsedUnit CreateParsedUnit(string an_type, string name, BodyModelData model_body) {
@@ -261,6 +263,9 @@ public class ParsedPipelineData {
 
       pu.model_body = model_body;
       pu.model_name = model_body.name;
+
+      pu.shot_types = model_body.shot_types;
+      if (pu.shot_types.IsEmpty()) pu.shot_types = pipeline.default_shot_types.Copy();
 
       // Debug.Log($"Transo name {transo.name}");
 
@@ -371,6 +376,8 @@ public class ParsedUnit {
 
    public Color? theme_color;
 
+   public SpriteRenderDetails[] shot_types;
+
    public GeneratedSpritesContainer.UnitCats result;
 }
 
@@ -395,6 +402,8 @@ public class BodyModelData {
    public Material material;
    public bool mirror_render;
    public ModelBodyCategory body_category;
+
+   public SpriteRenderDetails[] shot_types;
 }
 
 public class AnimationWrap {

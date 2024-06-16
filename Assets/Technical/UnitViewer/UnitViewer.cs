@@ -32,7 +32,7 @@ public class UnitViewer : MonoBehaviour {
 
       public string corner_msg;
       public Sprite sprite;
-      public Shared.UnitAnimationSprites animation_sprites;
+      public Shared.UnitAnimationSprites[] animation_sprites;
 
       public AnnotatedUI.ColoredSprite sized_sprite => new AnnotatedUI.ColoredSpriteImpl {
          sprite = sprite,

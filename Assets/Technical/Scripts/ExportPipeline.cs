@@ -8,27 +8,28 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using MetaRow = GeneratedSpritesContainer.MetaRow;
 
 [DefaultExecutionOrder(20)]
 public class ExportPipeline : MonoBehaviour {
    void OnValidate() {
       tag = "ExportPipeline";
    }
-   
+
 
    [Header("Export Pipeline Description")]
    public string export_sheet_name;
+
    public ExportPipelineSheets sheets_pipeline_descriptor;
-   
-   [FormerlySerializedAs("override_units")] public UnitTypeForRender[] extra_units_to_render;
+
+   [FormerlySerializedAs("override_units")]
+   public UnitTypeForRender[] extra_units_to_render;
+
    public int export_size = 64;
 
-   [Header("Exported Atlas Name")]
-   
-
-   public string prepend_to_sprite_name;
+   [Header("Exported Atlas Name")] public string prepend_to_sprite_name;
    public string append_to_atlas_name;
-   
+
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
@@ -46,16 +47,13 @@ public class ExportPipeline : MonoBehaviour {
 
    public int capture_resulitoon_multiplier = 2;
 
-   [Header("Not very useful now")]
-   public ModelPartsBundle parts_bundle;
+   [Header("Not very useful now")] public ModelPartsBundle parts_bundle;
 
    public int atlas_sprites_per_row = 5;
    public string export_to_folder = "Gen";
 
 
-   [Header("Unit Filter")]
-
-   [Header("Bindings")]
+   [Header("Unit Filter")] [Header("Bindings")]
    public AnimationManager animation_manager;
 
    public GameObject model;
@@ -66,8 +64,9 @@ public class ExportPipeline : MonoBehaviour {
 
    public string defaultRenderModelName = "Heavy Infantry";
 
+   public SpriteRenderDetails[] default_shot_types;
+
    void OnEnable() {
-      
       sprite_capture_pipeline.size = export_size * capture_resulitoon_multiplier;
    }
 
@@ -163,7 +162,7 @@ public class ExportPipeline : MonoBehaviour {
 
    TimeBenchmark time_benchmark;
 
-   List<(string FileOutput, RectInt rect, Vector2 ground_center_pivot)> sprite_gen_meta = new();
+   List<MetaRow> sprite_gen_meta = new();
 
 
    int _ResultHolderTicker;
@@ -176,11 +175,11 @@ public class ExportPipeline : MonoBehaviour {
       return a;
    }
 
-   string SpriteGenMetaRow((string FileOutput, RectInt rect, Vector2 ground_center_pivot) d) {
+   string SpriteGenMetaRow(MetaRow d) {
       var r = d.rect;
-      var p = d.ground_center_pivot;
+      var p = d.pivot;
 
-      return $"{prepend_to_sprite_name}{d.FileOutput}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
+      return $"{prepend_to_sprite_name}{d.file_name}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
    public UnitViewer unit_viewer_prefab;
@@ -235,7 +234,7 @@ public class ExportPipeline : MonoBehaviour {
    List<Shared.AnimationParsed> animations_parsed {
       get {
          if (_direct_ans.IsEmpty()) {
-            _direct_ans = AnimationManager.GetDirectAnimationsParsed().ToList();
+            _direct_ans = animation_manager.GetDirectAnimationsParsed().ToList();
 
             _direct_ans.AddRange(sheets_pipeline_descriptor.animation_arr.Flatten());
          }
@@ -253,7 +252,7 @@ public class ExportPipeline : MonoBehaviour {
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
          Sprites.GetAnimationSprites(pu.out_name, animations_parsed, pu.animation_type,
-            cats);
+            cats).ToArray();
 
       return r;
    }
@@ -391,7 +390,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var rect = new RectInt(pos.x * export_tex.width, pos.y * export_tex.height, export_tex.width, export_tex.height);
 
-      sprite_gen_meta.Add((FileOutput, rect, GeneratedSpritesContainer.DEFAULT_PIVOT));
+      sprite_gen_meta.Add(new(FileOutput, rect, GeneratedSpritesContainer.DEFAULT_PIVOT));
 
       return rect;
    }
@@ -436,22 +435,25 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
-   static string GetFileOutput(string out_name, string animation_category, int frame) {
-      return out_name + "." + animation_category + "." + frame;
-   }
 
-   static string GetFileOutput(ParsedUnit pu, string animation_category, int frame) {
-      return GetFileOutput(pu.out_name, animation_category, frame);
+   static string GetFileOutput(ParsedUnit pu, string animation_category, int frame, SpriteRenderDetails shot_type) {
+      string GetFileOutput(string out_name, string animation_category, SpriteRenderDetails shot_type) {
+         return out_name + "." + animation_category + "." + frame + "." + shot_type.ToFileNameExt().join(".");
+      }
+
+      return GetFileOutput(pu.out_name, animation_category, shot_type);
    }
 
    static IEnumerable<string> GetFileOutputs(ParsedUnit pu) {
-      foreach (var an in pu.animations) {
-         yield return GetFileOutput(pu, an.category, an.frame);
+      foreach (var shot_type in pu.shot_types) {
+         foreach (var an in pu.animations) {
+            yield return GetFileOutput(pu, an.category, an.frame, shot_type);
+         }
       }
    }
 
 
-   void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat) {
+   void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat, SpriteRenderDetails shot_type) {
       var model = sprite_capture_pipeline.model;
       bool mirror = pu.model_body.mirror_render;
       if (an.animation_type_object && an.animation_type_object.mirror_render) mirror = !mirror;
@@ -467,7 +469,7 @@ public class ExportPipeline : MonoBehaviour {
 
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
-      var FileOutput = GetFileOutput(pu.out_name, an.category, an.frame);
+      var FileOutput = GetFileOutput(pu, an.category, an.frame, shot_type);
 
       foreach (var x in GetChildRenders()) {
       }
@@ -484,13 +486,20 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
+      /*
+       * 
       if (an.animation_type_object) {
          model.transform.localPosition += an.animation_type_object.model_root_pos;
          sprite_capture_pipeline.model.render_obj.transform.localRotation = an.animation_type_object.model_root_rot;
       } else {
          sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
       }
+       */
 
+      {
+         sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.Euler(0, mirror ? -shot_type.yaw_angle : shot_type.yaw_angle, 0);
+      }
+      
       sprite_capture_pipeline.relative_model_height_for_shading = 1;
 
       if (pu.model_body.body_category) {
@@ -508,13 +517,13 @@ public class ExportPipeline : MonoBehaviour {
 
       if (an.animation_type_object != null) {
          var cid = output_i - 1;
-         (string FileOutput, RectInt rect, Vector2 ground_center_pivot) o = sprite_gen_meta[cid];
+         var o = sprite_gen_meta[cid];
          Vector3 model_off = an.animation_type_object.model_offsetmodel_offset;
          Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
 
          if (model_off != default) {
-            var sprite_pivot = GetAdjustedSpritePivot(o.ground_center_pivot, model_off, camera_d);
-            sprite_gen_meta[cid] = (o.FileOutput, o.rect, sprite_pivot);
+            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, model_off, camera_d);
+            sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
          }
       }
 
@@ -593,21 +602,22 @@ public class ExportPipeline : MonoBehaviour {
 
       var model = sprite_capture_pipeline.model;
 
+      foreach (var shot_type in pu.shot_types) {
+         foreach (AnimationWrap an in pu.animations) {
+            var mb = sprite_capture_pipeline.GetMoveBackFunk();
+            RunOutputImpl(pu, an, res_mat, shot_type);
 
-      foreach (AnimationWrap an in pu.animations) {
-         var mb = sprite_capture_pipeline.GetMoveBackFunk();
-         RunOutputImpl(pu, an, res_mat);
-
-         mb();
+            mb();
 
 
-         if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
-             Time.realtimeSinceStartupAsDouble) {
-            continue;
+            if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
+                Time.realtimeSinceStartupAsDouble) {
+               continue;
+            }
+
+            yield return null;
+            rt = Time.realtimeSinceStartupAsDouble;
          }
-
-         yield return null;
-         rt = Time.realtimeSinceStartupAsDouble;
       }
 
       {
@@ -755,7 +765,6 @@ public class ExportPipeline : MonoBehaviour {
       var model_body_prefab = model_prefab.GetComponent<ModelBodyRoot>();
 
 
-
       if (!model_body_prefab) {
          Debug.Log($"missing body root for: {model_prefab.name}");
       }
@@ -781,13 +790,14 @@ public class ExportPipeline : MonoBehaviour {
          if (!model_body) {
             return;
          }
-         var skinned_rend =model_body.renderers.Where(x => x.transform.parent == model.transform).ToArray();
+
+         var skinned_rend = model_body.renderers.Where(x => x.transform.parent == model.transform).ToArray();
 
          foreach (var kv in u.skin_map) {
             var sk_raw = skinned_rend.Find(x => x.name == kv.Key);
 
             var sk = (SkinnedMeshRenderer)sk_raw;
-            
+
             if (!sk) {
                Debug.Log($"Didn't find slot {kv.Key} on model {model.name}");
                continue;
@@ -811,11 +821,12 @@ public class ExportPipeline : MonoBehaviour {
                slot = model_body.Main_Hand;
             } else if (kv.Key is "Off_Hand_Shield") {
                slot = model_body.Off_Hand_Shield;
-            }else if (kv.Key is "Off_Hand") {
+            } else if (kv.Key is "Off_Hand") {
                slot = model_body.Off_Hand;
-            }else if (kv.Key is "NewHelmet") {
+            } else if (kv.Key is "NewHelmet") {
                slot = model_body.NewHelmet;
             }
+
             if (!slot) {
                Debug.LogError($"Missing slot {kv.Key} for unit {u.out_name}, model: {u.model_name}");
                continue;
@@ -940,10 +951,10 @@ public class ExportPipeline : MonoBehaviour {
       model_mappings = new();
 
       if (!animation_manager) {
-
          var prefab = Resources.Load<AnimationManager>("AnimationManager");
          animation_manager = Instantiate(prefab, transform);
       }
+
       animation_manager.Init();
 
 
@@ -1096,7 +1107,7 @@ public class ExportPipeline : MonoBehaviour {
    public void WriteFiles(string to_folder) {
       if (!only_atlas_meta) WriteTexturefile(to_folder);
       WriteMetaFile(to_folder);
-      
+
       omExportDone?.Invoke();
    }
 

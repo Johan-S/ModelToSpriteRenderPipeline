@@ -179,10 +179,9 @@ public class AnimationManager : MonoBehaviour {
       return res;
    }
 
-   public static IEnumerable<Shared.AnimationParsed> GetDirectAnimationsParsed() {
-      var allclips = Resources.LoadAll<AnimationBundle>("");
+   public IEnumerable<Shared.AnimationParsed> GetDirectAnimationsParsed() {
 
-      var clips = allclips.FlatMap(x => x.animation_clips).ToLookupListObj();
+      var clips = animation_bundles.FlatMap(x => x.animation_clips).ToLookupListObj();
 
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("");
 

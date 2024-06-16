@@ -338,7 +338,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6311687501909444526, guid: 68984592b13d5d640aab7ccaa42d4c8b, type: 3}
       propertyPath: prepend_to_sprite_name
-      value: tech_8_
+      value: tech_
       objectReference: {fileID: 0}
     - target: {fileID: 6311687501909444526, guid: 68984592b13d5d640aab7ccaa42d4c8b, type: 3}
       propertyPath: extra_units_to_render.Array.size
@@ -348,10 +348,6 @@ PrefabInstance:
       propertyPath: extra_units_to_render.Array.data[0]
       value: 
       objectReference: {fileID: 11400000, guid: 2f3bb12af21c8084088bb43f4fbc250e, type: 2}
-    - target: {fileID: 6311687501909444526, guid: 68984592b13d5d640aab7ccaa42d4c8b, type: 3}
-      propertyPath: default_shot_type.sprite_pixel_scale
-      value: 4
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

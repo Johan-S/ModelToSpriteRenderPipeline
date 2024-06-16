@@ -2978,6 +2978,30 @@ PrefabInstance:
       propertyPath: export_sheet_name
       value: dragon_sprites
       objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_type.yaw_angle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_type.pitch_angle
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_type.sprite_pixel_scale
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_types.Array.data[0].yaw_angle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_types.Array.data[0].pitch_angle
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: default_shot_types.Array.data[0].sprite_pixel_scale
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 4119609129880694070, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
       propertyPath: m_Name
       value: _PipelineFull_Dragon Variant

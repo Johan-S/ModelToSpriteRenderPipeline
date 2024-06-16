@@ -23,5 +23,6 @@ public interface IUnitTypeForRender {
       get;
    }
 
+   public SpriteRenderDetails[] ShotTypes { get; }
    
 }
