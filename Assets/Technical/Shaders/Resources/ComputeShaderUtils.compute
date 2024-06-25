@@ -27,7 +27,7 @@ float4 SumColors(Texture2D<float4> tex, int2 xy, int ns) {
       for (int j = 0; j < ns; j++) {
          float4 x = tex[xy + int2(i, j)];
          res += x * x.a;
-         a += x.a;
+         a += x.a > 0;
       }
    }
    if (a > 0) res /= a;
