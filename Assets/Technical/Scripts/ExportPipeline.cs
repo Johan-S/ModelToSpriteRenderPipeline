@@ -118,8 +118,8 @@ public class ExportPipeline : MonoBehaviour {
       IEnumerator SubPl() {
          yield return
             StartCoroutine(RunPipeline());
-         
-         
+
+
          sprite_capture_pipeline.exporting = false;
       }
 
