@@ -71,6 +71,7 @@ void ShadeBottom(uint3 id : SV_DispatchThreadID) {
    float a = 1;
    if (sh > 0) a -= sh / (shade_bottom_hs - shade_bottom_he);
 
+   a = clamp(a, 0, 1);
    if (c.a != 0) c = lerp(c, 0, a * shade_bottom_mag);
 
    Result[id.xy] = c;
