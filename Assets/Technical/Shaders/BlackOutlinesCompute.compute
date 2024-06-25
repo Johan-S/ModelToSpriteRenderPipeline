@@ -13,8 +13,15 @@ Texture2D<float4> ImageMarker;
 Texture2D<float4> front_depth_texture;
 Texture2D<float4> back_depth_texture;
 
+int res_width;
+
+int res_height;
+
 
 float depth_margin;
+
+float4 inner_outlines_color = float4(0, 0, 0, 1);
+float4 outlines_color = float4(0, 0, 0, 1);
 
 
 float DepthFromCol(float4 c) {
@@ -35,23 +42,49 @@ float DiffArea(uint2 i, uint2 j) {
    return 1 - res;
 }
 
+float IsOuter(uint2 i) {
+
+   return front_depth_texture[i].xyz == float3(1, 1, 1);
+
+}
+
+float4 CalcBlackOutline(int2 xy) {
+
+
+   uint2 d1 = uint2(xy.x > 0 && xy.x +1 < res_width, 0);
+   uint2 d2 = uint2(0, xy.y > 0 && xy.y +1 < res_height);
+   float res;
+   float4 color;
+
+   if (IsOuter(xy)) {
+
+
+      float same = IsOuter(xy - d1) * IsOuter(xy + d1) * IsOuter(xy - d2) * IsOuter(xy + d2);
+
+      res = !same;
+
+      return outlines_color * res;
+   } else if (!IsOuter(xy - d1) || !IsOuter(xy - d2)) {
+
+      res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
+      return inner_outlines_color * res;
+   }
+   return 0;
+}
+
 [numthreads(8,8,1)]
 void CSMain(uint3 id : SV_DispatchThreadID) {
-   uint2 xy = id.xy;
-
-
-   uint2 d1 = uint2(id.x > 0, 0);
-   uint2 d2 = uint2(0, id.y > 0);
-
-
-   float res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
-
 
    // TODO: insert actual code here!
+   float4 res = CalcBlackOutline(id.xy);
 
    float4 px = ImageInput[id.xy];
 
-   Result[id.xy] = float4(0, 0, 0, 1) * res + px * !res;
+
+   px.xyz = res * (res.a) + px * (1 - res.a);
+   px.a = max(res.a, px.a);
+
+   Result[id.xy] = px;
 }
 
 float shade_bottom_mag;

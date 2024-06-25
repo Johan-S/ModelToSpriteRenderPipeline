@@ -203,6 +203,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetFloat("shade_bottom_mag", shade_bottom_mag);
       shader.SetFloat("shade_bottom_hs", hs);
       shader.SetFloat("shade_bottom_he", he);
+      shader.SetInt("res_width", dest.width);
+      shader.SetInt("res_height", dest.height);
       
       shader.Dispatch(kernelHandle, dest.width / 8, dest.height / 8, 1);
    }
@@ -246,6 +248,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
       float depth_margin = dm / depth_to_z;
 
       shader.SetFloat("depth_margin", depth_margin);
+      shader.SetInt("res_width", result.width);
+      shader.SetInt("res_height", result.height);
+      shader.SetVector("outlines_color", black_outline_color);
+      shader.SetVector("inner_outlines_color", black_outline_color_internal);
 
       shader.SetTexture(kernelHandle, "Result", render_result);
       shader.SetTexture(kernelHandle, "ImageInput", partial_render_result);
