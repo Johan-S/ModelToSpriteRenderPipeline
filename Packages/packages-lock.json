@@ -186,7 +186,7 @@
       "dependencies": {}
     },
     "klockan_std_lib": {
-      "version": "file:../../NightfallRogue/Packages/klockan_std_lib",
+      "version": "file:../../KlockanStdLibs/UnityStd/Packages/klockan_std_lib",
       "depth": 0,
       "source": "local",
       "dependencies": {}

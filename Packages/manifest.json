@@ -14,7 +14,7 @@
     "com.unity.timeline": "1.7.5",
     "com.unity.ugui": "1.0.0",
     "com.unity.xr.legacyinputhelpers": "2.1.10",
-    "klockan_std_lib": "file:../../NightfallRogue/Packages/klockan_std_lib",
+    "klockan_std_lib": "file:../../KlockanStdLibs/UnityStd/Packages/klockan_std_lib",
     "nightfall_shared_lib": "file:../../NightfallRogue/Packages/NightfallShared",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
