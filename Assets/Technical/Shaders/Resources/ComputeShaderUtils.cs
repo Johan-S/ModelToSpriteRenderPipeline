@@ -45,7 +45,7 @@ public static class ComputeShaderUtils {
 
    public static void Clear(this RenderTexture tex, Color color) {
       RenderTexture.active = tex;
-      GL.Clear (true, true, Color.black);
+      GL.Clear (true, true, color);
       RenderTexture.active = null;
    }
 
