@@ -493,6 +493,8 @@ public class ExportPipeline : MonoBehaviour {
          model.transform.localRotation = Quaternion.Euler(mrot);
       }
 
+      sprite_capture_pipeline.mirror_output = mirror;
+
       if (an.animation_type_object != null && an.animation_type_object.looping_root) {
          sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
       }
