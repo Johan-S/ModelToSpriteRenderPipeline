@@ -269,26 +269,37 @@ public class SpriteCapturePipeline : MonoBehaviour {
          double dj_b = depth_b[j];
 
 
+         if (di_f > dj_f) {
+            return false;
+         } else {
+            
+            if (di_f > dj_b + depth_margin) {
+               // Only check one way.
+               return false;
+            }
+            if (dj_f > di_b + depth_margin) {
+               return true;
+            }
+         }
 
-         if (di_f > dj_b +depth_margin) {
-            // Debug.Log($"{di_f}, {di_b}");
-            return true;
-         }
-         if (dj_f > di_b + depth_margin) {
-            return true;
-         }
 
          return false;
       }
 
       for (int i = 1; i + 1 < px.Length; i++) {
          if (DiffArea(i, i - 1)) {
+            px[i] = Color.black;
+         }
+         if (DiffArea(i - 1, i)) {
             px[i - 1] = Color.black;
          }
       }
 
       for (int i = t.width; i + t.width < px.Length; i++) {
          if (DiffArea(i, i - t.width)) {
+            px[i] = Color.black;
+         }
+         if (DiffArea(i - t.width, i)) {
             px[i - t.width] = Color.black;
          }
       }

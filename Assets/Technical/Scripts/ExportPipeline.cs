@@ -64,9 +64,15 @@ public class ExportPipeline : MonoBehaviour {
 
    public string defaultRenderModelName = "Heavy Infantry";
 
-   public SpriteRenderDetails[] default_shot_types;
+   public SpriteRenderDetails[] default_shot_types = new SpriteRenderDetails[] {
+      new SpriteRenderDetails() {
+         pitch_angle = 10,
+         sprite_pixel_scale = 2,
+         yaw_angle = 30,
+      }
+   };
 
-   void OnEnable() {
+void OnEnable() {
       sprite_capture_pipeline.size = export_size * capture_resulitoon_multiplier;
    }
 
