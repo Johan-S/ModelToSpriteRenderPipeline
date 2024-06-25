@@ -162,9 +162,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       AddBlackOutline(partial_render_result, marker_texture);
 
-
       ComputeShaderUtils.CopyAndDownsampleTo(render_result, downsampled_render_result, mirror: mirror_output);
-
       time_benchmark?.Lap("Black Outline");
       foreach (var om in other_models) {
          om.SetActive(true);

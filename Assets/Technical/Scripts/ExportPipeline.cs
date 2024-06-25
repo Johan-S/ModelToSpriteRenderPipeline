@@ -19,7 +19,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    [Header("Export Pipeline Description")]
-   public string export_sheet_name;
+   public string export_sheet_name = "atlas";
 
    public ExportPipelineSheets sheets_pipeline_descriptor;
 
@@ -565,7 +565,10 @@ public class ExportPipeline : MonoBehaviour {
       if (!only_atlas) {
          export_tex.ReadPixelsFrom(sprite_capture_pipeline.downsampled_render_result);
          var data = export_tex.EncodeToPNG();
-         if (write_files) File.WriteAllBytes($"{folder}/{FileOutput}.png", data);
+         if (write_files) {
+            Std.EnsureLocalDir($"{folder}/{export_sheet_name}");
+            File.WriteAllBytes($"{folder}/{export_sheet_name}/{FileOutput}.png", data);
+         }
       }
 
       foreach (var x in model.GetComponentsInChildren<Renderer>()) {
@@ -1054,6 +1057,10 @@ public class ExportPipeline : MonoBehaviour {
 
 
    IEnumerator RunPipeline() {
+      if (write_files) {
+         
+         Std.EnsureLocalDir(export_to_folder);
+      }
       time_benchmark = new();
 
 
