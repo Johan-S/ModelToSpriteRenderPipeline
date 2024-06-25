@@ -22,15 +22,13 @@ void Clear(uint3 id : SV_DispatchThreadID) {
 
 float4 SumColors(Texture2D<float4> tex, int2 xy, int ns) {
    float4 res = 0;
-   float a = 0;
+   float a = 1.0 / (ns * ns);
    for (int i = 0; i < ns; i++) {
       for (int j = 0; j < ns; j++) {
          float4 x = tex[xy + int2(i, j)];
-         res += x * x.a;
-         a += x.a > 0;
+         res += x * a * (x.a > 0);
       }
    }
-   if (a > 0) res /= a;
 
    return res;
 }
