@@ -17,18 +17,18 @@ MonoBehaviour:
   animation_type: Wolf
   material: {fileID: 0}
   shot_types:
-  - pitch_angle: 0
+  - pitch_angle: 30
     yaw_angle: 10
     sprite_pixel_scale: 4
-  - pitch_angle: 0
+  - pitch_angle: 30
     yaw_angle: 45
     sprite_pixel_scale: 4
-  - pitch_angle: 0
+  - pitch_angle: 30
     yaw_angle: 90
     sprite_pixel_scale: 4
-  - pitch_angle: 0
+  - pitch_angle: 30
     yaw_angle: 270
     sprite_pixel_scale: 4
-  - pitch_angle: 0
+  - pitch_angle: 30
     yaw_angle: 315
     sprite_pixel_scale: 4
