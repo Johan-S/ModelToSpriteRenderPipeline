@@ -216,6 +216,14 @@ PrefabInstance:
       propertyPath: sheets_pipeline_descriptor
       value: 
       objectReference: {fileID: 11400000, guid: e8e80e363f02bb140851a617d6342781, type: 2}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: extra_units_to_render.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4086236554120409726, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
+      propertyPath: extra_units_to_render.Array.data[0]
+      value: 
+      objectReference: {fileID: 11400000, guid: 8943cd5424807e646b6083e5b8e28179, type: 2}
     - target: {fileID: 4119609129880694070, guid: d97f3436f61949d40b7ba79dcac53aa1, type: 3}
       propertyPath: m_Name
       value: _PipelineFull

@@ -182,7 +182,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
       var x = h - 0.25f;
       if (x < 0) return x;
 
-      return (x * relative_model_height_for_shading + 0.25f);
+      var angle_fac = model.render_obj.transform.up.Dot(camera_handle.transform.up);
+
+      return (x * relative_model_height_for_shading * angle_fac + 0.25f);
    }
 
    public void ShadeBottom(RenderTexture src, RenderTexture dest) {
