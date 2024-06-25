@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
@@ -26,11 +27,40 @@ public class ModelHandle : MonoBehaviour {
       return m;
    }
 
-   void SampleAnimation(GameObject go, float time, AnimationClip clip) {
+   public bool isSet => model_root;
+   static readonly ProfilerMarker _m_SampleAnimation = Std.Profiler<ModelHandle>("SampleAnimation");
 
+   void SampleAnimation(GameObject go, float time, AnimationClip clip) {
+      using var _m = _m_SampleAnimation.Auto();
+
+      var animator = model_root;
+      if (!animator) return;
       var last_pos = go.transform.localPosition;
       var last_rot = go.transform.localRotation;
       
+      if (TRY_ANIMATOR) {
+         var controller = animator.runtimeAnimatorController;
+         if (controller) {
+            
+            // Debug.Log($"an name: {controller.name}");
+            if (controller.animationClips.Exists(cl => cl.name == clip.name)) {
+         
+               // animator.StartPlayback();
+               var old = 
+                  animator.enabled;
+               animator.enabled = true;
+               animator.Play(clip.NormalizedName(), -1, time / clip.length);
+               animator.Update(1);
+               animator.enabled = false;
+               // animator.enabled = false;
+            
+               return;
+            } else {
+               Debug.Log($"Missing animation: {clip.name}");
+            }
+         }
+
+      }
       go.SetActive(false);
       clip.SampleAnimation(go, time);
       go.SetActive(true);
@@ -42,6 +72,8 @@ public class ModelHandle : MonoBehaviour {
       }
       
    }
+
+   public bool TRY_ANIMATOR;
 
    public void SetAnimationNow_Float(AnimationClip clip, float x) {
       {
@@ -95,12 +127,17 @@ public class ModelHandle : MonoBehaviour {
       }
 
       model_root = GetComponentInChildren<Animator>();
+      if (model_root) model_root.speed = 0;
    }
 
 
    // Start is called before the first frame update
    void Start() {
       Init();
+   }
+
+   void OnEnable() {
+      if (model_root) model_root.StartPlayback();
    }
 
    void LateUpdate() {
@@ -148,6 +185,8 @@ public class ModelHandle : MonoBehaviour {
 
    // Update is called once per frame
    void Update() {
+      if (!model_root) Init();
+      if (!model_root) return;
       HandleAnimation();
 
       animation_frame = Mathf.RoundToInt(animation_time * 60);

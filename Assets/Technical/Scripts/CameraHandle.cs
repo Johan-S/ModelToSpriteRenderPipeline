@@ -36,8 +36,6 @@ public class CameraHandle : MonoBehaviour {
 
    public float TotalDepth() => my_cam.farClipPlane - my_cam.nearClipPlane;
 
-   Dictionary<(int, int), RenderTexture> render_textures = new();
-
 
    public Material color_mat;
 
@@ -45,10 +43,7 @@ public class CameraHandle : MonoBehaviour {
    public void FlatRenderMeshes(Texture2D texture, Mesh[] meshes) {
       var size = (texture.width, texture.height);
 
-      if (!render_textures.TryGetValue(size, out var render_texture)) {
-         render_texture = new RenderTexture(size.width, size.height, 32);
-         render_textures[size] = render_texture;
-      }
+      var render_texture = texture.GetCachedRenderTextureFor();
 
       my_cam.targetTexture = render_texture;
       RenderTexture.active = render_texture;
@@ -69,44 +64,42 @@ public class CameraHandle : MonoBehaviour {
    }
 
 
-   public void CaptureTo(Texture2D texture, Shader shader) {
-      var render_texture = GetRenderFor(texture);
+   public void CaptureTo(RenderTexture render_texture, Shader shader, Color? clear_color=null) {
+      Color bg = my_cam.backgroundColor;
+      try {
+         my_cam.backgroundColor = clear_color ?? bg;
+         my_cam.targetTexture = render_texture;
+         my_cam.RenderWithShader(shader, "");
+         RenderTexture.active = render_texture;
+      }
+      finally {
+         my_cam.backgroundColor = bg;
+      }
 
-      my_cam.targetTexture = render_texture;
-      my_cam.RenderWithShader(shader, "");
 
-      RenderTexture.active = render_texture;
-      texture.ReadPixels(new Rect(0, 0, render_texture.width, render_texture.height), 0, 0);
-
-      texture.Apply();
    }
 
    RenderTexture GetRenderFor(Texture2D texture) {
-      var size = (texture.width, texture.height);
-
-      if (!render_textures.TryGetValue(size, out var render_texture)) {
-         render_texture = new RenderTexture(size.width, size.height, 32);
-         render_textures[size] = render_texture;
-      }
-
-      return render_texture;
-
-   } 
+      return texture.GetCachedRenderTextureFor();
+   }
 
    public void CaptureTo(Texture2D texture) {
-
       var render_texture = GetRenderFor(texture);
-      my_cam.targetTexture = render_texture;
-      my_cam.Render();
-
+      CaptureTo(render_texture);
       RenderTexture.active = render_texture;
       texture.ReadPixels(new Rect(0, 0, render_texture.width, render_texture.height), 0, 0);
 
       texture.Apply();
    }
 
-   public void CaptureTo(Transform tr, Texture2D texture) {
-      var rt = GetRenderFor(texture);
+   public void CaptureTo(RenderTexture render_texture) {
+
+      my_cam.targetTexture = render_texture;
+      my_cam.Render();
+
+   }
+
+   public void CaptureTo(Transform tr, RenderTexture rt) {
 
 
       var ot = my_cam.targetTexture;
@@ -115,14 +108,6 @@ public class CameraHandle : MonoBehaviour {
          my_cam.targetTexture = rt;
          RenderTexture.active = null;
          RenderMeshes(tr);
-         
-
-         RenderTexture.active = rt;
-
-         texture.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-
-         texture.Apply();
-         RenderTexture.active = null;
       }
       finally {
          RenderTexture.active = null;
@@ -203,6 +188,5 @@ public class CameraHandle : MonoBehaviour {
    }
    void Awake() {
       my_cam.enabled = false;
-      render_textures = new();
    }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using Shared;
 using UnityEngine;
 using TMPro;
+using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 using MetaRow = GeneratedSpritesContainer.MetaRow;
@@ -45,8 +46,6 @@ public class ExportPipeline : MonoBehaviour {
 
    public bool write_files = true;
 
-   public int capture_resulitoon_multiplier = 2;
-
    [Header("Not very useful now")] public ModelPartsBundle parts_bundle;
 
    public int atlas_sprites_per_row = 5;
@@ -72,8 +71,8 @@ public class ExportPipeline : MonoBehaviour {
       }
    };
 
-void OnEnable() {
-      sprite_capture_pipeline.size = export_size * capture_resulitoon_multiplier;
+   void OnEnable() {
+      sprite_capture_pipeline.size = export_size * sprite_capture_pipeline.export_resolution_downscale;
    }
 
    void Start() {
@@ -119,6 +118,9 @@ void OnEnable() {
       IEnumerator SubPl() {
          yield return
             StartCoroutine(RunPipeline());
+         
+         
+         sprite_capture_pipeline.exporting = false;
       }
 
       export_files_action = () => {
@@ -292,9 +294,10 @@ void OnEnable() {
       if (dst.width == src.width && dst.height == src.height) {
          dst.SetPixels(cols);
          dst.Apply();
-         DumpExport(cols, FileOutput);
+         // DumpExport(cols, FileOutput);
          return;
       }
+
 
       Color[] res = new Color[dst.width * dst.height];
 
@@ -369,7 +372,6 @@ void OnEnable() {
 
       dst.SetPixels(res);
       dst.Apply();
-      DumpExport(res, FileOutput);
    }
 
    void UpdateProgress() {
@@ -403,7 +405,27 @@ void OnEnable() {
 
    public List<Sprite> tot_sprites = new();
 
-   void DumpExport(Color[] res, string FileOutput) {
+   static readonly ProfilerMarker _m_DumpExport = Std.Profiler<ExportPipeline>("DumpExport");
+
+   void DumpExport(RenderTexture res, string FileOutput) {
+      using var _m = _m_DumpExport.Auto();
+      ei++;
+
+      var rect = MoveMeta(FileOutput);
+      RenderTexture.active = export_text_tot_r;
+      var scale = new Vector2(1f / export_text_tot_r.width, 1f / export_text_tot_r.height);
+      Graphics.CopyTexture(res, 0, 0, 0, 0, rect.width, rect.height, export_text_tot_r, 0, 0, rect.x, rect.y);
+
+      Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
+      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{prepend_to_sprite_name}{FileOutput}", rect,
+         new Vector2(0.5f, 0.15f));
+
+      tot_sprites.Add(spr);
+
+      UpdateProgress();
+   }
+
+   void DumpExport_Old(Color[] res, string FileOutput) {
       ei++;
 
       var rect = MoveMeta(FileOutput);
@@ -458,8 +480,10 @@ void OnEnable() {
       }
    }
 
+   static readonly ProfilerMarker _m_RunOutputImpl = Std.Profiler<ExportPipeline>("RunOutputImpl");
 
    void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat, SpriteRenderDetails shot_type) {
+      using var _m = _m_RunOutputImpl.Auto();
       var model = sprite_capture_pipeline.model;
       bool mirror = pu.model_body.mirror_render;
       if (an.animation_type_object && an.animation_type_object.mirror_render) mirror = !mirror;
@@ -503,9 +527,10 @@ void OnEnable() {
        */
 
       {
-         sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.Euler(0, mirror ? -shot_type.yaw_angle : shot_type.yaw_angle, 0);
+         sprite_capture_pipeline.model.render_obj.transform.localRotation =
+            Quaternion.Euler(0, mirror ? -shot_type.yaw_angle : shot_type.yaw_angle, 0);
       }
-      
+
       sprite_capture_pipeline.relative_model_height_for_shading = 1;
 
       if (pu.model_body.body_category) {
@@ -517,8 +542,9 @@ void OnEnable() {
 
       sprite_capture_pipeline.RunPipeline();
 
-      CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
-         mirror: mirror);
+      DumpExport(sprite_capture_pipeline.downsampled_render_result, FileOutput);
+      // CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
+      //    mirror: mirror);
 
 
       if (an.animation_type_object != null) {
@@ -534,9 +560,9 @@ void OnEnable() {
       }
 
 
-      var data = export_tex.EncodeToPNG();
-
       if (!only_atlas) {
+         export_tex.ReadPixelsFrom(sprite_capture_pipeline.downsampled_render_result);
+         var data = export_tex.EncodeToPNG();
          if (write_files) File.WriteAllBytes($"{folder}/{FileOutput}.png", data);
       }
 
@@ -653,7 +679,8 @@ void OnEnable() {
    }
 
    Texture2D export_tex;
-   Texture2D export_tex_tot;
+   public RenderTexture export_text_tot_r;
+   public Texture2D export_tex_tot;
 
    public static void ApplyTheme(Color theme_color, List<(string field, Color color)> rc, string theme_1,
       string theme_2,
@@ -1066,14 +1093,16 @@ void OnEnable() {
 
       export_tex_tot = new Texture2D(export_size * out_grid.x, out_grid.y * export_size);
 
-      export_tex_tot.SetPixels(new Color[export_tex_tot.width * export_tex_tot.height]);
+      export_text_tot_r = export_tex_tot.GetRenderTextureFor();
+
+      export_text_tot_r.Clear(default);
 
       time_benchmark.Lap("Setup");
 
       sprite_capture_pipeline.time_benchmark = time_benchmark;
 
       yield return RunParsedPipeline(parsed_pipeline_data);
-
+      export_tex_tot.ReadPixelsFrom(export_text_tot_r);
       export_tex_tot.Apply();
 
       var full_time = time_benchmark.LogTimes(out_sprite_count);
