@@ -463,26 +463,12 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
-
-   static string GetFileOutput(ParsedUnit pu, string animation_category, int frame, SpriteRenderDetails shot_type) {
-      string GetFileOutput(string out_name, string animation_category, SpriteRenderDetails shot_type) {
-         return out_name + "." + animation_category + "." + frame + "." + shot_type.ToFileNameExt().join(".");
-      }
-
-      return GetFileOutput(pu.out_name, animation_category, shot_type);
-   }
-
-   static IEnumerable<string> GetFileOutputs(ParsedUnit pu) {
-      foreach (var shot_type in pu.shot_types) {
-         foreach (var an in pu.animations) {
-            yield return GetFileOutput(pu, an.category, an.frame, shot_type);
-         }
-      }
-   }
-
    static readonly ProfilerMarker _m_RunOutputImpl = Std.Profiler<ExportPipeline>("RunOutputImpl");
 
-   void RunOutputImpl(ParsedUnit pu, AnimationWrap an, Material res_mat, SpriteRenderDetails shot_type) {
+   void RunOutputImpl(GeneratedSprite sprite_to_generate, Material res_mat) {
+      ParsedUnit pu = sprite_to_generate.pu;
+      AnimationWrap an = sprite_to_generate.an;
+      SpriteRenderDetails shot_type = sprite_to_generate.shot_type;
       using var _m = _m_RunOutputImpl.Auto();
       var model = sprite_capture_pipeline.model;
       bool mirror = pu.model_body.mirror_render;
@@ -501,7 +487,7 @@ public class ExportPipeline : MonoBehaviour {
 
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
-      var FileOutput = GetFileOutput(pu, an.category, an.frame, shot_type);
+      var FileOutput = sprite_to_generate.name;
 
       foreach (var x in GetChildRenders()) {
       }
@@ -639,22 +625,20 @@ public class ExportPipeline : MonoBehaviour {
 
       var model = sprite_capture_pipeline.model;
 
-      foreach (var shot_type in pu.shot_types) {
-         foreach (AnimationWrap an in pu.animations) {
-            var mb = sprite_capture_pipeline.GetMoveBackFunk();
-            RunOutputImpl(pu, an, res_mat, shot_type);
+      foreach (var sg in pu.sprites_to_generate) {
+         var mb = sprite_capture_pipeline.GetMoveBackFunk();
+         RunOutputImpl(sg, res_mat);
 
-            mb();
+         mb();
 
 
-            if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
-                Time.realtimeSinceStartupAsDouble) {
-               continue;
-            }
-
-            yield return null;
-            rt = Time.realtimeSinceStartupAsDouble;
+         if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
+             Time.realtimeSinceStartupAsDouble) {
+            continue;
          }
+
+         yield return null;
+         rt = Time.realtimeSinceStartupAsDouble;
       }
 
       {
@@ -1058,9 +1042,9 @@ public class ExportPipeline : MonoBehaviour {
 
    IEnumerator RunPipeline() {
       if (write_files) {
-         
          Std.EnsureLocalDir(export_to_folder);
       }
+
       time_benchmark = new();
 
 
@@ -1080,8 +1064,8 @@ public class ExportPipeline : MonoBehaviour {
 
       if (only_atlas_meta) {
          foreach (var u in parsed_pipeline_data.units) {
-            foreach (var FileOutput in GetFileOutputs(u)) {
-               MoveMeta(FileOutput);
+            foreach (var sg in u.sprites_to_generate) {
+               MoveMeta(sg.name);
             }
          }
 

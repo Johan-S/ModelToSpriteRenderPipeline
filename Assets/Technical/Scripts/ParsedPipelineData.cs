@@ -25,6 +25,8 @@ public class ParsedPipelineData {
 
    public IList<IUnitTypeForRender> extra_units => pipeline.extra_units_to_render;
 
+   public LookupList<GeneratedSprite> sprites_to_generate = new();
+
 
    public ParsedPipelineData(ExportPipelineSheets sheets_pipeline_descriptor, ExportPipeline pipeline) {
       this.pipeline = pipeline;
@@ -244,7 +246,38 @@ public class ParsedPipelineData {
          }
       }
 
-      output_n = units.Sum(x => x.animations.Count * x.shot_types.Length);
+      foreach (var pu in units) {
+
+         foreach (var shot_type in pu.shot_types) {
+            foreach (var an in pu.animations) {
+               
+               var fu = GetFileOutput(pu, an.category, an.frame, shot_type);
+             
+               if (sprites_to_generate.Contains(fu)) continue;
+               var s = new GeneratedSprite(fu, pu, an, shot_type);
+               sprites_to_generate.Add(s);
+               pu.sprites_to_generate.Add(s);
+            }
+         }
+      }
+
+      output_n = sprites_to_generate.Count;
+   }
+
+   static string GetFileOutput(ParsedUnit pu, string animation_category, int frame, SpriteRenderDetails shot_type) {
+      string GetFileOutput(string out_name, string animation_category, SpriteRenderDetails shot_type) {
+         return out_name + "." + animation_category + "." + frame + "." + shot_type.ToFileNameExt().join(".");
+      }
+
+      return GetFileOutput(pu.out_name, animation_category, shot_type);
+   }
+
+   static IEnumerable<string> GetFileOutputs(ParsedUnit pu) {
+      foreach (var shot_type in pu.shot_types) {
+         foreach (var an in pu.animations) {
+            yield return GetFileOutput(pu, an.category, an.frame, shot_type);
+         }
+      }
    }
 
    ParsedUnit CreateParsedUnit(string an_type, string name, BodyModelData model_body) {
@@ -379,6 +412,8 @@ public class ParsedUnit {
    public SpriteRenderDetails[] shot_types;
 
    public GeneratedSpritesContainer.UnitCats result;
+
+   public List<GeneratedSprite> sprites_to_generate = new();
 }
 
 public class ParsedPart {
@@ -421,6 +456,7 @@ public class AnimationWrap {
    public AnimationClip clip;
    public string category;
    public int frame;
+   public int time_ms;
 
    public AnimationTypeObject animation_type_object;
 

@@ -113,14 +113,22 @@ public class AnimationManager : MonoBehaviour {
 
                if (frames < 2) frames = 2;
 
-               for (int i = 1; i < frames; i++) {
+               int tot_dur = 0;
+               for (int i = 0; i < frames; i++) {
                   float time = i * len / (frames - 1);
+                  tot_dur += (1000 / data.auto_frames_per_s).Round();
 
-                  p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data));
+                  p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data){
+                     time_ms = tot_dur,
+                  });
                }
             } else {
-               foreach (var fr in data.capture_frame) {
-                  p.res.Add(new(data.clip_name, clip, data.category, fr, data));
+               int tot_dur = 0;
+               foreach (var (fr, dur) in data.capture_frame.Zip(data.time_ms)) {
+                  tot_dur += dur;
+                  p.res.Add(new(data.clip, clip, data.category, fr, null) {
+                     time_ms = tot_dur,
+                  });
                }
             }
          }
@@ -155,8 +163,12 @@ public class AnimationManager : MonoBehaviour {
                      continue;
                   }
 
-                  foreach (var fr in data.capture_frame) {
-                     p.res.Add(new(data.clip, clip, data.category, fr, null));
+                  int tot_dur = 0;
+                  foreach (var (fr, dur) in data.capture_frame.Zip(data.time_ms)) {
+                     tot_dur += dur;
+                     p.res.Add(new(data.clip, clip, data.category, fr, null) {
+                        time_ms = tot_dur,
+                     });
                   }
                }
             }
