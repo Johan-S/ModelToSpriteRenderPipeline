@@ -772,6 +772,7 @@ public class ExportPipeline : MonoBehaviour {
          if (model_prefab) {
             var mod = sprite_capture_pipeline.model.ResetModel(model_prefab, model_action);
 
+            sprite_capture_pipeline.model.animation_clip = u.animations.First().clip;
 
             model_prefab = mod;
          } else {
