@@ -6,6 +6,7 @@
   "unity": "2019.1",
   "unityRelease": "0b5",
   "dependencies": {
-    "klockan_std_lib": ""
+    "klockan_std_lib": "",
+    "nightfall_shared_lib": ""
   }
 }

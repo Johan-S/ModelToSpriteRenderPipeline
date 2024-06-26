@@ -204,7 +204,8 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "klockan_std_lib": ""
+        "klockan_std_lib": "",
+        "nightfall_shared_lib": ""
       }
     },
     "com.unity.modules.ai": {

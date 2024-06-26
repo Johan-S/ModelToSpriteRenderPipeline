@@ -244,20 +244,6 @@ public class ExportPipeline : MonoBehaviour {
       OpenUnitViewer();
    }
 
-   List<Shared.AnimationParsed> _direct_ans;
-
-   List<Shared.AnimationParsed> animations_parsed {
-      get {
-         if (_direct_ans.IsEmpty()) {
-            _direct_ans = animation_manager.GetDirectAnimationsParsed().ToList();
-
-            _direct_ans.AddRange(sheets_pipeline_descriptor.animation_arr.Flatten());
-         }
-
-         return _direct_ans;
-      }
-   }
-
    List<GeneratedSpritesContainer.UnitCats> genned_unit_cats = new();
 
    UnitViewer.UnitTypeDetails ParseUntP2(ParsedUnit pu, GeneratedSpritesContainer.UnitCats cats) {
@@ -266,7 +252,7 @@ public class ExportPipeline : MonoBehaviour {
       r.name = pu.out_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         Sprites.GetAnimationSprites(pu.out_name, animations_parsed, pu.animation_type,
+         Sprites.GetAnimationSprites(pu.out_name, AnimationSubsystem.animations_parsed, pu.animation_type,
             cats).ToArray();
 
       return r;
@@ -614,8 +600,6 @@ public class ExportPipeline : MonoBehaviour {
          RunOutputImpl(sg, res_mat);
 
          mb();
-         
-         Debug.Log($"mt: {model.transform.position}");
 
 
          if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
@@ -992,8 +976,8 @@ public class ExportPipeline : MonoBehaviour {
    public BodyModelData MakeModelData(ModelBodyCategory mt) {
       if (!mt.model_root_prefab) {
          throw new Exception($"Model: {mt.name} lacks root prefab! {mt.model_root_prefab}");
-         
       }
+
       if (!model_mappings.TryGetValue(mt.model_root_prefab.name, out var res)) {
          res = new BodyModelData();
          res.name = mt.model_root_prefab.name;
