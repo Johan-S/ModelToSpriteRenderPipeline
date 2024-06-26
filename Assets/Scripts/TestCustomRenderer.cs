@@ -31,7 +31,7 @@ public class TestCustomRenderer : MonoBehaviour {
       // Debug.Log($"on render {Camera.current.name}");
       CreateLineMaterial();
       
-      // Ensure we are in the correct rendering context
+      // Not sure this check is needed?
       if (
          // Game view.
          Camera.current == Camera.main
