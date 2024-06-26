@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteInEditMode]
-public class TestCustomRenderer : MonoBehaviour {
-   public Mesh mesh;
+public class TestCustomRenderer_Lines : MonoBehaviour {
+    public int lineCount = 100;
+    public float radius = 3.0f;
 
     static Material lineMaterial;
     static void CreateLineMaterial()
@@ -39,6 +40,8 @@ public class TestCustomRenderer : MonoBehaviour {
          || Camera.current.name == "SceneCamera"
          // Renders the camera preview when you select a camera. Note the space.
          || Camera.current.name == "Preview Camera") {
+         
+         // Set up the material and shader
 
          // Apply the material
          lineMaterial.SetPass(0);
@@ -47,20 +50,24 @@ public class TestCustomRenderer : MonoBehaviour {
          // Draw a simple shape (e.g., a quad)
          GL.PushMatrix();
          GL.MultMatrix(transform.localToWorldMatrix);
-         GL.Begin(GL.QUADS);
-         GL.Color(Color.white);
-         GL.Vertex3(-0.5f, -0.5f, 0);
-         GL.Color(Color.blue);
-         GL.Vertex3(-0.5f, 0.5f, 0);
-         GL.Color(Color.red);
-         GL.Vertex3(0.5f, 0.5f, 0);
-         GL.Color(Color.green);
-         GL.Vertex3(0.5f, -0.5f, 0);
+         
+
+         // Draw lines
+         GL.Begin(GL.LINES);
+         for (int i = 0; i < lineCount; ++i)
+         {
+            float a = i / (float)lineCount;
+            float angle = a * Mathf.PI * 2;
+            // Vertex colors change from red to green
+            GL.Color(new Color(a, 1 - a, 0, 0.8F));
+            // One vertex at transform position
+            GL.Vertex3(0, 0, 0);
+            // Another vertex at edge of circle
+            GL.Vertex3(Mathf.Cos(angle) * radius, Mathf.Sin(angle) * radius, 0);
+         }
          GL.End();
+         
          GL.PopMatrix();
-
-
-         Graphics.DrawMeshNow(mesh, transform.position + new Vector3(2, 0), transform.rotation);
       }
    }
 }
