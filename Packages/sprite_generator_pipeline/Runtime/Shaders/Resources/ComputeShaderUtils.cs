@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using MalbersAnimations;
 using Unity.Profiling;
 using UnityEngine;
 

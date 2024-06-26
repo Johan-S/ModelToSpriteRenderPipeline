@@ -199,6 +199,14 @@
         "klockan_std_lib": ""
       }
     },
+    "sprite_generator_pipeline": {
+      "version": "file:sprite_generator_pipeline",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "klockan_std_lib": ""
+      }
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,
