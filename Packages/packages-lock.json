@@ -62,7 +62,7 @@
       }
     },
     "com.unity.ide.rider": {
-      "version": "3.0.28",
+      "version": "3.0.26",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -186,7 +186,7 @@
       "dependencies": {}
     },
     "klockan_std_lib": {
-      "version": "file:../../NightfallRogue/Packages/klockan_std_lib",
+      "version": "file:../../KlockanStdLibs/UnityStd/Packages/klockan_std_lib",
       "depth": 0,
       "source": "local",
       "dependencies": {}
@@ -195,6 +195,14 @@
       "version": "file:../../NightfallRogue/Packages/NightfallShared",
       "depth": 0,
       "source": "local",
+      "dependencies": {
+        "klockan_std_lib": ""
+      }
+    },
+    "sprite_generator_pipeline": {
+      "version": "file:sprite_generator_pipeline",
+      "depth": 0,
+      "source": "embedded",
       "dependencies": {
         "klockan_std_lib": ""
       }

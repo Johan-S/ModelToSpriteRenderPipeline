@@ -1,0 +1,111 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+#pragma kernel ShadeBottom
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+Texture2D<float4> ImageInput;
+Texture2D<float4> ImageMarker;
+
+
+Texture2D<float4> front_depth_texture;
+Texture2D<float4> back_depth_texture;
+
+int res_width;
+
+int res_height;
+
+
+float depth_margin;
+
+float4 inner_outlines_color = float4(0, 0, 0, 1);
+float4 outlines_color = float4(0, 0, 0, 1);
+
+
+float DepthFromCol(float4 c) {
+   return c.g + c.b * (1.0 / 256);
+}
+
+float DiffArea(uint2 i, uint2 j) {
+
+   double di_f = DepthFromCol(front_depth_texture[i]);
+   double di_b = DepthFromCol(back_depth_texture[i]);
+
+   double dj_f = DepthFromCol(front_depth_texture[j]);
+   double dj_b = DepthFromCol(back_depth_texture[j]);
+
+
+   float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin) * (ImageMarker[i] == ImageMarker[j]);
+
+   return 1 - res;
+}
+
+float IsOuter(uint2 i) {
+
+   return front_depth_texture[i].xyz == float3(1, 1, 1);
+
+}
+
+float4 CalcBlackOutline(int2 xy) {
+
+
+   uint2 d1 = uint2(xy.x > 0 && xy.x +1 < res_width, 0);
+   uint2 d2 = uint2(0, xy.y > 0 && xy.y +1 < res_height);
+   float res;
+   float4 color;
+
+   if (IsOuter(xy)) {
+
+
+      float same = IsOuter(xy - d1) * IsOuter(xy + d1) * IsOuter(xy - d2) * IsOuter(xy + d2);
+
+      res = !same;
+
+      return outlines_color * res;
+   } else if (!IsOuter(xy - d1) || !IsOuter(xy - d2)) {
+
+      res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
+      return inner_outlines_color * res;
+   }
+   return 0;
+}
+
+[numthreads(8,8,1)]
+void CSMain(uint3 id : SV_DispatchThreadID) {
+
+   // TODO: insert actual code here!
+   float4 res = CalcBlackOutline(id.xy);
+
+   float4 px = ImageInput[id.xy];
+
+
+   px.xyz = res * (res.a) + px * (1 - res.a);
+   px.a = max(res.a, px.a);
+
+   Result[id.xy] = px;
+}
+
+float shade_bottom_mag;
+
+float shade_bottom_he;
+float shade_bottom_hs;
+
+[numthreads(8,8,1)]
+void ShadeBottom(uint3 id : SV_DispatchThreadID) {
+   uint2 xy = id.xy;
+
+   int h = xy.y;
+
+   float4 c = ImageInput[xy];
+
+   float sh = h - shade_bottom_he;
+   float a = 1;
+   if (sh > 0) a -= sh / (shade_bottom_hs - shade_bottom_he);
+
+   a = clamp(a, 0, 1);
+   if (c.a != 0) c.rgb = lerp(c.rgb, 0, a * shade_bottom_mag);
+
+   Result[id.xy] = c;
+}
