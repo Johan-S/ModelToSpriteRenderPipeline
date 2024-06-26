@@ -112,7 +112,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       if (result_rexture) return;
 
       other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
-      Debug.Log($"Init texture with size {size}");
+      // Debug.Log($"Init texture with size {size}");
       result_rexture = MakeTex(size);
       render_result = result_rexture.GetRenderTextureFor();
       partial_render_result = result_rexture.GetRenderTextureFor();
