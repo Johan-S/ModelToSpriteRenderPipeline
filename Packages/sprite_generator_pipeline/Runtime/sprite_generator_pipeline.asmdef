@@ -1,0 +1,18 @@
+{
+    "name": "sprite_generator_pipeline",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f23e051f17de058459e382dc20dfe3a6",
+        "GUID:146655d0a26144ac941dd700e3ed124d",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
