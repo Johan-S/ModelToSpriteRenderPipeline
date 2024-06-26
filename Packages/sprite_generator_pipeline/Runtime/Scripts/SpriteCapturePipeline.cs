@@ -40,11 +40,17 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public Shader front_depth_shader;
    public Shader back_depth_shader;
 
+
+   // Start is called before the first frame update
+   void Start() {
+      if (exporting) return;
+      InitTextures();
+
+      RunPipeline();
+   }
    void Awake() {
       front_depth_shader = Shader.Find("Unlit/DepthForward");
       back_depth_shader = Shader.Find("Unlit/DepthBackward");
-
-      other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
    }
 
    ModelHandle[] other_models = Array.Empty<ModelHandle>();
@@ -104,6 +110,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public void InitTextures() {
       if (result_rexture) return;
+
+      other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
       Debug.Log($"Init texture with size {size}");
       result_rexture = MakeTex(size);
       render_result = result_rexture.GetRenderTextureFor();
@@ -350,14 +358,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
       */
    }
 
-   // Start is called before the first frame update
-   void Start() {
-      if (exporting) return;
-      InitTextures();
-
-      RunPipeline();
-   }
-
    // Update is called once per frame
    void Update() {
       if (exporting) {
@@ -365,7 +365,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
          return;
       }
 
-      if (!model.isSet) {
+      if (!model || !model.isSet) {
          return;
       }
 

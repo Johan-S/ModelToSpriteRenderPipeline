@@ -10,12 +10,15 @@ using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 using MetaRow = GeneratedSpritesContainer.MetaRow;
+using Object = UnityEngine.Object;
 
 [DefaultExecutionOrder(20)]
 public class ExportPipeline : MonoBehaviour {
    void OnValidate() {
       tag = "ExportPipeline";
    }
+
+   public ModelHandle model;
 
 
    [Header("Export Pipeline Description")]
@@ -55,8 +58,6 @@ public class ExportPipeline : MonoBehaviour {
    [Header("Unit Filter")] [Header("Bindings")]
    public AnimationManager animation_manager;
 
-   public GameObject model;
-
    public SpriteCapturePipeline sprite_capture_pipeline;
 
    public TMP_Text progress_text;
@@ -72,6 +73,12 @@ public class ExportPipeline : MonoBehaviour {
    };
 
    void OnEnable() {
+      if (model) sprite_capture_pipeline.model = model;
+      else model = sprite_capture_pipeline.model;
+      if (!model) {
+         Debug.LogError("Please set model!");
+         enabled = false;
+      }
       sprite_capture_pipeline.size = export_size * sprite_capture_pipeline.export_resolution_downscale;
    }
 
@@ -95,9 +102,9 @@ public class ExportPipeline : MonoBehaviour {
 
       if (load_unit_on_play != cur_loaded) {
          cur_loaded = load_unit_on_play;
-         var u = parsed_pipeline_data.units.Find(x => x.raw_name == cur_loaded.name);
+         var u = parsed_pipeline_data.units.Find(x => x.out_name == cur_loaded.export_name);
          if (u == null) {
-            Debug.Log($"Didn't find {cur_loaded.name} in export data!");
+            Debug.Log($"Didn't find {cur_loaded.export_name} in export data!");
             return;
          }
 
@@ -448,21 +455,6 @@ public class ExportPipeline : MonoBehaviour {
 
    int ei = 0;
 
-
-   IEnumerable<Renderer> GetChildRenders() {
-      var sr = model.transform.GetChild(0);
-
-      for (int i = 0; i < sr.childCount; i++) {
-         var ch = sr.GetChild(i);
-         var x = ch.GetComponent<Renderer>();
-
-         if (x) {
-            // Debug.Log($"render {sr.name} {x}");
-            yield return x;
-         }
-      }
-   }
-
    static readonly ProfilerMarker _m_RunOutputImpl = Std.Profiler<ExportPipeline>("RunOutputImpl");
 
    void RunOutputImpl(GeneratedSprite sprite_to_generate, Material res_mat) {
@@ -488,9 +480,6 @@ public class ExportPipeline : MonoBehaviour {
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
       var FileOutput = sprite_to_generate.name;
-
-      foreach (var x in GetChildRenders()) {
-      }
       // Debug.Log($"Output {output_i}: {name}");
 
       var folder = export_to_folder;
@@ -620,16 +609,13 @@ public class ExportPipeline : MonoBehaviour {
 
       Material res_mat = ApplyMaterialColor(pu.colors, pu.material);
 
-
-      var body = pu.model_body.body_category;
-
-      var model = sprite_capture_pipeline.model;
-
       foreach (var sg in pu.sprites_to_generate) {
          var mb = sprite_capture_pipeline.GetMoveBackFunk();
          RunOutputImpl(sg, res_mat);
 
          mb();
+         
+         Debug.Log($"mt: {model.transform.position}");
 
 
          if (rt + (unit_viewer_running ? this.max_waits_per_frame_viewer_open : max_waits_per_frame) >
@@ -779,7 +765,7 @@ public class ExportPipeline : MonoBehaviour {
    [SerializeField] public Transform dummy_holder;
 
 
-   GameObject PrepModelObject(ParsedUnit u) {
+   ModelBodyRoot PrepModelObject(ParsedUnit u) {
       GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ??
                                 Resources.Load<GameObject>($"BaseModels/{u.model_name}");
       var omodel_prefab = model_prefab;
@@ -790,6 +776,8 @@ public class ExportPipeline : MonoBehaviour {
       if (!model_body_prefab) {
          Debug.Log($"missing body root for: {model_prefab.name}");
       }
+
+      model_body_prefab = null;
 
       sprite_capture_pipeline.model.model_offset = u.model_body.body_category.model_offset;
 
@@ -809,6 +797,7 @@ public class ExportPipeline : MonoBehaviour {
 
       RunLoadout(model => {
          var model_body = model.GetComponent<ModelBodyRoot>();
+         model_body_prefab = model_body;
          if (!model_body) {
             return;
          }
@@ -885,23 +874,17 @@ public class ExportPipeline : MonoBehaviour {
 
          // model.name = u.out_name;
       });
-      return model_prefab;
+      return model_body_prefab;
    }
 
    public void SetActiveUnit(ParsedUnit pu) {
       if (sprite_capture_pipeline.exporting) return;
 
-      var model_prefab = PrepModelObject(pu);
+      var model_body = PrepModelObject(pu);
 
       Material res_mat = ApplyMaterialColor(pu.colors, pu.material);
 
-
-      var nm = new GameObject("t");
-
-      nm.transform.parent = model.transform;
-
-
-      foreach (var x in model.GetComponentsInChildren<Renderer>(true)) {
+      foreach (var x in model.GetComponentsInChildren<Renderer>()) {
          if (x.transform.parent.parent == model.transform && !x.transform.parent.name.EndsWith($"(Clone)")) {
             x.material = res_mat;
          }
@@ -1007,6 +990,10 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    public BodyModelData MakeModelData(ModelBodyCategory mt) {
+      if (!mt.model_root_prefab) {
+         throw new Exception($"Model: {mt.name} lacks root prefab! {mt.model_root_prefab}");
+         
+      }
       if (!model_mappings.TryGetValue(mt.model_root_prefab.name, out var res)) {
          res = new BodyModelData();
          res.name = mt.model_root_prefab.name;

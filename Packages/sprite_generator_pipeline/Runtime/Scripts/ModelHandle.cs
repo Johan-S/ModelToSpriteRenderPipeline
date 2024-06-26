@@ -143,7 +143,7 @@ public class ModelHandle : MonoBehaviour {
    void LateUpdate() {
    }
 
-   [Button]
+   // [Button]
    public void UpdateModelWithAnimationTime() {
       UpdateModelAnimationPos(0);
    }
