@@ -454,9 +454,9 @@ public class ExportPipeline : MonoBehaviour {
       if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
-         model.transform.localRotation = Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0) * perspectove_rot;
+         model.transform.localRotation = perspectove_rot * Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0) ;
       } else {
-         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0) * perspectove_rot;
+         model.transform.localRotation = perspectove_rot * model.transform.localRotation * Quaternion.Euler(0, shot_type.yaw_angle, 0);
       }
 
       sprite_capture_pipeline.mirror_output = mirror;
