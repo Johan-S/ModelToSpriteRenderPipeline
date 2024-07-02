@@ -91,10 +91,20 @@ public class ExportPipeline : MonoBehaviour {
 
       InitSheets();
       if (to_visit) AnnotatedUI.Visit(to_visit, this).alwaysRevisit = true;
+
+      StartCoroutine("GCCoroutine");
+   }
+
+   public IEnumerator GCCoroutine() {
+      while (true) {
+         yield return new WaitForSeconds(10);
+         GC.Collect();
+         Resources.UnloadUnusedAssets();
+      }
    }
 
    UnitTypeForRender cur_loaded;
-
+   
    void Update() {
       if (sprite_capture_pipeline.exporting) {
          cur_loaded = null;

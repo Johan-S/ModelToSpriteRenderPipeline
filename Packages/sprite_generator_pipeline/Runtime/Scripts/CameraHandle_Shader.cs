@@ -29,6 +29,8 @@ public class CameraHandle_Shader : MonoBehaviour {
       }
    }
 
+   List<Mesh> created_meshes = new();
+
    IEnumerable<(Transform tr, Mesh m)> GetMeshes(Transform t) {
       foreach (var a in t.GetComponentsInChildren<MeshFilter>()) {
          if (a.sharedMesh) yield return (a.transform, a.sharedMesh);
@@ -40,6 +42,7 @@ public class CameraHandle_Shader : MonoBehaviour {
          
 
          a.BakeMesh(m);
+         created_meshes.Add(m);
          yield return (a.transform, m);
       }
    }
@@ -68,6 +71,11 @@ public class CameraHandle_Shader : MonoBehaviour {
       var ms = GetMeshes(tr).ToArray();
 
       FlatRenderMeshes(ms);
+
+      foreach (var m in created_meshes) {
+         Destroy(m);
+      }
+      created_meshes.Clear();
    }
 
    public void CaptureTo(Transform tr, Texture2D texture) {
