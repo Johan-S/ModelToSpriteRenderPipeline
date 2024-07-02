@@ -1118,6 +1118,12 @@ public class ExportPipeline : MonoBehaviour {
          export_tex_sprites_w = export_tex_sprites_w * 2;
       }
 
+      if (export_tex_sprites_w > 10) {
+         while (parsed_pipeline_data.output_n / export_tex_sprites_w > export_tex_sprites_w) {
+            export_tex_sprites_w += 1;
+         }
+      }
+
       out_sprite_count = parsed_pipeline_data.output_n;
       out_grid = new(export_tex_sprites_w,
          (out_sprite_count + export_tex_sprites_w - 1) / export_tex_sprites_w);
