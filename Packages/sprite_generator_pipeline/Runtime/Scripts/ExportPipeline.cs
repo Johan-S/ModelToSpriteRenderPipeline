@@ -454,7 +454,9 @@ public class ExportPipeline : MonoBehaviour {
       if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
-         model.transform.localRotation = Quaternion.Euler(mrot);
+         model.transform.localRotation = Quaternion.Euler(mrot) *Quaternion.Euler(0, -shot_type.yaw_angle, 0);
+      } else {
+         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0);
       }
 
       sprite_capture_pipeline.mirror_output = mirror;
@@ -479,19 +481,19 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
-      /*
-       * 
       if (an.animation_type_object) {
          model.transform.localPosition += an.animation_type_object.model_root_pos;
-         sprite_capture_pipeline.model.render_obj.transform.localRotation = an.animation_type_object.model_root_rot;
+         if (an.animation_type_object.model_root_rot.w != default) {
+            sprite_capture_pipeline.model.render_obj.transform.localRotation *= an.animation_type_object.model_root_rot;
+         }
+            
       } else {
-         sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
+         // sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
       }
-       */
 
       {
-         sprite_capture_pipeline.model.render_obj.transform.localRotation =
-            Quaternion.Euler(0, mirror ? -shot_type.yaw_angle : shot_type.yaw_angle, 0);
+         // sprite_capture_pipeline.model.render_obj.transform.localRotation =
+         //   Quaternion.Euler(0, mirror ? -shot_type.yaw_angle : shot_type.yaw_angle, 0);
       }
 
       sprite_capture_pipeline.relative_model_height_for_shading = 1;
