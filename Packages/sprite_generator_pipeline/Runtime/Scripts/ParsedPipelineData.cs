@@ -315,6 +315,9 @@ public class ParsedPipelineData {
       if (pipeline.idle_only && !ExportPipeline.export_override)
          anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
 
+      foreach (var an in anims) {
+         AnimationSubsystem.LogAnimationErrors(pu.animation_type, an.category);
+      }
 
       pu.animations.AddRange(anims);
       pu.idle_animation_id = pu.animations.FindIndex(x => x.category == "Idle");

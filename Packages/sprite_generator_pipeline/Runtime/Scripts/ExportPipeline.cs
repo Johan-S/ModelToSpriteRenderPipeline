@@ -252,8 +252,8 @@ public class ExportPipeline : MonoBehaviour {
       r.name = pu.out_name;
       r.sprite = cats.idle_sprite;
       r.animation_sprites =
-         Sprites.GetAnimationSprites(pu.out_name, AnimationSubsystem.animations_parsed, pu.animation_type,
-            cats).ToArray();
+         AnimationSubsystem.GetAnimationSprites(pu.out_name, AnimationSubsystem.animations_parsed, pu.animation_type,
+            cats, strip_missing_silently: true).ToArray();
 
       return r;
    }

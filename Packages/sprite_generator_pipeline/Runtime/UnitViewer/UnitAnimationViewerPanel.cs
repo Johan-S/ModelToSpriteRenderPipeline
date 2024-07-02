@@ -21,7 +21,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
    float tick = 0;
 
 
-   (string name, Shared.AnimationBundle anim)[] bundles;
+   List<(string name, Shared.AnimationBundle anim)> bundles;
 
    List<Image> images = new();
 
@@ -37,10 +37,10 @@ public class UnitAnimationViewerPanel : UISubComponent {
 
       bundles = animation_sprites.GetAllAnimations()
          .Where(x => x.Item2 != null && !x.Item2.sprites.IsEmpty())
-         .ToArray();
+         .ToList();
+      if (animation_sprites.extra_bundles.IsNonEmpty()) bundles.AddRange(animation_sprites.extra_bundles);
 
-
-      for (int i = 0; i < bundles.Length; i++) {
+      for (int i = 0; i < bundles.Count; i++) {
          if (images.Count == i) Register(Instantiate(prefab, panel));
 
 
@@ -49,7 +49,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
          p.gameObject.SetActive(true);
       }
 
-      for (int i = bundles.Length; i < images.Count; i++) {
+      for (int i = bundles.Count; i < images.Count; i++) {
          images[i].transform.parent.gameObject.SetActive(false);
       }
 
@@ -57,7 +57,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
    }
 
    void UpdateAnimationState() {
-      for (int i = 0; i < bundles.Length; i++) {
+      for (int i = 0; i < bundles.Count; i++) {
          var b = bundles[i].anim;
          var img = images[i];
 
@@ -72,7 +72,7 @@ public class UnitAnimationViewerPanel : UISubComponent {
       prefab.SetActive(false);
       Register(prefab);
 
-      bundles = Array.Empty<(string, Shared.AnimationBundle)>();
+      bundles = new();
       UpdateAnimationState();
    }
 
