@@ -8,6 +8,7 @@ using FilterMode = UnityEngine.FilterMode;
 
 [DefaultExecutionOrder(10)]
 public class SpriteCapturePipeline : MonoBehaviour {
+   public bool check_model_clipping;
    public int size = 128;
    public int export_resolution_downscale = 2;
 
@@ -177,11 +178,40 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       AddBlackOutline(partial_render_result, marker_texture);
 
+      if (check_model_clipping) {
+         CheckModelClipping(partial_render_result);
+
+      }
       ComputeShaderUtils.CopyAndDownsampleTo(render_result, downsampled_render_result, mirror: mirror_output);
       time_benchmark?.Lap("Black Outline");
       foreach (var om in other_models) {
          om.SetActive(true);
       }
+   }
+
+   public void CheckModelClipping(RenderTexture rt) {
+      var tex = new Texture2D(rt.width, rt.height);
+
+      tex.ReadPixelsFrom(rt);
+
+      tex.Apply();
+      var cols = tex.GetPixels();
+
+      for (int i = 0; i < cols.Length; i++) {
+
+         int y = i / rt.width;
+         int x = i % rt.width;
+
+         if (y == 0 || y == rt.height - 1 || x == 0 || x == rt.width - 1) {
+            var c = cols[i];
+            if (c.a != 0 && (c.r != 0 || c.g != 0 || c.b != 0)) {
+               Debug.LogError($"Clipping found! {x}, {y}: {c}");
+               PushToResultTextures();
+               throw new Exception($"Clipping error found!");
+            }
+         }
+      }
+      Destroy(tex);
    }
 
    public void PushToResultTextures() {
