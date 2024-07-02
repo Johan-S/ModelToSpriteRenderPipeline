@@ -48,6 +48,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       RunPipeline();
    }
+
    void Awake() {
       front_depth_shader = Shader.Find("Unlit/DepthForward");
       back_depth_shader = Shader.Find("Unlit/DepthBackward");
@@ -80,23 +81,30 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    public void HandleLoopingRootMotion(AnimationClip clip, float t) {
-      model.SetAnimationNow_Float(clip, 0);
+      bool root = model.model_root.applyRootMotion;
+      try {
+         model.model_root.applyRootMotion = true;
+         model.SetAnimationNow_Float(clip, 0);
 
-      var pstart = model.render_obj.transform.position;
+         var pstart = model.render_obj.transform.position;
 
-      model.SetAnimationNow_Float(clip, 1);
+         model.SetAnimationNow_Float(clip, 1);
 
-      var pend = model.render_obj.transform.position;
+         var pend = model.render_obj.transform.position;
 
-      var diff = pstart - pend;
+         var diff = pstart - pend;
 
-      var dt = diff * t;
+         var dt = diff * t;
 
-      // Debug.Log($"Diff: {clip.name} - {dt}  ({diff})");
+         // Debug.Log($"Diff: {clip.name} - {dt}  ({diff})");
 
-      var pos_before_root = model.transform.position;
+         var pos_before_root = model.transform.position;
 
-      model.transform.position = pos_before_root + dt;
+         model.transform.position = pos_before_root + dt;
+      }
+      finally {
+         model.model_root.applyRootMotion = root;
+      }
    }
 
    public void ResetPos() {
@@ -165,7 +173,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
          ShadeBottom(basic_shading_texture, partial_render_result);
       } else {
          Graphics.Blit(basic_shading_texture, partial_render_result);
-         
       }
 
       AddBlackOutline(partial_render_result, marker_texture);
@@ -196,24 +203,23 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    public void ShadeBottom(RenderTexture src, RenderTexture dest) {
-
       var be = MapShadingHeight(Mathf.Min(shade_bottom_end, shade_bottom_start));
 
       float he = be * src.height;
       float hs = MapShadingHeight(shade_bottom_start) * src.height * relative_model_height_for_shading;
-      
+
       int kernelHandle = shader.FindKernel("ShadeBottom");
-      
+
 
       shader.SetTexture(kernelHandle, "Result", dest);
       shader.SetTexture(kernelHandle, "ImageInput", src);
-      
+
       shader.SetFloat("shade_bottom_mag", shade_bottom_mag);
       shader.SetFloat("shade_bottom_hs", hs);
       shader.SetFloat("shade_bottom_he", he);
       shader.SetInt("res_width", dest.width);
       shader.SetInt("res_height", dest.height);
-      
+
       shader.Dispatch(kernelHandle, dest.width / 8, dest.height / 8, 1);
    }
 

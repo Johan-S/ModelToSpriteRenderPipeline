@@ -105,8 +105,8 @@ public class ModelHandle : MonoBehaviour {
    [Header("Render types")] public Material raw_color_material;
    public Material forward_depth_material;
    public Material back_depth_material;
-
-   Animator model_root;
+[NonSerialized]
+   public Animator model_root;
 
    public bool negate_root_motion;
 

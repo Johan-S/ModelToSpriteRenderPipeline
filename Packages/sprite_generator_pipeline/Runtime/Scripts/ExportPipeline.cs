@@ -445,7 +445,8 @@ public class ExportPipeline : MonoBehaviour {
 
    static readonly ProfilerMarker _m_RunOutputImpl = Std.Profiler<ExportPipeline>("RunOutputImpl");
 
-   public void SetModelRotation(ParsedUnit pu, AnimationTypeObject animation_type_object, SpriteRenderDetails shot_type) {
+   public void SetModelRotation(ParsedUnit pu, AnimationTypeObject animation_type_object,
+      SpriteRenderDetails shot_type) {
       bool mirror = pu.model_body.mirror_render;
       if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
       if (mirror) {
@@ -455,8 +456,9 @@ public class ExportPipeline : MonoBehaviour {
       } else {
          model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0);
       }
+
       sprite_capture_pipeline.mirror_output = mirror;
-      
+
       if (animation_type_object) {
          model.transform.localPosition += animation_type_object.model_root_pos;
          if (animation_type_object.model_root_rot.w != default) {
@@ -466,7 +468,7 @@ public class ExportPipeline : MonoBehaviour {
          // sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
       }
    }
-   
+
    public void OverrideRunSpritePipeline(GeneratedSprite sprite_to_generate, Material res_mat) {
       ParsedUnit pu = sprite_to_generate.pu;
       AnimationWrap an = sprite_to_generate.an;
@@ -475,12 +477,30 @@ public class ExportPipeline : MonoBehaviour {
       var model = sprite_capture_pipeline.model;
 
       SetModelRotation(pu, an.animation_type_object, sprite_to_generate.shot_type);
+      {
+         bool old_neg = model.negate_root_motion;
+         bool old_app = model.model_root.applyRootMotion;
+         try {
+            var animation_type_object = an.animation_type_object;
+            if (animation_type_object != null) {
+               if (animation_type_object.negate_root_motion) {
+                  model.model_root.applyRootMotion = true;
+                  model.negate_root_motion = true;
+               } else {
+                  if (animation_type_object.looping_root) {
+                     sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
+                  }
+               }
+            }
 
-      if (an.animation_type_object != null && an.animation_type_object.looping_root) {
-         sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
+            sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
+         }
+         finally {
+            model.negate_root_motion = old_neg;
+            model.model_root.applyRootMotion = old_app;
+         }
       }
 
-      sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
       // Debug.Log($"Output {output_i}: {name}");
 
@@ -512,7 +532,6 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    void RunOutputImpl(GeneratedSprite sprite_to_generate, Material res_mat) {
-
       OverrideRunSpritePipeline(sprite_to_generate, res_mat);
 
       DumpExport(sprite_capture_pipeline.downsampled_render_result, sprite_to_generate.name);
@@ -896,7 +915,6 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    IEnumerator RunAnimationCoroutine(ParsedUnit pu) {
-
       float t = 0;
       var mb = sprite_capture_pipeline.GetMoveBackFunk();
       while (!sprite_capture_pipeline.exporting && pu.raw_name == load_unit_on_play.export_name) {
@@ -905,7 +923,7 @@ public class ExportPipeline : MonoBehaviour {
          t %= 1;
 
          AnimationClip clip;
-         
+
          if (load_animation_on_play && load_animation_on_play.clip_ref) {
             clip = sprite_capture_pipeline.model.animation_clip = load_animation_on_play.clip_ref;
          } else {
@@ -918,11 +936,27 @@ public class ExportPipeline : MonoBehaviour {
          SetModelRotation(pu, load_animation_on_play, default_shot_types[0]);
 
 
-         if (animation_type_object.looping_root) {
-            sprite_capture_pipeline.HandleLoopingRootMotion(clip, t);
+         if (animation_type_object != null) {
+            bool old_neg = model.negate_root_motion;
+            bool old_app = model.model_root.applyRootMotion;
+            try {
+               if (animation_type_object.negate_root_motion) {
+                  model.model_root.applyRootMotion = true;
+                  model.negate_root_motion = true;
+               } else {
+                  if (animation_type_object.looping_root) {
+                     sprite_capture_pipeline.HandleLoopingRootMotion(clip, t);
+                  }
+               }
+
+               sprite_capture_pipeline.model.SetAnimationNow_Float(clip, t);
+            }
+            finally {
+               model.negate_root_motion = old_neg;
+               model.model_root.applyRootMotion = old_app;
+            }
          }
 
-         sprite_capture_pipeline.model.SetAnimationNow_Float(clip, t);
          sprite_capture_pipeline.model.enabled = false;
          sprite_capture_pipeline.RunPipeline();
          sprite_capture_pipeline.PushToResultTextures();
@@ -930,6 +964,7 @@ public class ExportPipeline : MonoBehaviour {
          mb?.Invoke();
          yield return null;
       }
+
       sprite_capture_pipeline.model.enabled = true;
       sprite_capture_pipeline.enabled = true;
    }
