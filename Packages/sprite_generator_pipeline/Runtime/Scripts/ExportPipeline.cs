@@ -448,21 +448,23 @@ public class ExportPipeline : MonoBehaviour {
    public void SetModelRotation(ParsedUnit pu, AnimationTypeObject animation_type_object,
       SpriteRenderDetails shot_type) {
       bool mirror = pu.model_body.mirror_render;
+      var ano = animation_type_object;
       if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
+      Quaternion perspectove_rot = ano ? Quaternion.Euler(ano.model_perspective_rot) : Quaternion.identity;
       if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
-         model.transform.localRotation = Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0);
+         model.transform.localRotation = Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0) * perspectove_rot;
       } else {
-         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0);
+         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0) * perspectove_rot;
       }
 
       sprite_capture_pipeline.mirror_output = mirror;
-
+      model.render_obj.transform.localRotation = Quaternion.identity;
       if (animation_type_object) {
          model.transform.localPosition += animation_type_object.model_root_pos;
          if (animation_type_object.model_root_rot.w != default) {
-            sprite_capture_pipeline.model.render_obj.transform.localRotation *= animation_type_object.model_root_rot;
+            model.render_obj.transform.localRotation = animation_type_object.model_root_rot;
          }
       } else {
          // sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
