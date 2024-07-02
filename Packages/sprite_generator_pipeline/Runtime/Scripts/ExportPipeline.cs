@@ -39,6 +39,7 @@ public class ExportPipeline : MonoBehaviour {
 
    [Header("Debug Helpers")] public bool export_when_done;
    public UnitTypeForRender load_unit_on_play;
+   public Shared.AnimationTypeObject load_animation_on_play;
    [Header("Pipeline Toggles")] public bool idle_only;
 
    public static bool export_override;
@@ -79,6 +80,7 @@ public class ExportPipeline : MonoBehaviour {
          Debug.LogError("Please set model!");
          enabled = false;
       }
+
       sprite_capture_pipeline.size = export_size * sprite_capture_pipeline.export_resolution_downscale;
    }
 
@@ -443,23 +445,36 @@ public class ExportPipeline : MonoBehaviour {
 
    static readonly ProfilerMarker _m_RunOutputImpl = Std.Profiler<ExportPipeline>("RunOutputImpl");
 
-   void RunOutputImpl(GeneratedSprite sprite_to_generate, Material res_mat) {
+   public void SetModelRotation(ParsedUnit pu, AnimationTypeObject animation_type_object, SpriteRenderDetails shot_type) {
+      bool mirror = pu.model_body.mirror_render;
+      if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
+      if (mirror) {
+         var mrot = model.transform.localRotation.eulerAngles;
+         mrot.y *= -1;
+         model.transform.localRotation = Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0);
+      } else {
+         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0);
+      }
+      sprite_capture_pipeline.mirror_output = mirror;
+      
+      if (animation_type_object) {
+         model.transform.localPosition += animation_type_object.model_root_pos;
+         if (animation_type_object.model_root_rot.w != default) {
+            sprite_capture_pipeline.model.render_obj.transform.localRotation *= animation_type_object.model_root_rot;
+         }
+      } else {
+         // sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
+      }
+   }
+   
+   public void OverrideRunSpritePipeline(GeneratedSprite sprite_to_generate, Material res_mat) {
       ParsedUnit pu = sprite_to_generate.pu;
       AnimationWrap an = sprite_to_generate.an;
       SpriteRenderDetails shot_type = sprite_to_generate.shot_type;
       using var _m = _m_RunOutputImpl.Auto();
       var model = sprite_capture_pipeline.model;
-      bool mirror = pu.model_body.mirror_render;
-      if (an.animation_type_object && an.animation_type_object.mirror_render) mirror = !mirror;
-      if (mirror) {
-         var mrot = model.transform.localRotation.eulerAngles;
-         mrot.y *= -1;
-         model.transform.localRotation = Quaternion.Euler(mrot) *Quaternion.Euler(0, -shot_type.yaw_angle, 0);
-      } else {
-         model.transform.localRotation *= Quaternion.Euler(0, shot_type.yaw_angle, 0);
-      }
 
-      sprite_capture_pipeline.mirror_output = mirror;
+      SetModelRotation(pu, an.animation_type_object, sprite_to_generate.shot_type);
 
       if (an.animation_type_object != null && an.animation_type_object.looping_root) {
          sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
@@ -467,10 +482,8 @@ public class ExportPipeline : MonoBehaviour {
 
       sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
       output_i++;
-      var FileOutput = sprite_to_generate.name;
       // Debug.Log($"Output {output_i}: {name}");
 
-      var folder = export_to_folder;
       int mapped_mats = 0;
 
 
@@ -479,16 +492,6 @@ public class ExportPipeline : MonoBehaviour {
             x.material = res_mat;
             mapped_mats++;
          }
-      }
-
-      if (an.animation_type_object) {
-         model.transform.localPosition += an.animation_type_object.model_root_pos;
-         if (an.animation_type_object.model_root_rot.w != default) {
-            sprite_capture_pipeline.model.render_obj.transform.localRotation *= an.animation_type_object.model_root_rot;
-         }
-            
-      } else {
-         // sprite_capture_pipeline.model.render_obj.transform.localRotation = Quaternion.identity;
       }
 
       {
@@ -506,16 +509,20 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       sprite_capture_pipeline.RunPipeline();
+   }
 
-      DumpExport(sprite_capture_pipeline.downsampled_render_result, FileOutput);
+   void RunOutputImpl(GeneratedSprite sprite_to_generate, Material res_mat) {
+
+      OverrideRunSpritePipeline(sprite_to_generate, res_mat);
+
+      DumpExport(sprite_capture_pipeline.downsampled_render_result, sprite_to_generate.name);
       // CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
       //    mirror: mirror);
 
-
-      if (an.animation_type_object != null) {
+      if (sprite_to_generate.an.animation_type_object != null) {
          var cid = output_i - 1;
          var o = sprite_gen_meta[cid];
-         Vector3 model_off = an.animation_type_object.model_offsetmodel_offset;
+         Vector3 model_off = sprite_to_generate.an.animation_type_object.model_offsetmodel_offset;
          Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
 
          if (model_off != default) {
@@ -529,8 +536,8 @@ public class ExportPipeline : MonoBehaviour {
          export_tex.ReadPixelsFrom(sprite_capture_pipeline.downsampled_render_result);
          var data = export_tex.EncodeToPNG();
          if (write_files) {
-            Std.EnsureLocalDir($"{folder}/{export_sheet_name}");
-            File.WriteAllBytes($"{folder}/{export_sheet_name}/{FileOutput}.png", data);
+            Std.EnsureLocalDir($"{export_to_folder}/{export_sheet_name}");
+            File.WriteAllBytes($"{export_to_folder}/{export_sheet_name}/{sprite_to_generate.name}.png", data);
          }
       }
 
@@ -883,6 +890,48 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       sprite_capture_pipeline.model.animation_clip = pu.animations[0].clip;
+      if (load_animation_on_play) {
+         StartCoroutine(RunAnimationCoroutine(pu));
+      }
+   }
+
+   IEnumerator RunAnimationCoroutine(ParsedUnit pu) {
+
+      float t = 0;
+      var mb = sprite_capture_pipeline.GetMoveBackFunk();
+      while (!sprite_capture_pipeline.exporting && pu.raw_name == load_unit_on_play.export_name) {
+         mb = sprite_capture_pipeline.GetMoveBackFunk();
+         t += sprite_capture_pipeline.model.animation_speed * Time.deltaTime;
+         t %= 1;
+
+         AnimationClip clip;
+         
+         if (load_animation_on_play && load_animation_on_play.clip_ref) {
+            clip = sprite_capture_pipeline.model.animation_clip = load_animation_on_play.clip_ref;
+         } else {
+            clip =
+               pu.animations.First(x => x.category == load_animation_on_play.category)?.clip;
+            if (clip) sprite_capture_pipeline.model.animation_clip = clip;
+         }
+
+         var animation_type_object = load_animation_on_play;
+         SetModelRotation(pu, load_animation_on_play, default_shot_types[0]);
+
+
+         if (animation_type_object.looping_root) {
+            sprite_capture_pipeline.HandleLoopingRootMotion(clip, t);
+         }
+
+         sprite_capture_pipeline.model.SetAnimationNow_Float(clip, t);
+         sprite_capture_pipeline.model.enabled = false;
+         sprite_capture_pipeline.RunPipeline();
+         sprite_capture_pipeline.PushToResultTextures();
+         sprite_capture_pipeline.enabled = false;
+         mb?.Invoke();
+         yield return null;
+      }
+      sprite_capture_pipeline.model.enabled = true;
+      sprite_capture_pipeline.enabled = true;
    }
 
 

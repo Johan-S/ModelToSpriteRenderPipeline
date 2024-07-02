@@ -177,7 +177,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       }
    }
 
-   void PushToResultTextures() {
+   public void PushToResultTextures() {
       result_rexture.ReadPixelsFrom(render_result);
       result_rexture.Apply();
 
