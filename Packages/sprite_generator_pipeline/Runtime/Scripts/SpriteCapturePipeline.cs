@@ -22,7 +22,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public bool outline_depth = true;
    public bool outline_parts = true;
 
+   [Tooltip("Outline color for the edges against the background, alpha makes it weaker/stronger.")]
    public Color black_outline_color = Color.black;
+   [Tooltip("Outline color for the edges between different parts of the model, alpha makes it weaker/stronger.")]
    public Color black_outline_color_internal = Color.black;
 
    [Header("Unity Bindings")] public ModelHandle model;
