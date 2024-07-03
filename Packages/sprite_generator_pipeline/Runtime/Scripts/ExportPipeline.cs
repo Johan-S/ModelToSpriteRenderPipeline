@@ -9,6 +9,7 @@ using TMPro;
 using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using static UnityEngine.Mathf;
 using MetaRow = GeneratedSpritesContainer.MetaRow;
 using Object = UnityEngine.Object;
 
@@ -33,7 +34,7 @@ public class ExportPipeline : MonoBehaviour {
 
    public int export_size = 64;
 
-   public int effective_export_size => Mathf.CeilToInt(export_size * capture_scale / 8) * 8;
+   public int effective_export_size => CeilToInt(export_size * capture_scale / 8) * 8;
 
    [Header("Exported Atlas Name")] public string prepend_to_sprite_name;
    public string append_to_atlas_name;
@@ -144,7 +145,7 @@ public class ExportPipeline : MonoBehaviour {
 
       if (load_unit_on_play != cur_loaded) {
          cur_loaded = load_unit_on_play;
-         var u = parsed_pipeline_data.units.Find(x => x.out_name == cur_loaded.export_name);
+         var u = parsed_pipeline_data_orig.units.Find(x => x.out_name == cur_loaded.export_name);
          if (u == null) {
             Debug.Log($"Didn't find {cur_loaded.export_name} in export data!");
             return;
@@ -178,43 +179,6 @@ public class ExportPipeline : MonoBehaviour {
       };
 
       StartCoroutine(SubPl());
-   }
-
-   public class TimeBenchmark {
-      Dictionary<string, double> times = new();
-
-      double last_t = Time.realtimeSinceStartupAsDouble;
-      double first_t = Time.realtimeSinceStartupAsDouble;
-
-      public void Begin() {
-         last_t = Time.realtimeSinceStartupAsDouble;
-      }
-
-      List<string> steps = new();
-
-      public void Lap(string n) {
-         var t = Time.realtimeSinceStartupAsDouble;
-
-         if (!times.TryGetValue(n, out var res)) {
-            res = 0;
-            steps.Add(n);
-         }
-
-         res += t - last_t;
-         last_t = t;
-
-         times[n] = res;
-      }
-
-
-      public double LogTimes(int nc) {
-         var dt = last_t - first_t;
-
-         Debug.Log(
-            $"Export Bench tot {dt / nc * 1000:0} ms  per render: {dt:0.0} / {nc} :\n{steps.join("\n", x => $"{x}: {times[x]}")}");
-
-         return dt;
-      }
    }
 
    TimeBenchmark time_benchmark;
@@ -305,7 +269,7 @@ public class ExportPipeline : MonoBehaviour {
 
       {
          export_tex_tot.Apply();
-         var catzip = parsed_pipeline_data.units.Map(x => ParseUntP2(x, x.result));
+         var catzip = parsed_pipeline_data_orig.units.Map(x => ParseUntP2(x, x.result));
 
          unit_viewer_running = Instantiate(unit_viewer_prefab);
 
@@ -413,13 +377,15 @@ public class ExportPipeline : MonoBehaviour {
       if (progress_text) {
          progress_text.transform.parent.gameObject.SetActive(true);
 
-         progress_text.text = $"{ei} / {out_sprite_count}";
+         progress_text.text = $"{ei} / {tot_out_sprites_count}";
       }
    }
 
    Vector2Int out_grid;
    int out_sprite_count;
+   int tot_out_sprites_count;
 
+   int batch_id;
 
    RectInt MoveMeta(string FileOutput) {
       var ei = sprite_gen_meta.Count;
@@ -719,6 +685,8 @@ public class ExportPipeline : MonoBehaviour {
    public RenderTexture export_text_tot_r;
    public Texture2D export_tex_tot;
 
+   List<(Texture2D tex, List<MetaRow> metadata)> export_tex_tot_res = new();
+
    public static void ApplyTheme(Color theme_color, List<(string field, Color color)> rc, string theme_1,
       string theme_2,
       string theme_3) {
@@ -920,7 +888,7 @@ public class ExportPipeline : MonoBehaviour {
                continue;
             }
 
-            if (!parsed_pipeline_data.parts.TryGetValue(kv.Value, out var part_o)) {
+            if (!parsed_pipeline_data_orig.parts.TryGetValue(kv.Value, out var part_o)) {
                LogMissing($"Missing part METADATA {kv.Value} in parts bundle, from model {u.model_name}!");
 
                continue;
@@ -1104,7 +1072,8 @@ public class ExportPipeline : MonoBehaviour {
       }
 
 
-      parsed_pipeline_data = new(sheets_pipeline_descriptor, this);
+      parsed_pipeline_data_orig = new(sheets_pipeline_descriptor, this);
+      Debug.Log($"units: {parsed_pipeline_data_orig.units.Count}");
       // if (this.generate_only.IsNonEmpty()) {
       //    parsed_pipeline_data.units.Filter(x =>
       //       generate_only.Exists(ut => ut.name == x.raw_name || ut.Unit_Name == x.raw_name));
@@ -1140,7 +1109,7 @@ public class ExportPipeline : MonoBehaviour {
       return res;
    }
 
-   ParsedPipelineData parsed_pipeline_data;
+   ParsedPipelineData parsed_pipeline_data_orig;
 
 
    public Dictionary<string, BodyModelData> model_mapping_by_body_type;
@@ -1149,6 +1118,37 @@ public class ExportPipeline : MonoBehaviour {
 
    public RectTransform to_visit;
 
+   int max_per_grid;
+   int max_grid_width;
+
+   void SetGridVars(int export_size) {
+      max_grid_width =
+         max_per_grid = ((1 << 14) / export_size);
+      max_per_grid = max_grid_width * max_grid_width;
+   }
+
+   void SetOutGrid(int n_left) {
+      export_tex_sprites_w = Min(atlas_sprites_per_row, n_left, export_tex_sprites_w, max_grid_width);
+      if (export_tex_sprites_w < 1) export_tex_sprites_w = 1;
+      while (n_left > 2 * (export_tex_sprites_w + 5) * export_tex_sprites_w) {
+         export_tex_sprites_w = export_tex_sprites_w * 2;
+      }
+
+      while (n_left > max_grid_width * export_tex_sprites_w) {
+         export_tex_sprites_w += 1;
+      }
+
+
+      out_sprite_count = n_left;
+      out_grid = new(export_tex_sprites_w,
+         (out_sprite_count + export_tex_sprites_w - 1) / export_tex_sprites_w);
+
+      out_grid.x = Min(out_grid.x, max_grid_width);
+      out_grid.y = Min(out_grid.y, max_grid_width);
+   }
+
+   void DumbDataNow() {
+   }
 
    IEnumerator RunPipeline() {
       int export_size = this.effective_export_size;
@@ -1156,67 +1156,58 @@ public class ExportPipeline : MonoBehaviour {
          Std.EnsureLocalDir(export_to_folder);
       }
 
+      tot_out_sprites_count = parsed_pipeline_data_orig.output_n;
+
+      SetGridVars(export_size);
+      sprite_gen_meta = new();
+
+
       time_benchmark = new();
+      batch_id = -1;
+      foreach (var parsed_pipeline_data in parsed_pipeline_data_orig.SplitMe(max_per_grid)) {
+         batch_id++;
+         output_i = 0;
+         sprite_gen_meta = new();
+
+         SetOutGrid(parsed_pipeline_data.output_n);
 
 
-      dummy_holder.gameObject.SetActive(false);
-      export_tex = new Texture2D(export_size, export_size);
+         dummy_holder.gameObject.SetActive(false);
+         export_tex = new Texture2D(export_size, export_size);
 
-
-      export_tex_sprites_w = atlas_sprites_per_row;
-      if (export_tex_sprites_w > parsed_pipeline_data.output_n) export_tex_sprites_w = parsed_pipeline_data.output_n;
-      while (parsed_pipeline_data.output_n / export_tex_sprites_w > 2 * (export_tex_sprites_w + 5)) {
-         export_tex_sprites_w = export_tex_sprites_w * 2;
-      }
-
-      if (export_tex_sprites_w > 10) {
-         while (parsed_pipeline_data.output_n / export_tex_sprites_w > export_tex_sprites_w) {
-            export_tex_sprites_w += 1;
-         }
-      }
-
-      out_sprite_count = parsed_pipeline_data.output_n;
-      out_grid = new(export_tex_sprites_w,
-         (out_sprite_count + export_tex_sprites_w - 1) / export_tex_sprites_w);
-
-      if (only_atlas_meta) {
-         foreach (var u in parsed_pipeline_data.units) {
-            foreach (var sg in u.sprites_to_generate) {
-               MoveMeta(sg.name);
+         if (only_atlas_meta) {
+            foreach (var u in parsed_pipeline_data.units) {
+               foreach (var sg in u.sprites_to_generate) {
+                  MoveMeta(sg.name);
+               }
             }
+
+            export_tex_tot_res.Add((null, sprite_gen_meta));
+
+            continue;
          }
 
-         if (progress_text) {
-            progress_text.transform.parent.gameObject.SetActive(false);
-         }
+         UpdateProgress();
 
-         if (write_files) {
-            WriteMetaFile(export_to_folder);
-         }
+         Debug.Log($"grid: {parsed_pipeline_data.output_n}, {out_grid}, sz: {out_grid * export_size}");
 
-         yield break;
+         export_tex_tot = new Texture2D(export_size * out_grid.x, out_grid.y * export_size);
+         export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
+
+         export_text_tot_r = export_tex_tot.GetRenderTextureFor();
+
+         export_text_tot_r.Clear(default);
+
+         time_benchmark.Lap("Setup");
+
+         sprite_capture_pipeline.time_benchmark = time_benchmark;
+
+         yield return RunParsedPipeline(parsed_pipeline_data);
+         export_tex_tot.ReadPixelsFrom(export_text_tot_r);
+         export_tex_tot.Apply();
       }
-
-      UpdateProgress();
-
-      Debug.Log($"grid: {parsed_pipeline_data.output_n}, {out_grid}");
-
-      export_tex_tot = new Texture2D(export_size * out_grid.x, out_grid.y * export_size);
-
-      export_text_tot_r = export_tex_tot.GetRenderTextureFor();
-
-      export_text_tot_r.Clear(default);
-
-      time_benchmark.Lap("Setup");
-
-      sprite_capture_pipeline.time_benchmark = time_benchmark;
-
-      yield return RunParsedPipeline(parsed_pipeline_data);
-      export_tex_tot.ReadPixelsFrom(export_text_tot_r);
-      export_tex_tot.Apply();
 
       var full_time = time_benchmark.LogTimes(out_sprite_count);
-
 
       if (write_files) {
          WriteFiles(export_to_folder);
@@ -1233,25 +1224,55 @@ public class ExportPipeline : MonoBehaviour {
       CompleteJingle();
    }
 
+   string multi_atlas_name(int batch_id) => batch_id > 0 ? $"__{batch_id}" : "";
+   string full_atlas_name(int id) => $"{export_sheet_name}{append_to_atlas_name}{multi_atlas_name(id)}";
 
-   public void WriteMetaFile(string to_folder) {
+
+   bool DeleteIfExists(string to_folder, string name) {
+      if (File.Exists($"{to_folder}/{name}")) {
+         File.Delete($"{to_folder}/{name}");
+         return true;
+      }
+
+      return false;
+   }
+
+   public void WriteMetaFile(string to_folder, List<MetaRow> sprite_gen_meta, int id) {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
 
-      var mf = $"{to_folder}/{export_sheet_name}{append_to_atlas_name}.spritemeta";
+      var mf = $"{to_folder}/{full_atlas_name(id)}.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
 
       // File.Copy(mf, $"{export_to_folder}/test_atlas.spritemeta", overwrite: true);
    }
 
-   public void WriteTexturefile(string to_folder) {
-      var rb = export_tex_tot.EncodeToPNG();
-      File.WriteAllBytes($"{to_folder}/{export_sheet_name}{append_to_atlas_name}.png", rb);
+   public void WriteTexturefile(string to_folder, Texture2D tex, int id) {
+      var rb = tex.EncodeToPNG();
+      File.WriteAllBytes($"{to_folder}/{full_atlas_name(id)}.png", rb);
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
    }
 
    public void WriteFiles(string to_folder) {
-      if (!only_atlas_meta) WriteTexturefile(to_folder);
-      WriteMetaFile(to_folder);
+      int i = 0;
+      for (; i < export_tex_tot_res.Count; i++) {
+         var (tex, meta) = export_tex_tot_res[i];
+         if (!only_atlas_meta) {
+            WriteTexturefile(to_folder, tex, i);
+         }
+
+         WriteMetaFile(to_folder, meta, i);
+      }
+
+      bool d;
+      do {
+         d = false;
+
+         if (!only_atlas_meta) {
+            d = DeleteIfExists(to_folder, $"{full_atlas_name(i)}.png");
+         }
+
+         d = DeleteIfExists(to_folder, $"{full_atlas_name(i)}.spritemeta") || d;
+      } while (d);
 
       omExportDone?.Invoke();
    }

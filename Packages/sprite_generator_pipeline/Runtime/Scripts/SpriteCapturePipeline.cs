@@ -142,7 +142,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       if (display_handle) display_handle.DisplayTex(downsampled_result_rexture, result_rexture);
    }
 
-   public ExportPipeline.TimeBenchmark time_benchmark;
+   public TimeBenchmark time_benchmark;
 
    static readonly ProfilerMarker _m_RunPipeline = Std.Profiler<SpriteCapturePipeline>("RunPipeline");
 

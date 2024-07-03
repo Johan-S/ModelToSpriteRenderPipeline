@@ -27,6 +27,34 @@ public class ParsedPipelineData {
 
    public LookupList<GeneratedSprite> sprites_to_generate = new();
 
+   public IEnumerable<ParsedPipelineData> SplitMe(int sprites_per) {
+      int cur = 0;
+
+      List<ParsedUnit> ru = new();
+
+      foreach (var pu in units) {
+         if (cur + pu.sprites_to_generate.Count > sprites_per) {
+            var cp = (ParsedPipelineData)MemberwiseClone();
+            cp.units = ru;
+            cp.output_n = cur;
+            cur = 0;
+            yield return cp;
+            ru = new();
+         }
+
+         ru.Add(pu);
+         cur += pu.sprites_to_generate.Count;
+      }
+
+      if (ru.Count > 0) {
+         var cp = (ParsedPipelineData)MemberwiseClone();
+         cp.units = ru;
+         cp.output_n = cur;
+         cur = 0;
+         yield return cp;
+      }
+   }
+
 
    public ParsedPipelineData(ExportPipelineSheets sheets_pipeline_descriptor, ExportPipeline pipeline) {
       this.pipeline = pipeline;
@@ -247,12 +275,10 @@ public class ParsedPipelineData {
       }
 
       foreach (var pu in units) {
-
          foreach (var shot_type in pu.shot_types) {
             foreach (var an in pu.animations) {
-               
                var fu = GetFileOutput(pu, an.category, an.frame, shot_type);
-             
+
                if (sprites_to_generate.Contains(fu)) continue;
                var s = new GeneratedSprite(fu, pu, an, shot_type);
                sprites_to_generate.Add(s);
