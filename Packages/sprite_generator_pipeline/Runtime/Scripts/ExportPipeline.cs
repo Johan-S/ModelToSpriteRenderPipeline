@@ -20,6 +20,8 @@ public class ExportPipeline : MonoBehaviour {
 
    public ModelHandle model;
 
+   [Range(0.1f, 5)] public float capture_scale = 1;
+
 
    [Header("Export Pipeline Description")]
    public string export_sheet_name = "atlas";
@@ -30,6 +32,8 @@ public class ExportPipeline : MonoBehaviour {
    public UnitTypeForRender[] extra_units_to_render;
 
    public int export_size = 64;
+
+   public int effective_export_size => Mathf.CeilToInt(export_size * capture_scale / 8) * 8;
 
    [Header("Exported Atlas Name")] public string prepend_to_sprite_name;
    public string append_to_atlas_name;
@@ -81,7 +85,28 @@ public class ExportPipeline : MonoBehaviour {
          enabled = false;
       }
 
-      sprite_capture_pipeline.size = export_size * sprite_capture_pipeline.export_resolution_downscale;
+      UpdateCaptureScale();
+      if (!default_shot_types.IsEmpty()) SetShotType(default_shot_types[0]);
+   }
+
+   public void SetShotType(SpriteRenderDetails shot_type) {
+      var cam = sprite_capture_pipeline.camera_handle;
+      cam.camera_pitch_angle = shot_type.pitch_angle;
+      cam.camera_yaw = shot_type.yaw_angle;
+      cam.UpdateCamera();
+   }
+
+   public bool UpdateCaptureScale() {
+      var ns = effective_export_size * sprite_capture_pipeline.export_resolution_downscale;
+      sprite_capture_pipeline.camera_handle.camera_size = capture_scale * 4;
+      sprite_capture_pipeline.camera_handle.UpdateCamera();
+      if (ns != sprite_capture_pipeline.size) {
+         sprite_capture_pipeline.size = ns;
+         sprite_capture_pipeline.InitTextures(force: true);
+         return true;
+      }
+
+      return false;
    }
 
    void Start() {
@@ -104,11 +129,16 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    UnitTypeForRender cur_loaded;
-   
+
    void Update() {
       if (sprite_capture_pipeline.exporting) {
          cur_loaded = null;
          return;
+      }
+
+      if (UpdateCaptureScale()) {
+         sprite_capture_pipeline.RunPipeline();
+         sprite_capture_pipeline.PushToResultTextures();
       }
 
 
@@ -197,7 +227,7 @@ public class ExportPipeline : MonoBehaviour {
    public SpriteCaptureResultHolder NewResultHolder(string name) {
       var a = new GameObject(name).AddComponent<SpriteCaptureResultHolder>();
       a.transform.parent = dummy_holder.transform;
-      a.transform.position = new Vector3((_ResultHolderTicker % 10) * 2 + 10, _ResultHolderTicker / 10);
+      a.transform.position = new Vector3((_ResultHolderTicker % 10) * 2 + 10, _ResultHolderTicker / 10 + 40);
       _ResultHolderTicker++;
       return a;
    }
@@ -403,7 +433,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var rect = new RectInt(pos.x * export_tex.width, pos.y * export_tex.height, export_tex.width, export_tex.height);
 
-      sprite_gen_meta.Add(new(FileOutput, rect, GeneratedSpritesContainer.DEFAULT_PIVOT));
+      sprite_gen_meta.Add(new(FileOutput, rect, sprite_capture_pipeline.camera_handle.camera_pivot));
 
       return rect;
    }
@@ -457,6 +487,8 @@ public class ExportPipeline : MonoBehaviour {
 
    public void SetModelRotation(ParsedUnit pu, AnimationTypeObject animation_type_object,
       SpriteRenderDetails shot_type) {
+      SetShotType(shot_type);
+
       bool mirror = pu.model_body.mirror_render;
       var ano = animation_type_object;
       if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
@@ -464,9 +496,10 @@ public class ExportPipeline : MonoBehaviour {
       if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
-         model.transform.localRotation = perspectove_rot * Quaternion.Euler(mrot) * Quaternion.Euler(0, -shot_type.yaw_angle, 0) ;
+         model.transform.localRotation =
+            perspectove_rot * Quaternion.Euler(mrot);
       } else {
-         model.transform.localRotation = perspectove_rot * model.transform.localRotation * Quaternion.Euler(0, shot_type.yaw_angle, 0);
+         model.transform.localRotation = perspectove_rot * model.transform.localRotation;
       }
 
       sprite_capture_pipeline.mirror_output = mirror;
@@ -559,6 +592,7 @@ public class ExportPipeline : MonoBehaviour {
          if (model_off != default) {
             var sprite_pivot = GetAdjustedSpritePivot(o.pivot, model_off, camera_d);
             sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
+            
          }
       }
 
@@ -930,6 +964,7 @@ public class ExportPipeline : MonoBehaviour {
       float t = 0;
       var mb = sprite_capture_pipeline.GetMoveBackFunk();
       while (!sprite_capture_pipeline.exporting && pu.raw_name == load_unit_on_play.export_name) {
+         UpdateCaptureScale();
          mb = sprite_capture_pipeline.GetMoveBackFunk();
          t += sprite_capture_pipeline.model.animation_speed * Time.deltaTime;
          t %= 1;
@@ -1032,6 +1067,7 @@ public class ExportPipeline : MonoBehaviour {
 
    void InitSheets() {
       if (!dummy_holder) dummy_holder = new GameObject("DummyHolder").transform;
+      dummy_holder.gameObject.SetActive(false);
       if (sheets_inited) return;
       sheets_inited = true;
       sheets_pipeline_descriptor.InitData();
@@ -1111,6 +1147,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    IEnumerator RunPipeline() {
+      int export_size = this.effective_export_size;
       if (write_files) {
          Std.EnsureLocalDir(export_to_folder);
       }

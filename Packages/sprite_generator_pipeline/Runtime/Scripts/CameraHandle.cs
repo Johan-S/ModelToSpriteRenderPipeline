@@ -5,7 +5,47 @@ using System.Linq;
 using UnityEngine;
 
 
+[DefaultExecutionOrder(-150)]
 public class CameraHandle : MonoBehaviour {
+
+   [Range(0, 90)]
+   public float camera_pitch_angle;
+   
+   [Range(-180, 180)]
+   public float camera_yaw;
+
+   public Vector2 camera_pivot = new Vector2(0.5f, 0.15f);
+
+   public float camera_size = 4;
+
+   void OnValidate() {
+      UpdateCamera();
+   }
+
+   void Update() {
+      UpdateCamera();
+   }
+
+   void OnEnable() {
+      if (Application.isPlaying) my_cam.enabled = false;
+      UpdateCamera();
+   }
+   
+
+   public void UpdateCamera() {
+      if (camera_size / 2 != my_cam.orthographicSize) {
+         my_cam.orthographicSize = camera_size / 2;
+      }
+      float size = my_cam.orthographicSize;
+      transform.localRotation = Quaternion.Euler(camera_pitch_angle, -camera_yaw, 0);
+
+      var bl = new Vector2(size, size);
+      var mid = bl - camera_pivot * size * 2;
+      transform.localPosition = transform.localRotation * new Vector3(mid.x, mid.y, 0);
+
+
+   }
+   
    public static Color ColorFrom(int i, bool fun = false) {
       if (!fun) return new Color32(255, 255, (byte)i, 255);
       Color cb = new Color();
@@ -29,7 +69,7 @@ public class CameraHandle : MonoBehaviour {
       return cb;
    }
 
-   Camera my_cam => _my_cam ? _my_cam : (_my_cam = GetComponent<Camera>());
+   Camera my_cam => _my_cam ? _my_cam : (_my_cam = GetComponentInChildren<Camera>());
 
    Camera _my_cam;
    public Vector2 OrthographicRectSize => new(my_cam.orthographicSize * 2, my_cam.orthographicSize * 2);
@@ -185,8 +225,5 @@ public class CameraHandle : MonoBehaviour {
          my_cam.cullingMask = omask;
       }
 
-   }
-   void Awake() {
-      my_cam.enabled = false;
    }
 }

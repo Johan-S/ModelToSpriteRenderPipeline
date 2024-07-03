@@ -84,6 +84,18 @@ public static class ComputeShaderUtils {
       RenderTexture.active = null;
    }
 
+   public static Color[] ReadPixels_Expensive(this RenderTexture t) {
+      var tex = new Texture2D(t.width, t.height);
+      tex.ReadPixelsFrom(t);
+      tex.Apply();
+      var c = tex.GetPixels();
+      
+      GameObject.Destroy(tex);
+      return c;
+   }
+   
+
+
    public static void ReadPixelsFrom(this Texture2D t, RenderTexture rt) =>
       ReadPixelsFrom(t, rt, new (0, 0, rt.width, rt.height));
 

@@ -22,6 +22,7 @@ Shader "Unlit/DepthForward"
          #pragma multi_compile_fog
 
          #include "UnityCG.cginc"
+         #include "KlockanShader.cginc"
 
          struct appdata {
             float4 vertex : POSITION;
@@ -49,9 +50,9 @@ Shader "Unlit/DepthForward"
             // sample the texture
             fixed4 col = tex2D(_MainTex, i.uv);
             float z = i.vertex.z;
-            float z1 = (z * 256) - floor(z * 256);
             
-            return fixed4(0, z - z1 / 256, z1, 1);
+            
+            return DepthToCol(i.vertex.z);
          }
          ENDCG
       }

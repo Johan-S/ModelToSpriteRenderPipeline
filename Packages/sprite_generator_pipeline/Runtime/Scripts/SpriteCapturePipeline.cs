@@ -1,17 +1,20 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Rendering.VirtualTexturing;
+using static UnityEngine.Mathf;
 using FilterMode = UnityEngine.FilterMode;
 
 [DefaultExecutionOrder(10)]
 public class SpriteCapturePipeline : MonoBehaviour {
    public bool check_model_clipping;
-   public int size = 128;
    public int export_resolution_downscale = 2;
 
+   [Header("Old late")]
+   public int size = 128;
    public bool mirror_output;
    public bool outline_depth = true;
    public bool outline_parts = true;
@@ -72,9 +75,11 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public Action GetMoveBackFunk() {
       var neg = model.negate_root_motion;
       model.negate_root_motion = false;
+      var cv = camera_handle.camera_pivot;
       var pos_before_root = model.transform.localPosition;
       var rot_before = model.transform.localRotation;
       return () => {
+         camera_handle.camera_pivot = cv;
          model.negate_root_motion = neg;
          model.transform.localPosition = pos_before_root;
          model.transform.localRotation = rot_before;
@@ -117,8 +122,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
       return r;
    }
 
-   public void InitTextures() {
-      if (result_rexture) return;
+   public void InitTextures(bool force=false) {
+      if (result_rexture && !force) return;
 
       other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
       // Debug.Log($"Init texture with size {size}");
@@ -233,7 +238,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    public void ShadeBottom(RenderTexture src, RenderTexture dest) {
-      var be = MapShadingHeight(Mathf.Min(shade_bottom_end, shade_bottom_start));
+      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start));
 
       float he = be * src.height;
       float hs = MapShadingHeight(shade_bottom_start) * src.height * relative_model_height_for_shading;
@@ -256,7 +261,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public void ShadeBottom(Texture2D t) {
       var px = t.GetPixels();
 
-      var be = MapShadingHeight(Mathf.Min(shade_bottom_end, shade_bottom_start));
+      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start));
 
       float he = be * t.height;
       float hs = MapShadingHeight(shade_bottom_start) * t.height * relative_model_height_for_shading;
@@ -305,11 +310,16 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       shader.Dispatch(kernelHandle, marker.width / 8, marker.height / 8, 1);
    }
+   
+   float DepthFromCol(Color c) {
+      return c.r +  (c.g + c.b * (1.0f / 255)) * (1.0f / 255);
+   }
 
    void AddBlackOutline(RenderTexture t, RenderTexture marker) {
       if (try_shader_outlining) {
          // Debug.Log($"Experimental shader outlining");
          AddBlackOutlineGOU(t, marker);
+         
          return;
       }
 
@@ -407,5 +417,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       RunPipeline();
       PushToResultTextures();
+   }
+
+   void LateUpdate() {
+      
    }
 }
