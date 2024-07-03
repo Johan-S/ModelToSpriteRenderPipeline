@@ -1121,9 +1121,8 @@ public class ExportPipeline : MonoBehaviour {
    int max_per_grid;
    int max_grid_width;
 
-   void SetGridVars(int export_size) {
-      max_grid_width =
-         max_per_grid = ((1 << 14) / export_size);
+   void SetGridVars(int sz) {
+      max_grid_width = ((16384) / sz);
       max_per_grid = max_grid_width * max_grid_width;
    }
 
@@ -1133,6 +1132,8 @@ public class ExportPipeline : MonoBehaviour {
       while (n_left > 2 * (export_tex_sprites_w + 5) * export_tex_sprites_w) {
          export_tex_sprites_w = export_tex_sprites_w * 2;
       }
+
+      export_tex_sprites_w = Min(max_grid_width, export_tex_sprites_w);
 
       while (n_left > max_grid_width * export_tex_sprites_w) {
          export_tex_sprites_w += 1;
