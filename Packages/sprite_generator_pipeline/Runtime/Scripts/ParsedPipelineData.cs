@@ -259,16 +259,7 @@ public class ParsedPipelineData {
 
       if (this.extra_units != null) {
          foreach (var u in extra_units) {
-            var model_data = pipeline.MakeModelData(u.ModelBody);
-
-
-            var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
-
-            if (u.ShotTypes.NotEmpty()) pu.shot_types = u.ShotTypes;
-
-            if (u.MaterialOverride) {
-               pu.material = u.MaterialOverride;
-            }
+            var pu = CreateParsedUnit(u);
 
             units.Add(pu);
          }
@@ -288,6 +279,21 @@ public class ParsedPipelineData {
       }
 
       output_n = sprites_to_generate.Count;
+   }
+
+   public ParsedUnit CreateParsedUnit(IUnitTypeForRender u) {
+      var model_data = pipeline.MakeModelData(u.ModelBody);
+
+
+      var pu = CreateParsedUnit(u.AnimationType, u.ExportName, model_data);
+
+      if (u.ShotTypes.NotEmpty()) pu.shot_types = u.ShotTypes;
+
+      if (u.MaterialOverride) {
+         pu.material = u.MaterialOverride;
+      }
+
+      return pu;
    }
 
    static string GetFileOutput(ParsedUnit pu, string animation_category, int frame, SpriteRenderDetails shot_type) {

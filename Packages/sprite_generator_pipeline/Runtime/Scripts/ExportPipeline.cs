@@ -19,34 +19,51 @@ public class ExportPipeline : MonoBehaviour {
       tag = "ExportPipeline";
    }
 
-   public ModelHandle model;
 
-   [Range(0.1f, 5)] public float capture_scale = 1;
-
-
-   [Header("Export Pipeline Description")]
+   [Tooltip("Name of the output sheets, overwrites other sheets that has the same name.")]
    public string export_sheet_name = "atlas";
 
-   public ExportPipelineSheets sheets_pipeline_descriptor;
+   [Space]
+   [Tooltip(
+      "Loads units on startup, doesn't add it to pipeline this is just to see what it loos like without running the pipeline.")]
+   public UnitTypeForRender load_unit_on_play;
 
-   [FormerlySerializedAs("override_units")]
+   [Tooltip(
+      "When set this applies the full animation and pipeline logic at load, including rotations etc. Overrides a lot of other controls.")]
+   public Shared.AnimationTypeObject load_animation_on_play;
+
+   [Space]
+   [InspectorName("UnitsToRender")]
+   [Tooltip("These are the units that will get rendered in the pipeline and exported as sheets.")]
    public UnitTypeForRender[] extra_units_to_render;
 
+
+   [Range(0.1f, 5)] [Tooltip("Scales up camera capture area, adding pixels to capture larger models.")]
+   public float capture_scale = 1;
+
+   [Tooltip("Pixels per sprite, before capture scale is applied")]
    public int export_size = 64;
+
+   [Tooltip("The angles the differnet sprites will be taken in. Sprite pixel scale doesn't work.")]
+   public SpriteRenderDetails[] default_shot_types = new SpriteRenderDetails[] {
+      new SpriteRenderDetails() {
+         pitch_angle = 10,
+         sprite_pixel_scale = 2,
+         yaw_angle = 30,
+      }
+   };
 
    public int effective_export_size => CeilToInt(export_size * capture_scale / 8) * 8;
 
-   [Header("Exported Atlas Name")] public string prepend_to_sprite_name;
-   public string append_to_atlas_name;
+
+   [Space] [Header("Export Pipeline Description")]
+   public ExportPipelineSheets sheets_pipeline_descriptor;
 
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
-   [Header("Debug Helpers")] public bool export_when_done;
-   public UnitTypeForRender load_unit_on_play;
-   public Shared.AnimationTypeObject load_animation_on_play;
-   [Header("Pipeline Toggles")] public bool idle_only;
-
+   [Space] [Header("Pipeline Toggles")] public bool idle_only;
+   public bool export_when_done;
    public static bool export_override;
 
    public bool only_atlas;
@@ -57,26 +74,20 @@ public class ExportPipeline : MonoBehaviour {
 
    [Header("Not very useful now")] public ModelPartsBundle parts_bundle;
 
-   public int atlas_sprites_per_row = 5;
+   [NonSerialized] public int atlas_sprites_per_row = 5;
    public string export_to_folder = "Gen";
 
 
    [Header("Unit Filter")] [Header("Bindings")]
    public AnimationManager animation_manager;
 
+
+   public ModelHandle model;
    public SpriteCapturePipeline sprite_capture_pipeline;
 
    public TMP_Text progress_text;
 
    public string defaultRenderModelName = "Heavy Infantry";
-
-   public SpriteRenderDetails[] default_shot_types = new SpriteRenderDetails[] {
-      new SpriteRenderDetails() {
-         pitch_angle = 10,
-         sprite_pixel_scale = 2,
-         yaw_angle = 30,
-      }
-   };
 
    void OnEnable() {
       if (model) sprite_capture_pipeline.model = model;
@@ -147,6 +158,7 @@ public class ExportPipeline : MonoBehaviour {
          cur_loaded = load_unit_on_play;
          var u = parsed_pipeline_data_orig.units.Find(x => x.out_name == cur_loaded.export_name);
          if (u == null) {
+            u = parsed_pipeline_data_orig.CreateParsedUnit(load_unit_on_play);
             Debug.Log($"Didn't find {cur_loaded.export_name} in export data!");
             return;
          }
@@ -200,7 +212,7 @@ public class ExportPipeline : MonoBehaviour {
       var r = d.rect;
       var p = d.pivot;
 
-      return $"{prepend_to_sprite_name}{d.file_name}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
+      return $"{d.file_name}\t{r.x},{r.y},{r.width},{r.height}\t{p.x},{p.y}";
    }
 
    public UnitViewer unit_viewer_prefab;
@@ -418,7 +430,7 @@ public class ExportPipeline : MonoBehaviour {
       Graphics.CopyTexture(res, 0, 0, 0, 0, rect.width, rect.height, export_text_tot_r, 0, 0, rect.x, rect.y);
 
       Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
-      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{prepend_to_sprite_name}{FileOutput}", rect,
+      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{FileOutput}", rect,
          new Vector2(0.5f, 0.15f));
 
       tot_sprites.Add(spr);
@@ -436,7 +448,7 @@ public class ExportPipeline : MonoBehaviour {
          res);
 
       Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
-      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{prepend_to_sprite_name}{FileOutput}", rect,
+      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{FileOutput}", rect,
          new Vector2(0.5f, 0.15f));
 
       tot_sprites.Add(spr);
@@ -1226,7 +1238,7 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    string multi_atlas_name(int batch_id) => batch_id > 0 ? $"__{batch_id}" : "";
-   string full_atlas_name(int id) => $"{export_sheet_name}{append_to_atlas_name}{multi_atlas_name(id)}";
+   string full_atlas_name(int id) => $"{export_sheet_name}{multi_atlas_name(id)}";
 
 
    bool DeleteIfExists(string to_folder, string name) {

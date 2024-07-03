@@ -10,12 +10,15 @@ using FilterMode = UnityEngine.FilterMode;
 
 [DefaultExecutionOrder(10)]
 public class SpriteCapturePipeline : MonoBehaviour {
+   [Tooltip("Stops the run with an error in case the model clips out of the rendered view..")]
    public bool check_model_clipping;
+
+   [Tooltip("How many extra pixels are rendered and then merged into a single pixel, creating AA effect.")]
    public int export_resolution_downscale = 2;
 
-   [Header("Old late")]
-   public int size = 128;
-   public bool mirror_output;
+
+   [NonSerialized] public int size = 256;
+   [Header("Old late")] public bool mirror_output;
    public bool outline_depth = true;
    public bool outline_parts = true;
 
@@ -122,7 +125,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       return r;
    }
 
-   public void InitTextures(bool force=false) {
+   public void InitTextures(bool force = false) {
       if (result_rexture && !force) return;
 
       other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
@@ -185,8 +188,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       if (check_model_clipping) {
          CheckModelClipping(partial_render_result);
-
       }
+
       ComputeShaderUtils.CopyAndDownsampleTo(render_result, downsampled_render_result, mirror: mirror_output);
       time_benchmark?.Lap("Black Outline");
       foreach (var om in other_models) {
@@ -203,7 +206,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
       var cols = tex.GetPixels();
 
       for (int i = 0; i < cols.Length; i++) {
-
          int y = i / rt.width;
          int x = i % rt.width;
 
@@ -216,6 +218,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
             }
          }
       }
+
       Destroy(tex);
    }
 
@@ -310,16 +313,16 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       shader.Dispatch(kernelHandle, marker.width / 8, marker.height / 8, 1);
    }
-   
+
    float DepthFromCol(Color c) {
-      return c.r +  (c.g + c.b * (1.0f / 255)) * (1.0f / 255);
+      return c.r + (c.g + c.b * (1.0f / 255)) * (1.0f / 255);
    }
 
    void AddBlackOutline(RenderTexture t, RenderTexture marker) {
       if (try_shader_outlining) {
          // Debug.Log($"Experimental shader outlining");
          AddBlackOutlineGOU(t, marker);
-         
+
          return;
       }
 
@@ -420,6 +423,5 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    void LateUpdate() {
-      
    }
 }
