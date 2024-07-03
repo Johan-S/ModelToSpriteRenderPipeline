@@ -494,6 +494,11 @@ public class ExportPipeline : MonoBehaviour {
       if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
       Quaternion perspectove_rot = ano ? Quaternion.Euler(ano.model_perspective_rot) : Quaternion.identity;
       if (mirror) {
+         sprite_capture_pipeline.camera_handle.camera_yaw *= -1;
+         sprite_capture_pipeline.camera_handle.UpdateCamera();
+      }
+
+      if (mirror) {
          var mrot = model.transform.localRotation.eulerAngles;
          mrot.y *= -1;
          model.transform.localRotation =
@@ -592,7 +597,6 @@ public class ExportPipeline : MonoBehaviour {
          if (model_off != default) {
             var sprite_pivot = GetAdjustedSpritePivot(o.pivot, model_off, camera_d);
             sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
-            
          }
       }
 
