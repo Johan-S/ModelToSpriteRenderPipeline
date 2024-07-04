@@ -56,6 +56,7 @@ public class ExportPipeline : MonoBehaviour {
    public int effective_export_size => CeilToInt(export_size * capture_scale / 8) * 8;
 
 
+   public string prepend_to_sprite_name;
    [Space] [Header("Export Pipeline Description")]
    public ExportPipelineSheets sheets_pipeline_descriptor;
 
