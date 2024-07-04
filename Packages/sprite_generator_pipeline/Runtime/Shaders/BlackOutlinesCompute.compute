@@ -27,11 +27,11 @@ float4 outlines_color = float4(0, 0, 0, 1);
 
 float DiffArea(uint2 i, uint2 j) {
 
-   double di_f = DepthFromCol(front_depth_texture[i]);
-   double di_b = DepthFromCol(back_depth_texture[i]);
+   double di_f = FloatFromCol(front_depth_texture[i]);
+   double di_b = FloatFromCol(back_depth_texture[i]);
 
-   double dj_f = DepthFromCol(front_depth_texture[j]);
-   double dj_b = DepthFromCol(back_depth_texture[j]);
+   double dj_f = FloatFromCol(front_depth_texture[j]);
+   double dj_b = FloatFromCol(back_depth_texture[j]);
 
 
    float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin) * (ImageMarker[i] == ImageMarker[j]);

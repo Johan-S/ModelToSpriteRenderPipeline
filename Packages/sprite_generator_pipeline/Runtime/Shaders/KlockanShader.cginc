@@ -1,24 +1,20 @@
 ﻿#include "UnityCG.cginc"
 
-float2 parts(float z, int d) {
-   float z1 = (z * d) - floor(z * d);
-   return float2(z - z1 / d, z1);
+float crunch_to_256(float f) {
+   return floor(f * 255) / 255;
 }
 
-const float S_B = (1.0 / (255 * 256));
-const float S_G = (1.0 / 255);
-fixed4 DepthToCol(float z) {
+float4 FloatToCol(float z1r) {
+   float z1 = crunch_to_256(z1r);
+   float z2r = (z1r - z1) * 256;
+   float z2 = crunch_to_256(z2r);
+   float z3r = (z2r - z2) * 256;
+   float z3 = crunch_to_256(z3r);
+   
 
-   float2 p = parts(z, 256);
-
-   float2 p2 = parts(p.x, 256);
-   float z1 = (z * 256) - floor(z * 256);
-   return fixed4(p.x, p2.x, p2.y, 1);
+   return float4(z1, z2, z3, 1);
 }
 
-
-float DepthFromCol(float4 c) {
-   float a = (1.0 / (255 * 255));
-   float b = (1.0 / 255);
-   return c.r + c.g * S_G + c.b * S_B;
+float FloatFromCol(float4 c) {
+   return c.r + c.g / 256 + c.b / (256 * 256);
 }

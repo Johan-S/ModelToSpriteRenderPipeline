@@ -3,6 +3,27 @@ using Unity.Profiling;
 using UnityEngine;
 
 public static class ComputeShaderUtils {
+   public static Color FloatFromColor(float z1r) {
+      float z1 = crunch_to_256(z1r);
+      float z2r = (z1r - z1) * 256;
+      float z2 = crunch_to_256(z2r);
+      float z3r = (z2r - z2) * 256;
+      float z3 = crunch_to_256(z3r);
+
+      return new Color(z1, z2, z3, 1);
+   }
+
+   static float crunch_to_256(float f) {
+
+      return (int)(f * 255) / 255f;
+
+   }
+
+
+   public static float ColorToFloat(Color c) {
+      return crunch_to_256(c.r) + crunch_to_256(c.g) / 256 + crunch_to_256(c.b) / (256 * 256);
+   }
+
    static Dictionary<(int, int), RenderTexture> render_textures = new();
 
    [RuntimeInitializeOnLoadMethod]

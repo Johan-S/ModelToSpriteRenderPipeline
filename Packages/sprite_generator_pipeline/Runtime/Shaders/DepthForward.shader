@@ -52,7 +52,7 @@ Shader "Unlit/DepthForward"
             float z = i.vertex.z;
             
             
-            return DepthToCol(i.vertex.z);
+            return FloatToCol(i.vertex.z);
          }
          ENDCG
       }

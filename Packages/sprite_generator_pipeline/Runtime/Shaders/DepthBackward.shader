@@ -51,7 +51,7 @@ Shader "Unlit/DepthBackward"
             fixed4 col = tex2D(_MainTex, i.uv);
             // apply fog
             float z = i.vertex.z;
-            return DepthToCol(i.vertex.z);
+            return FloatToCol(i.vertex.z);
          }
          ENDCG
       }
