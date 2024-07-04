@@ -106,21 +106,7 @@ public class AnimationManager : MonoBehaviour {
             }
 
             if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty()) {
-               var len = clip.length;
-
-               var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
-
-               if (frames < 2) frames = 2;
-
-               int tot_dur = 0;
-               for (int i = 0; i < frames; i++) {
-                  float time = i * len / (frames - 1);
-                  tot_dur += (1000 / data.auto_frames_per_s).Round();
-
-                  p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data){
-                     time_ms = tot_dur,
-                  });
-               }
+               GenerateCaptureFrames(data, clip, p);
             } else {
                int tot_dur = 0;
                foreach (var (fr, dur) in data.capture_frame.Zip(data.time_ms)) {
@@ -138,6 +124,24 @@ public class AnimationManager : MonoBehaviour {
 
          // Debug.Log($"Group {g.Key}: {g.ToList().join(", ", x => x.category)}");
          yield return p;
+      }
+   }
+
+   public static void GenerateCaptureFrames(AnimationTypeObject data, AnimationClip clip, AnimationSet p) {
+      var len = clip.length;
+
+      var frames = Mathf.CeilToInt(len * data.auto_frames_per_s);
+
+      if (frames < 2) frames = 2;
+
+      int tot_dur = 0;
+      for (int i = 0; i < frames; i++) {
+         float time = i * len / (frames - 1);
+         tot_dur += (1000 / data.auto_frames_per_s).Round();
+
+         p.res.Add(new(data.clip_name, clip, data.category, Mathf.FloorToInt(time * 60), data) {
+            time_ms = tot_dur,
+         });
       }
    }
 
