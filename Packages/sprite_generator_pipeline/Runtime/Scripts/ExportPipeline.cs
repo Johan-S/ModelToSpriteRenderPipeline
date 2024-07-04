@@ -161,8 +161,8 @@ public class ExportPipeline : MonoBehaviour {
          var u = parsed_pipeline_data_orig.units.Find(x => x.out_name == cur_loaded.export_name);
          if (u == null) {
             u = parsed_pipeline_data_orig.CreateParsedUnit(load_unit_on_play);
-            Debug.Log($"Didn't find {cur_loaded.export_name} in export data!");
-            return;
+            // Debug.Log($"Didn't find {cur_loaded.export_name} in export data!");
+            // return;
          }
 
          SetActiveUnit(u);
