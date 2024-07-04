@@ -21,9 +21,24 @@ int res_height;
 
 float depth_margin;
 
-float4 inner_outlines_color = float4(0, 0, 0, 1);
 float4 outlines_color = float4(0, 0, 0, 1);
+float4 parts_outlines_color = float4(0, 0, 0, 1);
+float4 inner_outlines_color = float4(0, 0, 0, 1);
 
+float IsOuter(uint2 i) {
+
+   return front_depth_texture[i].xyz == float3(1, 1, 1);
+
+}
+
+float IsOuterMarker(uint2 i) {
+
+   return ImageMarker[i].xy != float2(1, 1);
+
+}
+float IsMarkerDiff(uint2 i, uint2 j) {
+   return (1 - IsOuterMarker(j)) * (ImageMarker[i].b > ImageMarker[j].b);
+}
 
 float DiffArea(uint2 i, uint2 j) {
 
@@ -34,26 +49,29 @@ float DiffArea(uint2 i, uint2 j) {
    double dj_b = FloatFromCol(back_depth_texture[j]);
 
 
-   float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin) * (ImageMarker[i] == ImageMarker[j]);
+   float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin);
 
-   return 1 - res;
+
+   return (1 - res) * !(IsMarkerDiff(j, i));
 }
 
-float IsOuter(uint2 i) {
-
-   return front_depth_texture[i].xyz == float3(1, 1, 1);
-
-}
 
 float4 CalcBlackOutline(int2 xy) {
 
 
-   uint2 d1 = uint2(xy.x > 0 && xy.x +1 < res_width, 0);
-   uint2 d2 = uint2(0, xy.y > 0 && xy.y +1 < res_height);
+   uint2 d1 = uint2(xy.x > 0 && xy.x + 1 < res_width, 0);
+   uint2 d2 = uint2(0, xy.y > 0 && xy.y + 1 < res_height);
    float res;
    float4 color;
 
-   if (IsOuter(xy)) {
+   if (IsOuterMarker(xy)) {
+
+      float same = IsOuterMarker(xy - d1) * IsOuterMarker(xy + d1) * IsOuterMarker(xy - d2) * IsOuterMarker(xy + d2);
+
+      res = !same;
+
+      return outlines_color * res;
+   } else if (IsOuter(xy)) {
 
 
       float same = IsOuter(xy - d1) * IsOuter(xy + d1) * IsOuter(xy - d2) * IsOuter(xy + d2);
@@ -61,10 +79,17 @@ float4 CalcBlackOutline(int2 xy) {
       res = !same;
 
       return outlines_color * res;
-   } else if (!IsOuter(xy - d1) || !IsOuter(xy - d2)) {
+   } else {
 
-      res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
-      return inner_outlines_color * res;
+      if (IsMarkerDiff(xy, xy - d1) + IsMarkerDiff(xy, xy + d1) + IsMarkerDiff(xy, xy - d2) + IsMarkerDiff(xy, xy + d2)) {
+         return parts_outlines_color;
+      }
+      
+      if (!IsOuter(xy - d1) && !IsOuter(xy - d2)) {
+
+         res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));
+         return inner_outlines_color * res;
+      }
    }
    return 0;
 }

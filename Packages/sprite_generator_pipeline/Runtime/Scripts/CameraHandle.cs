@@ -7,12 +7,9 @@ using UnityEngine;
 
 [DefaultExecutionOrder(-150)]
 public class CameraHandle : MonoBehaviour {
+   [Range(0, 90)] public float camera_pitch_angle;
 
-   [Range(0, 90)]
-   public float camera_pitch_angle;
-   
-   [Range(-180, 180)]
-   public float camera_yaw;
+   [Range(-180, 180)] public float camera_yaw;
 
    public Vector2 camera_pivot = new Vector2(0.5f, 0.15f);
 
@@ -30,22 +27,21 @@ public class CameraHandle : MonoBehaviour {
       if (Application.isPlaying) my_cam.enabled = false;
       UpdateCamera();
    }
-   
+
 
    public void UpdateCamera() {
       if (camera_size / 2 != my_cam.orthographicSize) {
          my_cam.orthographicSize = camera_size / 2;
       }
+
       float size = my_cam.orthographicSize;
       transform.localRotation = Quaternion.Euler(camera_pitch_angle, -camera_yaw, 0);
 
       var bl = new Vector2(size, size);
       var mid = bl - camera_pivot * size * 2;
       transform.localPosition = transform.localRotation * new Vector3(mid.x, mid.y, 0);
-
-
    }
-   
+
    public static Color ColorFrom(int i, bool fun = false) {
       if (!fun) return new Color32(255, 255, (byte)i, 255);
       Color cb = new Color();
@@ -53,6 +49,7 @@ public class CameraHandle : MonoBehaviour {
 
 
       float scale = 0.5f;
+      i += 3;
 
       while (i > 0) {
          if ((i & 1) == 1) cb.r += scale;
@@ -104,7 +101,7 @@ public class CameraHandle : MonoBehaviour {
    }
 
 
-   public void CaptureTo(RenderTexture render_texture, Shader shader, Color? clear_color=null) {
+   public void CaptureTo(RenderTexture render_texture, Shader shader, Color? clear_color = null) {
       Color bg = my_cam.backgroundColor;
       try {
          my_cam.backgroundColor = clear_color ?? bg;
@@ -115,8 +112,6 @@ public class CameraHandle : MonoBehaviour {
       finally {
          my_cam.backgroundColor = bg;
       }
-
-
    }
 
    RenderTexture GetRenderFor(Texture2D texture) {
@@ -133,15 +128,11 @@ public class CameraHandle : MonoBehaviour {
    }
 
    public void CaptureTo(RenderTexture render_texture) {
-
       my_cam.targetTexture = render_texture;
       my_cam.Render();
-
    }
 
    public void CaptureTo(Transform tr, RenderTexture rt) {
-
-
       var ot = my_cam.targetTexture;
 
       try {
@@ -204,15 +195,25 @@ public class CameraHandle : MonoBehaviour {
 
       var omask = my_cam.cullingMask;
 
+      var oc = my_cam.backgroundColor;
       try {
+         my_cam.backgroundColor = Color.black;
          my_cam.cullingMask = 1 << 15;
+         Color last_c = ColorFrom(0);
          for (int i = 0; i < meshes.Length; i++) {
             var (tr, m) = meshes[i];
 
+            var par = tr.GetComponent<PartsOutlineController>();
+
             var mat = tr.localToWorldMatrix;
 
+            if (par && par.renderAsPartOfLastPart) {
+               mb.SetColor("_Color", last_c);
+            } else {
+               last_c = ColorFrom(i, false);
+               mb.SetColor("_Color", last_c);
+            }
 
-            mb.SetColor("_Color", ColorFrom(i));
             rp.matProps = mb;
             rp.layer = 15;
 
@@ -223,7 +224,7 @@ public class CameraHandle : MonoBehaviour {
       }
       finally {
          my_cam.cullingMask = omask;
+         my_cam.backgroundColor = oc;
       }
-
    }
 }

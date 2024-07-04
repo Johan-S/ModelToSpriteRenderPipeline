@@ -227,4 +227,4 @@ MonoBehaviour:
   camera_yaw: 0
   camera_pivot: {x: 0.5, y: 0.15}
   camera_size: 4
-  color_mat: {fileID: 0}
+  color_mat: {fileID: 2100000, guid: 676ccee694016294ba661d4065b88714, type: 2}

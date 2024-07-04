@@ -830,7 +830,7 @@ public class ExportPipeline : MonoBehaviour {
          if (model_prefab) {
             var mod = sprite_capture_pipeline.model.ResetModel(model_prefab, model_action);
 
-            sprite_capture_pipeline.model.animation_clip = u.animations.First().clip;
+            // sprite_capture_pipeline.model.animation_clip = u.animations.First().clip;
 
             model_prefab = mod;
          } else {
@@ -938,7 +938,7 @@ public class ExportPipeline : MonoBehaviour {
          sprite_capture_pipeline.relative_model_height_for_shading = r == 0 ? 1 : r;
       }
 
-      sprite_capture_pipeline.model.animation_clip = pu.animations[0].clip;
+      // sprite_capture_pipeline.model.animation_clip = pu.animations[0].clip;
       if (load_animation_on_play) {
          StartCoroutine(RunAnimationCoroutine(pu));
       }

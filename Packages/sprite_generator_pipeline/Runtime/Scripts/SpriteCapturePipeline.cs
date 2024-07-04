@@ -24,6 +24,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
    [Tooltip("Outline color for the edges against the background, alpha makes it weaker/stronger.")]
    public Color black_outline_color = Color.black;
    [Tooltip("Outline color for the edges between different parts of the model, alpha makes it weaker/stronger.")]
+   public Color parts_outline_color_internal = Color.black;
+   [Tooltip("Outline color for the edges between different depths of the model, alpha makes it weaker/stronger.")]
    public Color black_outline_color_internal = Color.black;
 
    [Header("Unity Bindings")] public ModelHandle model;
@@ -136,6 +138,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       partial_render_result = result_rexture.GetRenderTextureFor();
       basic_shading_texture = result_rexture.GetRenderTextureFor();
       marker_texture = result_rexture.GetRenderTextureFor();
+      marker_texture.name = "marker_texture";
       front_depth_texture = result_rexture.GetRenderTextureFor();
       back_depth_texture = result_rexture.GetRenderTextureFor();
 
@@ -159,17 +162,18 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       time_benchmark?.Begin();
       if (outline_parts) {
+         marker_texture.Clear(Color.white);
          camera_handle.CaptureTo(model.render_obj.transform, marker_texture);
       } else {
-         marker_texture.Clear(Color.black);
+         marker_texture.Clear(Color.white);
       }
 
       if (outline_depth) {
          camera_handle.CaptureTo(front_depth_texture, front_depth_shader, Color.white);
          camera_handle.CaptureTo(back_depth_texture, back_depth_shader, Color.white);
       } else {
-         front_depth_texture.Clear(Color.white);
-         back_depth_texture.Clear(Color.white);
+         front_depth_texture.Clear(Color.black);
+         back_depth_texture.Clear(Color.black);
       }
 
       camera_handle.CaptureTo(basic_shading_texture);
@@ -304,6 +308,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetInt("res_width", result.width);
       shader.SetInt("res_height", result.height);
       shader.SetVector("outlines_color", black_outline_color);
+      shader.SetVector("parts_outlines_color", parts_outline_color_internal);
       shader.SetVector("inner_outlines_color", black_outline_color_internal);
 
       shader.SetTexture(kernelHandle, "Result", render_result);
