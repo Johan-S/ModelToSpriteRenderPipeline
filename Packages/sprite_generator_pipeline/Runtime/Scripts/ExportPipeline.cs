@@ -57,6 +57,7 @@ public class ExportPipeline : MonoBehaviour {
 
 
    public string prepend_to_sprite_name;
+
    [Space] [Header("Export Pipeline Description")]
    public ExportPipelineSheets sheets_pipeline_descriptor;
 
@@ -1252,7 +1253,8 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    public void WriteMetaFile(string to_folder, List<MetaRow> sprite_gen_meta, int id) {
-      var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
+      var meta_rows = sprite_gen_meta.Select(x => new MetaRow(prepend_to_sprite_name + x.file_name, x.rect, x.pivot))
+         .Select(SpriteGenMetaRow).ToArray();
 
       var mf = $"{to_folder}/{full_atlas_name(id)}.spritemeta";
       File.WriteAllText(mf, meta_rows.join("\n"));
