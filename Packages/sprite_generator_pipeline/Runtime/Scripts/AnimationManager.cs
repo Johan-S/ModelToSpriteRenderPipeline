@@ -111,7 +111,7 @@ public class AnimationManager : MonoBehaviour {
                int tot_dur = 0;
                foreach (var (fr, dur) in data.capture_frame.Zip(data.time_ms)) {
                   tot_dur += dur;
-                  p.res.Add(new(data.clip, clip, data.category, fr, null) {
+                  p.res.Add(new(data.clip, clip, data.category, fr, data) {
                      time_ms = tot_dur,
                   });
                }
