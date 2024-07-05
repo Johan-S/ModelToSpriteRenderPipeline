@@ -1347,9 +1347,6 @@ public class ExportPipeline : MonoBehaviour {
                var sprite = spr[i];
                if (sprite.marker_locations.TryGetValue(o.effect_spawn_pos_marker, out var p)) {
                   a.effect_spawn_pos = p;
-                  if (o.effect_spawn_pos_marker != None)
-                     Debug.Log(
-                        $"Spawn pos {a.unit} {a.category} {yaw} : {i} {o.effect_spawn_pos_marker}: {a.effect_spawn_pos}");
                } else {
                   Debug.LogError(
                      $"Misisng pos marker for {a.unit} animation {a.category}: {o.effect_spawn_pos_marker}");
