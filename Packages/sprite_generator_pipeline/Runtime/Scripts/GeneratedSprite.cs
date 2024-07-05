@@ -5,12 +5,15 @@ public class GeneratedSprite : Named {
 
    string _name;
 
-   public GeneratedSprite(string name, ParsedUnit pu, AnimationWrap an, SpriteRenderDetails shot_type) {
+   public GeneratedSprite(string name, int frame, ParsedUnit pu, AnimationWrap an, SpriteRenderDetails shot_type) {
       _name = name;
       this.pu = pu;
+      this.frame = frame;
       this.an = an;
       this.shot_type = shot_type;
    }
+
+   public int frame;
 
    public ParsedUnit pu;
    public AnimationWrap an;

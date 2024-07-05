@@ -99,6 +99,7 @@ public class AnimationManager : MonoBehaviour {
 
 
          foreach (var data in g.Concat(orig_g)) {
+            p.categories[data.category] = data;
             AnimationClip clip = GetAnimationClip(data);
             if (clip == null) {
                Debug.LogError($"Missing clip: {data.clip_name} for animation {data.name}");
@@ -146,6 +147,19 @@ public class AnimationManager : MonoBehaviour {
    }
 
    Dictionary<string, AnimationSet> GetanimationSets() {
+      Dictionary<string, AnimationSet> res = new();
+      var direct_anims = GetDirectAnimationSets().ToList();
+
+      foreach (var p in direct_anims) {
+         if (!res.TryAdd(p.name, p)) {
+            Debug.Log($"Duplicate animation: {p.name}");
+         }
+      }
+
+      return res;
+   }
+
+   Dictionary<string, AnimationSet> GetanimationSets_Old() {
       Dictionary<string, AnimationSet> res = new();
 
       if (sheets_pipeline_descriptor) {

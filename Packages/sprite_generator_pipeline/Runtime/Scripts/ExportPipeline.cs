@@ -1268,6 +1268,32 @@ public class ExportPipeline : MonoBehaviour {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
    }
 
+   public static IEnumerable<UnitAnimationData> GetAnimationDatas(string prefix, ParsedUnit pu) {
+      var sdict = pu.sprites_to_generate.ToKeyDict(x => (a: x.an.category, yaw: x.shot_type.yaw_angle));
+
+      foreach (var kv in sdict.sorted(x => x.ToString())) {
+         var (cat, yaw) = kv.Key;
+         var sprites = kv.Value.ToList();
+
+         var o = pu.animation_categories[cat];
+
+         var a = new UnitAnimationData();
+
+         a.unit = prefix + pu.out_name;
+         a.category = cat;
+         a.yaw = yaw;
+         a.sprites = o.capture_frame.IsEmpty()
+            ? sprites.map(x => prefix + x.name)
+            : o.capture_frame.map(x => prefix + sprites.Find(s => s.frame == x).name);
+         a.time_ms = o.time_ms.IsEmpty() ? a.sprites.map(x => (1000 / o.auto_frames_per_s).Round())
+               : o.time_ms.Copy();
+         
+         Debug.Assert(a.time_ms.Length == a.sprites.Length, a.unit + " " + a.category);
+
+         yield return a;
+      }
+   }
+
    public void WriteFiles(string to_folder) {
       int i = 0;
       for (; i < export_tex_tot_res.Count; i++) {
@@ -1278,6 +1304,14 @@ public class ExportPipeline : MonoBehaviour {
 
          WriteMetaFile(to_folder, meta, i);
       }
+
+      var anim = this.parsed_pipeline_data_orig.units.FlatMap(x => {
+         var datas = GetAnimationDatas(prepend_to_sprite_name, x);
+         return datas;
+      });
+
+      var json = anim.join("\n", x => JsonUtility.ToJson(x));
+      File.WriteAllText($"{to_folder}/{full_atlas_name(0)}.animationmeta", json);
 
       bool d;
       do {

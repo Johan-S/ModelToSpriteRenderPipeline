@@ -271,7 +271,7 @@ public class ParsedPipelineData {
                var fu = GetFileOutput(pu, an.category, an.frame, shot_type);
 
                if (sprites_to_generate.Contains(fu)) continue;
-               var s = new GeneratedSprite(fu, pu, an, shot_type);
+               var s = new GeneratedSprite(fu, an.frame, pu, an, shot_type);
                sprites_to_generate.Add(s);
                pu.sprites_to_generate.Add(s);
             }
@@ -352,6 +352,8 @@ public class ParsedPipelineData {
       }
 
       pu.animations.AddRange(anims);
+      pu.animation_categories = animation_set.categories;
+
       pu.idle_animation_id = pu.animations.FindIndex(x => x.category == "Idle");
       return pu;
    }
@@ -438,6 +440,8 @@ public class ParsedUnit {
 
    public List<AnimationWrap> animations = new();
 
+   public Dictionary<string, AnimationTypeObject> animation_categories = new();
+
    public string animation_type;
 
    public int idle_animation_id;
@@ -500,6 +504,8 @@ public class AnimationWrap {
 
 public class AnimationSet {
    public string name;
+
+   public Dictionary<string, AnimationTypeObject> categories = new();
 
    public List<AnimationWrap> res = new();
 }
