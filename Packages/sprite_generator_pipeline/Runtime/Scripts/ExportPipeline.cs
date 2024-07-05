@@ -318,7 +318,7 @@ public class ExportPipeline : MonoBehaviour {
 
    int batch_id;
 
-   RectInt MoveMeta(string FileOutput, int2 exp_size) {
+   RectInt MoveMeta(string FileOutput, int2 exp_size, Vector2 pivot) {
       var ei = sprite_gen_meta.Count;
 
       var px = out_grid_pix;
@@ -342,7 +342,7 @@ public class ExportPipeline : MonoBehaviour {
 
       var rect = new RectInt(pos.x, pos.y, exp_size.x, exp_size.y);
 
-      sprite_gen_meta.Add(new(FileOutput, rect, sprite_capture_pipeline.camera_handle.camera_pivot));
+      sprite_gen_meta.Add(new(FileOutput, rect, pivot));
 
       return rect;
    }
@@ -355,7 +355,10 @@ public class ExportPipeline : MonoBehaviour {
       using var _m = _m_DumpExport.Auto();
       ei++;
       RectInt from_r = new RectInt(0, 0, effective_export_size, effective_export_size);
+      var pivot = sprite_capture_pipeline.camera_handle.camera_pivot;
       if (compress_rects) {
+         Vector2Int osz = new Vector2Int(effective_export_size, effective_export_size);
+         Vector2 pivot_px = pivot * osz;
          using var rect_buffer = ComputeShaderUtils.gpu_GetVisibleRect(res);
 
          rect_buffer.Read();
@@ -363,9 +366,12 @@ public class ExportPipeline : MonoBehaviour {
 
          from_r.max = from_r.min + new int2(r.z.Round(), r.w.Round());
          from_r.min += new int2(r.x.Round(), r.y.Round());
+
+         var po2 = pivot_px - from_r.min;
+         pivot = po2 / from_r.size;
       }
 
-      var rect = MoveMeta(FileOutput, from_r.size);
+      var rect = MoveMeta(FileOutput, from_r.size, pivot);
 
 
       RenderTexture.active = export_text_tot_r;
