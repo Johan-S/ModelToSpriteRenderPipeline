@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using Shared;
+using UnityEngine;
+
 public class GeneratedSprite : Named {
    public string name {
       get => _name;
@@ -18,4 +22,9 @@ public class GeneratedSprite : Named {
    public ParsedUnit pu;
    public AnimationWrap an;
    public SpriteRenderDetails shot_type;
+
+
+   public Dictionary<AnimationTypeObject.EffectPosMarkerTags, Vector3> marker_locations = new() {
+      { AnimationTypeObject.EffectPosMarkerTags.None, new Vector3(0, 0.6f, 0) }
+   };
 }

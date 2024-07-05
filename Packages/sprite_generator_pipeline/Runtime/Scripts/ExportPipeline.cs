@@ -9,6 +9,7 @@ using TMPro;
 using Unity.Profiling;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
+using static Shared.AnimationTypeObject.EffectPosMarkerTags;
 using static UnityEngine.Mathf;
 using MetaRow = GeneratedSpritesContainer.MetaRow;
 using Object = UnityEngine.Object;
@@ -589,6 +590,37 @@ public class ExportPipeline : MonoBehaviour {
             File.WriteAllBytes($"{export_to_folder}/{export_sheet_name}/{sprite_to_generate.name}.png", data);
          }
       }
+
+      var mb = model.model_root.GetComponent<ModelBodyRoot>();
+
+      if (mb) {
+         bool mirror = sprite_to_generate.pu.model_body.mirror_render !=
+                       sprite_to_generate.an.animation_type_object.mirror_render;
+         var mat = sprite_capture_pipeline.camera_handle.transform.rotation;
+         mat = Quaternion.Inverse(mat);
+         // var mat2 = Quaternion.Euler(30, 0, 0);
+         var cp = sprite_capture_pipeline.camera_handle.transform.position;
+
+         Vector3 Trans(Vector3 p) {
+            p = mat * p;
+            if (mirror) p.x *= -1;
+            return p;
+         }
+
+
+         if (mb.Main_Hand) {
+            sprite_to_generate.marker_locations[Main_Hand] = Trans(mb.Main_Hand.transform.position);
+         }
+
+         if (mb.Off_Hand) {
+            sprite_to_generate.marker_locations[Off_Hand] = Trans(mb.Off_Hand.transform.position);
+         }
+
+         if (mb.Mouth) {
+            sprite_to_generate.marker_locations[Mouth] = Trans(mb.Mouth.transform.position);
+         }
+      }
+
 
       foreach (var x in model.GetComponentsInChildren<Renderer>()) {
          if (x.transform.parent.parent == model.transform) {
@@ -1282,13 +1314,40 @@ public class ExportPipeline : MonoBehaviour {
          a.unit = prefix + pu.out_name;
          a.category = cat;
          a.yaw = yaw;
-         a.sprites = o.capture_frame.IsEmpty()
-            ? sprites.map(x => prefix + x.name)
-            : o.capture_frame.map(x => prefix + sprites.Find(s => s.frame == x).name);
-         a.time_ms = o.time_ms.IsEmpty() ? a.sprites.map(x => (1000 / o.auto_frames_per_s).Round())
-               : o.time_ms.Copy();
-         
+         a.effect_time_ms = o.effect_time_ms;
+         a.loop_end_index = o.loop_end_index;
+         a.loop_start_index = o.loop_start_index;
+         var spr = o.capture_frame.IsEmpty()
+            ? sprites.ToArray()
+            : o.capture_frame.map(x => sprites.Find(s => s.frame == x));
+         a.sprites = spr.map(x => prefix + x.name);
+         a.time_ms = o.time_ms.IsEmpty()
+            ? spr.map(x => (1000 / o.auto_frames_per_s).Round())
+            : o.time_ms.Copy();
+
          Debug.Assert(a.time_ms.Length == a.sprites.Length, a.unit + " " + a.category);
+
+
+         int time = a.effect_time_ms;
+
+         for (int i = 0; i < a.time_ms.Length; i++) {
+            time -= a.time_ms[i];
+            if (time <= 0 || i == a.time_ms.Length - 1) {
+               var sprite = spr[i];
+               if (sprite.marker_locations.TryGetValue(o.effect_spawn_pos_marker, out var p)) {
+                  a.effect_spawn_pos = p;
+                  if (o.effect_spawn_pos_marker != None)
+                     Debug.Log(
+                        $"Spawn pos {a.unit} {a.category} {yaw} : {i} {o.effect_spawn_pos_marker}: {a.effect_spawn_pos}");
+               } else {
+                  Debug.LogError(
+                     $"Misisng pos marker for {a.unit} animation {a.category}: {o.effect_spawn_pos_marker}");
+               }
+
+               break;
+            }
+         }
+
 
          yield return a;
       }
