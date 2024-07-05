@@ -1158,43 +1158,7 @@ public class ExportPipeline : MonoBehaviour {
          Debug.Log($"px: {out_grid_pix}");
          yield return RunParsedPipeline(parsed_pipeline_data);
 
-         Vector2Int res_size = new Vector2Int(out_grid_pix.x, export_tex_cursor.y + export_tex_height_cursor);
-
-         int height_diff = out_grid_pix.y - res_size.y;
-
-         for (int i = 0; i < sprite_gen_meta.Count; i++) {
-            var mr = sprite_gen_meta[i];
-            mr.rect.y -= height_diff;
-            sprite_gen_meta[i] = mr;
-         }
-
-         export_tex_tot = new Texture2D(res_size.x, res_size.y);
-         export_tex_tot.ReadPixelsFrom(export_text_tot_r);
-         export_tex_tot.Apply();
-         export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
-
-
-         foreach (var metas in sprite_gen_meta) {
-            Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
-            var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{metas.file_name}", metas.rect,
-               metas.pivot);
-
-            tot_sprites.Add(spr);
-         }
-
-         int sprites_in = 0;
-
-         foreach (var pu in parsed_pipeline_data.units) {
-            var sc = GeneratedSpritesContainer.GetUnitCats(tot_sprites.SubArray(sprites_in,
-               sprites_in + pu.sprites_to_generate.Count));
-
-            sprites_in += sc.Count;
-
-            Debug.Assert(sc.Count == 1, $"Single unit should get since unit cats, but got: {sc.Count} ");
-
-            GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
-            PushNewRes(pu, cat);
-         }
+         CreateFinalTexture(parsed_pipeline_data);
       }
 
       var full_time = time_benchmark.LogTimes(out_sprite_count);
@@ -1212,6 +1176,47 @@ public class ExportPipeline : MonoBehaviour {
 
       OnDone();
       CompleteJingle();
+   }
+
+   void CreateFinalTexture(ParsedPipelineData parsed_pipeline_data) {
+      Vector2Int res_size = new Vector2Int(out_grid_pix.x, export_tex_cursor.y + export_tex_height_cursor);
+
+      int height_diff = out_grid_pix.y - res_size.y;
+
+      for (int i = 0; i < sprite_gen_meta.Count; i++) {
+         var mr = sprite_gen_meta[i];
+         mr.rect.y -= height_diff;
+         sprite_gen_meta[i] = mr;
+      }
+
+      export_tex_tot = new Texture2D(res_size.x, res_size.y);
+      export_tex_tot.ReadPixelsFrom(export_text_tot_r);
+      export_tex_tot.Apply();
+      export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
+
+
+      foreach (var metas in sprite_gen_meta) {
+         Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
+         var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{metas.file_name}", metas.rect,
+            metas.pivot);
+
+         tot_sprites.Add(spr);
+      }
+
+      int sprites_in = 0;
+
+      int tsr = parsed_pipeline_data.units.Sum(x => x.sprites_to_generate.Count);
+
+      foreach (var pu in parsed_pipeline_data.units) {
+         var tt = tot_sprites.SubArray(sprites_in, sprites_in + pu.sprites_to_generate.Count);
+         sprites_in += pu.sprites_to_generate.Count;
+         var sc = GeneratedSpritesContainer.GetUnitCats(tt);
+
+         Debug.Assert(sc.Count == 1, $"Single unit should get since unit cats, but got: {sc.Count} ");
+
+         GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
+         PushNewRes(pu, cat);
+      }
    }
 
    string multi_atlas_name(int batch_id) => batch_id > 0 ? $"__{batch_id}" : "";
