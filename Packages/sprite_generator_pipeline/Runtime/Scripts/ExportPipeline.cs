@@ -1117,9 +1117,6 @@ public class ExportPipeline : MonoBehaviour {
       out_grid.y = Min(out_grid.y, max_grid_width);
    }
 
-   void DumbDataNow() {
-   }
-
    IEnumerator RunPipeline() {
       int export_size = this.effective_export_size;
       if (write_files) {
