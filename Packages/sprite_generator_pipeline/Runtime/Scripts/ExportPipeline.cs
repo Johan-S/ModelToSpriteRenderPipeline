@@ -272,9 +272,10 @@ public class ExportPipeline : MonoBehaviour {
 
       r.name = pu.out_name;
       r.sprite = cats.idle_sprite;
-      r.animation_sprites =
-         AnimationSubsystem.GetAnimationSprites(pu.out_name, AnimationSubsystem.animations_parsed, pu.animation_type,
-            cats, strip_missing_silently: true).ToArray();
+      r.animation_sprites = AnimationSubsystem.GetAnimationSprites(pu.out_name, pu.generated_animation_datas, cats)
+         .ToArray();
+//          AnimationSubsystem.GetAnimationSprites(pu.out_name, AnimationSubsystem.animations_parsed, pu.animation_type,
+//            cats, strip_missing_silently: true).ToArray();
 
       return r;
    }
@@ -720,6 +721,7 @@ public class ExportPipeline : MonoBehaviour {
    void PushNewRes(ParsedUnit pu, GeneratedSpritesContainer.UnitCats cat) {
       unit_cats_list.Add(cat);
       pu.result = cat;
+      FillAnimationDatas("", pu);
 
       if (unit_viewer_running) {
          export_tex_tot.Apply();
@@ -1300,6 +1302,15 @@ public class ExportPipeline : MonoBehaviour {
       var meta_rows = sprite_gen_meta.Select(SpriteGenMetaRow).ToArray();
    }
 
+   public static List<UnitAnimationData> FillAnimationDatas(string prefix, ParsedUnit pu) {
+      Debug.Assert(pu.generated_animation_datas.IsEmpty());
+      var ad = GetAnimationDatas(prefix, pu);
+
+      pu.generated_animation_datas = ad.ToList();
+
+      return pu.generated_animation_datas;
+   }
+
    public static IEnumerable<UnitAnimationData> GetAnimationDatas(string prefix, ParsedUnit pu) {
       var sdict = pu.sprites_to_generate.ToKeyDict(x => (a: x.an.category, yaw: x.shot_type.yaw_angle));
 
@@ -1364,13 +1375,7 @@ public class ExportPipeline : MonoBehaviour {
          WriteMetaFile(to_folder, meta, i);
       }
 
-      var anim = this.parsed_pipeline_data_orig.units.FlatMap(x => {
-         var datas = GetAnimationDatas(prepend_to_sprite_name, x);
-         return datas;
-      });
-
-      var json = anim.join("\n", x => JsonUtility.ToJson(x));
-      File.WriteAllText($"{to_folder}/{full_atlas_name(0)}.animationmeta", json);
+      WriteAnimationDatas(to_folder);
 
       bool d;
       do {
@@ -1384,6 +1389,18 @@ public class ExportPipeline : MonoBehaviour {
       } while (d);
 
       omExportDone?.Invoke();
+   }
+
+   void WriteAnimationDatas(string to_folder) {
+      var anim = this.parsed_pipeline_data_orig.units.FlatMap(x => x.generated_animation_datas.map(x => {
+         x = x.Copy();
+         x.unit = prepend_to_sprite_name + x.unit;
+         x.sprites = x.sprites.map(x => prepend_to_sprite_name + x);
+         return x;
+      }));
+
+      var json = anim.join("\n", x => JsonUtility.ToJson(x));
+      File.WriteAllText($"{to_folder}/{full_atlas_name(0)}.animationmeta", json);
    }
 
    public Action open_output_folder => OpenOutputFolder;

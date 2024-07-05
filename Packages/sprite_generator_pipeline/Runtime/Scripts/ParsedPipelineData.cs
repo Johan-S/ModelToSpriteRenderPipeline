@@ -453,6 +453,8 @@ public class ParsedUnit {
    public GeneratedSpritesContainer.UnitCats result;
 
    public List<GeneratedSprite> sprites_to_generate = new();
+
+   public List<UnitAnimationData> generated_animation_datas;
 }
 
 public class ParsedPart {

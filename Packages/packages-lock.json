@@ -205,7 +205,8 @@
       "source": "embedded",
       "dependencies": {
         "klockan_std_lib": "",
-        "nightfall_shared_lib": ""
+        "nightfall_shared_lib": "",
+        "com.unity.mathematics": "1.2.6"
       }
     },
     "com.unity.modules.ai": {

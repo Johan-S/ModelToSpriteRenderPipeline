@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Unity.Mathematics;
 using Unity.Profiling;
+using UnityEditor;
 using UnityEngine;
 
 public static class ComputeShaderUtils {
@@ -14,9 +18,7 @@ public static class ComputeShaderUtils {
    }
 
    static float crunch_to_256(float f) {
-
       return (int)(f * 255) / 255f;
-
    }
 
 
@@ -31,6 +33,21 @@ public static class ComputeShaderUtils {
       render_textures = new();
    }
 
+
+   public static Buffer<float4> gpu_GetVisibleRect(this Texture tex) {
+      Buffer<float4> res = new(1);
+      shader.SetKernel("GetRectKernel");
+         
+      shader.SetTexture("tex_in", tex);
+      shader.SetInts("tex_in_size", tex.width, tex.height);
+
+      shader.SetBuffer("buffer4", res);
+
+      shader.Dispatch();
+
+      return res;
+   }
+
    public static RenderTexture GetCachedRenderTextureFor(this Texture2D texture) {
       int2 size = new int2(texture.width.UpperDiv(8), texture.height.UpperDiv(8)) * 8;
 
@@ -42,7 +59,7 @@ public static class ComputeShaderUtils {
       return render_texture;
    }
 
-   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits=32) {
+   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits = 32) {
       int2 size = new int2(texture.width.UpperDiv(8), texture.height.UpperDiv(8)) * 8;
 
       var render_texture = new RenderTexture(size.width, size.height, bits);
@@ -54,7 +71,7 @@ public static class ComputeShaderUtils {
 
    static ComputeShader _shader;
 
-   static ComputeShader shader {
+   public static ComputeShader shader {
       get {
          if (!_shader) {
             _shader = Resources.Load<ComputeShader>("ComputeShaderUtils");
@@ -66,13 +83,13 @@ public static class ComputeShaderUtils {
 
    public static void Clear(this RenderTexture tex, Color color) {
       RenderTexture.active = tex;
-      GL.Clear (true, true, color);
+      GL.Clear(true, true, color);
       RenderTexture.active = null;
    }
 
    public static void Clear(this Texture2D tex, Color color) {
       var rt = GetCachedRenderTextureFor(tex);
-      
+
       rt.Clear(color);
       RenderTexture.active = rt;
       tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0);
@@ -80,7 +97,7 @@ public static class ComputeShaderUtils {
    }
 
    public static void CopyAndDownsampleTo(RenderTexture src, RenderTexture rt, bool mirror) {
-      int kernelHandle = shader.FindKernel("CopyAndDownsampleTo");
+      int kernelHandle = shader.SetKernel("CopyAndDownsampleTo");
 
       shader.SetTexture(kernelHandle, "Result", rt);
       shader.SetTexture(kernelHandle, "tex_in", src);
@@ -91,7 +108,7 @@ public static class ComputeShaderUtils {
    }
 
    public static void MirrorInplace(this RenderTexture rt) {
-      int kernelHandle = shader.FindKernel("MirrorInplace");
+      int kernelHandle = shader.SetKernel("MirrorInplace");
       shader.SetTexture(kernelHandle, "Result", rt);
       shader.SetInt("N", rt.width);
       // Only dispatch for half width.
@@ -99,6 +116,7 @@ public static class ComputeShaderUtils {
    }
 
    static readonly ProfilerMarker _m_ReadPixelsFrom = Std.Profiler("ComputeShaderUtils", "ReadPixelsFrom");
+
    public static void ReadPixelsFrom(this Texture2D t, RenderTexture rt, RectInt rect) {
       using var _m = _m_ReadPixelsFrom.Auto();
       RenderTexture.active = rt;
@@ -111,16 +129,50 @@ public static class ComputeShaderUtils {
       tex.ReadPixelsFrom(t);
       tex.Apply();
       var c = tex.GetPixels();
-      
+
       GameObject.Destroy(tex);
       return c;
    }
-   
 
 
    public static void ReadPixelsFrom(this Texture2D t, RenderTexture rt) =>
-      ReadPixelsFrom(t, rt, new (0, 0, rt.width, rt.height));
+      ReadPixelsFrom(t, rt, new(0, 0, rt.width, rt.height));
 
    public static void CopyToRenderTexture(this Texture2D t, RenderTexture rt) =>
-      ReadPixelsFrom(t, rt, new (0, 0, rt.width, rt.height));
+      ReadPixelsFrom(t, rt, new(0, 0, rt.width, rt.height));
+
+
+   static int glob_kernel = -1;
+
+   public static int SetKernel(this ComputeShader shader, string name) {
+      // Debug.Assert(glob_kernel == -1);
+      glob_kernel = shader.FindKernel(name);
+      return glob_kernel;
+   }
+
+   public static void SetTexture(this ComputeShader shader, string name, Texture texture) {
+      Debug.Assert(glob_kernel != -1);
+      shader.SetTexture(glob_kernel, name, texture);
+   }
+
+   public static void SetBuffer(this ComputeShader shader, string name, ComputeBuffer buffer) {
+      Debug.Assert(glob_kernel != -1);
+      shader.SetBuffer(glob_kernel, name, buffer);
+   }
+
+   public static void SetBuffer<T>(this ComputeShader shader, string name, Buffer<T> buffer) where T : struct {
+      Debug.Assert(glob_kernel != -1);
+      shader.SetBuffer(glob_kernel, name, buffer.gpu);
+   }
+
+   public static void SetBuffer<T>(this ComputeShader shader, int kernel, string name, Buffer<T> buffer)
+      where T : struct {
+      shader.SetBuffer(kernel, name, buffer.gpu);
+   }
+
+   public static void Dispatch(this ComputeShader shader, int x = 1, int y = 1, int z = 1) {
+      Debug.Assert(glob_kernel != -1);
+      shader.Dispatch(glob_kernel, x, y, z);
+      glob_kernel = -1;
+   }
 }

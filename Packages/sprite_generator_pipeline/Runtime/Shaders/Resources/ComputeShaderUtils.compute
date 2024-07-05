@@ -1,18 +1,91 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CopyAndDownsampleTo
 #pragma kernel MirrorInplace
+#pragma kernel TestKernel
+#pragma kernel SumKernel
+#pragma kernel GetRectKernel
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-RWTexture2D<float4> Result;
+#include "Inputs.cginc"
 
-Texture2D<float4> tex_in;
+groupshared float internal_mem[64];
 
-float4 color;
+// Sums from buffer -> Result_Buffer[0]
+[numthreads(64, 1, 1)]
+void SumKernel(uint id : SV_DispatchThreadID) {
 
-int N;
+   float res = 0;
+   uint n = N / 64u;
+   for (uint i = 0; i < n; ++i) {
+      res += buffer[i + id * n];
+   }
+   internal_mem[id] = res;
+   GroupMemoryBarrierWithGroupSync();
+   if (id == 0) {
+
+      res = 0;
+      for (int i = 0; i < 64; ++i) {
+         res += internal_mem[i];
+      }
+      result_buffer[0] = res;
+   }
+}
+
+[numthreads(64, 1, 1)]
+void TestKernel(uint id : SV_DispatchThreadID) {
+
+   float res = 0;
+   for (int i = 0; i < N; ++i) {
+      res += buffer4[i + id * N].x;
+   }
+   internal_mem[id] = res;
+   GroupMemoryBarrierWithGroupSync();
+   if (id == 0) {
+
+      res = 0;
+      for (int i = 0; i < 64; ++i) {
+         res += internal_mem[i];
+      }
+      buffer[0] = res;
 
 
+   }
+}
+
+groupshared int4 rect_shared[64];
+
+// puts rect in buffer4[0]
+[numthreads(8, 8,1)]
+void GetRectKernel(uint3 id : SV_DispatchThreadID) {
+
+   int2 nn = tex_in_size / 8;
+
+   int2 ma = 0;
+   int2 mi = tex_in_size;
+   
+   for (int i = 0; i < nn.x; ++i) {
+      for (int j = 0; j < nn.y; ++j) {
+         int2 p = int2(i * 8, j * 8) + id.xy;
+         float4 c = tex_in[p];
+         if (c.a > 0) {
+            mi = min(mi, p);
+            ma = max(ma, p + 1);
+         }
+
+      }
+   }
+   rect_shared[id.x + id.y * 8] = int4(mi, ma);
+   GroupMemoryBarrierWithGroupSync();
+   if (id.x + id.y + id.z == 0) {
+
+      for (int i = 1; i < 64; ++i) {
+         mi = min(mi, rect_shared[i].xy);
+         ma = max(ma, rect_shared[i].zw);
+      }
+      mi = min(mi, ma);
+      buffer4[0] = float4(mi, ma);
+   }
+
+}
 
 [numthreads(8,8,1)]
 void Clear(uint3 id : SV_DispatchThreadID) {
@@ -37,6 +110,7 @@ float4 SumColors(Texture2D<float4> tex, int2 xy, int ns) {
 void CopyAndDownsampleTo(uint3 id : SV_DispatchThreadID) {
    int ns = N;
    Result[id.xy] = SumColors(tex_in, id.xy * ns, ns);
+   AllMemoryBarrierWithGroupSync();
 }
 
 // Use half width kernel here.
@@ -46,11 +120,11 @@ void MirrorInplace(uint3 id : SV_DispatchThreadID) {
    int w = N;
    int2 p = id.xy;
    int2 op = int2(w - 1 - p.x, p.y);
-   
+
    float4 a = Result[p];
    float4 b = Result[op];
 
    Result[op] = a;
    Result[p] = b;
-   
+
 }

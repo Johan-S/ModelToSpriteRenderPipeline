@@ -251,7 +251,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       float he = be * src.height;
       float hs = MapShadingHeight(shade_bottom_start) * src.height * relative_model_height_for_shading;
 
-      int kernelHandle = shader.FindKernel("ShadeBottom");
+      int kernelHandle = shader.SetKernel("ShadeBottom");
 
 
       shader.SetTexture(kernelHandle, "Result", dest);
@@ -298,7 +298,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    void AddBlackOutlineGOU(RenderTexture result, RenderTexture marker) {
       RenderTexture render_tex;
-      int kernelHandle = shader.FindKernel("CSMain");
+      int kernelHandle = shader.SetKernel("CSMain");
 
       float depth_to_z = camera_handle.TotalDepth();
       float dm = 0.024f;
