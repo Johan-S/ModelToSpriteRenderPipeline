@@ -65,13 +65,13 @@ public class ExportPipeline : MonoBehaviour {
    public const string defalt_export_dir = "../NightfallRogue/Packages/nightfall_sprites/Resources";
 
 
-   [Space] [Header("Pipeline Toggles")] public bool idle_only;
+   [Space] [Header("Pipeline Toggles")] public bool compress_rects;
+
+   public bool idle_only;
    public bool export_when_done;
    public static bool export_override;
 
    public bool only_atlas;
-
-   public bool only_atlas_meta;
 
    public bool write_files = true;
 
@@ -312,22 +312,35 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    Vector2Int out_grid;
+   Vector2Int out_grid_pix => out_grid * effective_export_size;
    int out_sprite_count;
    int tot_out_sprites_count;
 
    int batch_id;
 
-   RectInt MoveMeta(string FileOutput) {
+   RectInt MoveMeta(string FileOutput, int2 exp_size) {
       var ei = sprite_gen_meta.Count;
 
-      Vector2Int tid = new(ei % export_tex_sprites_w, ei / export_tex_sprites_w);
+      var px = out_grid_pix;
+
+      // Vector2Int tid = new(ei % export_tex_sprites_w, ei / export_tex_sprites_w);
+      Vector2Int tid = export_tex_cursor;
+
+      if (exp_size.x + tid.x > px.x) {
+         tid = new Vector2Int(0, tid.y + export_tex_height_cursor);
+         export_tex_height_cursor = 0;
+      }
+
+      export_tex_height_cursor = Mathf.Max(export_tex_height_cursor, exp_size.y);
+      export_tex_cursor = tid + new Vector2Int(exp_size.x, 0);
+
       var pos = tid;
       ei++;
 
-      pos.y = out_grid.y - 1 - pos.y;
+      pos.y = px.y - exp_size.y - pos.y;
 
 
-      var rect = new RectInt(pos.x * export_tex.width, pos.y * export_tex.height, export_tex.width, export_tex.height);
+      var rect = new RectInt(pos.x, pos.y, exp_size.x, exp_size.y);
 
       sprite_gen_meta.Add(new(FileOutput, rect, sprite_capture_pipeline.camera_handle.camera_pivot));
 
@@ -341,40 +354,33 @@ public class ExportPipeline : MonoBehaviour {
    void DumpExport(RenderTexture res, string FileOutput) {
       using var _m = _m_DumpExport.Auto();
       ei++;
+      RectInt from_r = new RectInt(0, 0, effective_export_size, effective_export_size);
+      if (compress_rects) {
+         using var rect_buffer = ComputeShaderUtils.gpu_GetVisibleRect(res);
 
-      var rect = MoveMeta(FileOutput);
+         rect_buffer.Read();
+         var r = rect_buffer[0];
+
+         from_r.max = from_r.min + new int2(r.z.Round(), r.w.Round());
+         from_r.min += new int2(r.x.Round(), r.y.Round());
+      }
+
+      var rect = MoveMeta(FileOutput, from_r.size);
+
+
       RenderTexture.active = export_text_tot_r;
       var scale = new Vector2(1f / export_text_tot_r.width, 1f / export_text_tot_r.height);
-      Graphics.CopyTexture(res, 0, 0, 0, 0, rect.width, rect.height, export_text_tot_r, 0, 0, rect.x, rect.y);
-
-      Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
-      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{FileOutput}", rect,
-         new Vector2(0.5f, 0.15f));
-
-      tot_sprites.Add(spr);
-
-      UpdateProgress();
-   }
-
-   void DumpExport_Old(Color[] res, string FileOutput) {
-      ei++;
-
-      var rect = MoveMeta(FileOutput);
-
-
-      export_tex_tot.SetPixels(rect.x, rect.y, rect.width, rect.height,
-         res);
-
-      Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
-      var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{FileOutput}", rect,
-         new Vector2(0.5f, 0.15f));
-
-      tot_sprites.Add(spr);
+      Graphics.CopyTexture(res, 0, 0, from_r.x, from_r.y, from_r.width, from_r.height, export_text_tot_r, 0, 0, rect.x,
+         rect.y);
 
       UpdateProgress();
    }
 
    int export_tex_sprites_w;
+
+   Vector2Int export_tex_cursor;
+   int export_tex_height_cursor;
+
    Vector2Int tid => new(ei % export_tex_sprites_w, ei / export_tex_sprites_w);
 
    int ei = 0;
@@ -621,13 +627,6 @@ public class ExportPipeline : MonoBehaviour {
 
          holder.used_material = res_mat;
       }
-
-      var sc = GeneratedSpritesContainer.GetUnitCats(tot_sprites.SubArray(sprites_in, tot_sprites.Count));
-
-      Debug.Assert(sc.Count == 1, $"Singe unit should get since unit cats, but got: {sc.Count} ");
-
-      GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
-      PushNewRes(pu, cat);
    }
 
    List<GeneratedSpritesContainer.UnitCats> unit_cats_list = new();
@@ -1089,6 +1088,8 @@ public class ExportPipeline : MonoBehaviour {
    }
 
    void SetOutGrid(int n_left) {
+      export_tex_cursor = default;
+      export_tex_height_cursor = 0;
       export_tex_sprites_w = Min(atlas_sprites_per_row, n_left, export_tex_sprites_w, max_grid_width);
       if (export_tex_sprites_w < 1) export_tex_sprites_w = 1;
       while (n_left > 2 * (export_tex_sprites_w + 5) * export_tex_sprites_w) {
@@ -1138,26 +1139,15 @@ public class ExportPipeline : MonoBehaviour {
          dummy_holder.gameObject.SetActive(false);
          export_tex = new Texture2D(export_size, export_size);
 
-         if (only_atlas_meta) {
-            foreach (var u in parsed_pipeline_data.units) {
-               foreach (var sg in u.sprites_to_generate) {
-                  MoveMeta(sg.name);
-               }
-            }
-
-            export_tex_tot_res.Add((null, sprite_gen_meta));
-
-            continue;
-         }
-
          UpdateProgress();
 
          Debug.Log($"grid: {parsed_pipeline_data.output_n}, {out_grid}, sz: {out_grid * export_size}");
 
-         export_tex_tot = new Texture2D(export_size * out_grid.x, out_grid.y * export_size);
-         export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
 
-         export_text_tot_r = export_tex_tot.GetRenderTextureFor();
+         export_text_tot_r = new RenderTexture(export_size * out_grid.x, out_grid.y * export_size, 32);
+         export_text_tot_r.enableRandomWrite = true;
+         export_text_tot_r.filterMode = FilterMode.Point;
+
 
          export_text_tot_r.Clear(default);
 
@@ -1165,9 +1155,46 @@ public class ExportPipeline : MonoBehaviour {
 
          sprite_capture_pipeline.time_benchmark = time_benchmark;
 
+         Debug.Log($"px: {out_grid_pix}");
          yield return RunParsedPipeline(parsed_pipeline_data);
+
+         Vector2Int res_size = new Vector2Int(out_grid_pix.x, export_tex_cursor.y + export_tex_height_cursor);
+
+         int height_diff = out_grid_pix.y - res_size.y;
+
+         for (int i = 0; i < sprite_gen_meta.Count; i++) {
+            var mr = sprite_gen_meta[i];
+            mr.rect.y -= height_diff;
+            sprite_gen_meta[i] = mr;
+         }
+
+         export_tex_tot = new Texture2D(res_size.x, res_size.y);
          export_tex_tot.ReadPixelsFrom(export_text_tot_r);
          export_tex_tot.Apply();
+         export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
+
+
+         foreach (var metas in sprite_gen_meta) {
+            Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
+            var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{metas.file_name}", metas.rect,
+               metas.pivot);
+
+            tot_sprites.Add(spr);
+         }
+
+         int sprites_in = 0;
+
+         foreach (var pu in parsed_pipeline_data.units) {
+            var sc = GeneratedSpritesContainer.GetUnitCats(tot_sprites.SubArray(sprites_in,
+               sprites_in + pu.sprites_to_generate.Count));
+
+            sprites_in += sc.Count;
+
+            Debug.Assert(sc.Count == 1, $"Single unit should get since unit cats, but got: {sc.Count} ");
+
+            GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
+            PushNewRes(pu, cat);
+         }
       }
 
       var full_time = time_benchmark.LogTimes(out_sprite_count);
@@ -1279,9 +1306,7 @@ public class ExportPipeline : MonoBehaviour {
       int i = 0;
       for (; i < export_tex_tot_res.Count; i++) {
          var (tex, meta) = export_tex_tot_res[i];
-         if (!only_atlas_meta) {
-            WriteTexturefile(to_folder, tex, i);
-         }
+         WriteTexturefile(to_folder, tex, i);
 
          WriteMetaFile(to_folder, meta, i);
       }
@@ -1292,9 +1317,7 @@ public class ExportPipeline : MonoBehaviour {
       do {
          d = false;
 
-         if (!only_atlas_meta) {
-            d = DeleteIfExists(to_folder, $"{full_atlas_name(i)}.png");
-         }
+         d = DeleteIfExists(to_folder, $"{full_atlas_name(i)}.png");
 
          d = DeleteIfExists(to_folder, $"{full_atlas_name(i)}.spritemeta") || d;
       } while (d);
