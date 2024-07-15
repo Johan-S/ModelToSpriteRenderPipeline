@@ -364,8 +364,8 @@ public class ExportPipeline : MonoBehaviour {
          rect_buffer.Read();
          var r = rect_buffer[0];
 
-         from_r.max = from_r.min + new int2(r.z.Round(), r.w.Round());
-         from_r.min += new int2(r.x.Round(), r.y.Round());
+         from_r.max = Vector2Int.Min(from_r.max, from_r.min + new int2(r.z.Round(), r.w.Round())+ new int2(1, 1));
+         from_r.min += Vector2Int.Max(new int2(r.x.Round(), r.y.Round()) - new int2(1, 1), new Vector2Int(0, 0));
 
          var po2 = pivot_px - from_r.min;
          pivot = po2 / from_r.size;
