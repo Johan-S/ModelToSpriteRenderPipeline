@@ -87,6 +87,8 @@ public class AnimationManager : MonoBehaviour {
       var ogroups = override_anims.ToKeyDict(x => x.animation_type.Replace("&", "_"));
       var groups = anim_objs.ToKeyDict(x => x.animation_type.Replace("&", "_"));
 
+      Dictionary<(string Type, string category), AnimationTypeObject> animation_mapping = new();
+
 
       foreach (var gk in all_keys) {
          var p = new AnimationSet();
@@ -98,7 +100,14 @@ public class AnimationManager : MonoBehaviour {
          p.name = gk;
 
 
-         foreach (var data in g.Concat(orig_g)) {
+         foreach (AnimationTypeObject data in g.Concat(orig_g)) {
+            (string Type, string category) key = (gk, data.category);
+            if (animation_mapping.TryGetValue(key, out var odata)) {
+               Debug.LogError($"Two animatons have same key {key}: {data.name} and {odata.name}! {data.name}");
+               continue;
+            }
+
+            animation_mapping[key] = data;
             p.categories[data.category] = data;
             AnimationClip clip = GetAnimationClip(data);
             if (clip == null) {
@@ -209,7 +218,6 @@ public class AnimationManager : MonoBehaviour {
    }
 
    public IEnumerable<Shared.AnimationParsed> GetDirectAnimationsParsed() {
-
       var clips = animation_bundles.FlatMap(x => x.animation_clips).ToLookupListObj();
 
       var anim_objs = Resources.LoadAll<AnimationTypeObject>("");
@@ -221,8 +229,8 @@ public class AnimationManager : MonoBehaviour {
          if (!clip) {
             clip = clips[data.clip_name];
          }
-         
-         
+
+
          if (data.auto_frames_per_s > 0 && data.capture_frame.IsEmpty() && clip) {
             var len = clip.length;
 
@@ -261,7 +269,8 @@ public class AnimationManager : MonoBehaviour {
                if (!TryFixMissingMs(data, ap)) {
                   Debug.Log($"Missing animation ms for: {data.name}, clips refered: {data.clip_name}!");
                   var clio = clips[data.clip_name];
-                  Debug.Log($"Missing animation ms for: {data.name}, clips refered: {data.clip_name}! but found: {clio}");
+                  Debug.Log(
+                     $"Missing animation ms for: {data.name}, clips refered: {data.clip_name}! but found: {clio}");
                }
             } else {
                ap.time_ms = data.time_ms;
