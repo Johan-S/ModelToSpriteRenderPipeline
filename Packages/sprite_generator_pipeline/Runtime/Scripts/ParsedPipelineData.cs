@@ -347,7 +347,7 @@ public class ParsedPipelineData {
          anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
 
       foreach (var an in anims) {
-         AnimationSubsystem.LogAnimationErrors(pu.animation_type, an.category);
+         AnimationSubsystem.LogAnimationErrors(pu.animation_type, an.category, an.animation_type_object);
       }
 
       pu.animations.AddRange(anims);
