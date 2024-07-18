@@ -31,8 +31,9 @@ public class TimeBenchmark {
    public double LogTimes(int nc) {
       var dt = last_t - first_t;
 
-      Debug.Log(
-         $"Export Bench tot {dt / nc * 1000:0} ms  per render: {dt:0.0} / {nc} :\n{steps.join("\n", x => $"{x}: {times[x]}")}");
+      if (ExportPipeline.editor_prefs.log_info)
+         Debug.Log(
+            $"Export Bench tot {dt / nc * 1000:0} ms  per render: {dt:0.0} / {nc} :\n{steps.join("\n", x => $"{x}: {times[x]}")}");
 
       return dt;
    }

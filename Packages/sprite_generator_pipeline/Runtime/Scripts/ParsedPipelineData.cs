@@ -378,7 +378,8 @@ public class ParsedPipelineData {
       if (name == "None" && ob_name == "") return null;
       var tr = parts_bundle.slotted_parts.Find(x => x.name == ob_name);
       if (!tr) {
-         Debug.Log($"Missing part: {name}, '{ob_name}'");
+         if (ExportPipeline.editor_prefs.log_info)
+            Debug.Log($"Missing part: {name}, '{ob_name}'");
          return null;
       }
 

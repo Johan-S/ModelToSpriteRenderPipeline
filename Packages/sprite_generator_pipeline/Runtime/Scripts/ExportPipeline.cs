@@ -7,6 +7,7 @@ using Shared;
 using UnityEngine;
 using TMPro;
 using Unity.Profiling;
+using UnityEditor;
 using UnityEngine.Events;
 using UnityEngine.Serialization;
 using static Shared.AnimationTypeObject.EffectPosMarkerTags;
@@ -15,7 +16,20 @@ using MetaRow = GeneratedSpritesContainer.MetaRow;
 using Object = UnityEngine.Object;
 
 [DefaultExecutionOrder(20)]
+[InitializeOnLoad]
 public class ExportPipeline : MonoBehaviour {
+   [Serializable]
+   [Stat("Export Pipeline Prefs")]
+   public class ExportPipelinePrefs {
+      public bool log_info;
+   }
+
+   public static ExportPipelinePrefs prefs = StandardLib.EditorSettingsHandler.Register<ExportPipelinePrefs>();
+
+   public static ExportPipelinePrefs editor_prefs => prefs;
+
+   static bool loginfo => prefs.log_info;
+
    void OnValidate() {
       tag = "ExportPipeline";
    }
@@ -364,7 +378,7 @@ public class ExportPipeline : MonoBehaviour {
          rect_buffer.Read();
          var r = rect_buffer[0];
 
-         from_r.max = Vector2Int.Min(from_r.max, from_r.min + new int2(r.z.Round(), r.w.Round())+ new int2(1, 1));
+         from_r.max = Vector2Int.Min(from_r.max, from_r.min + new int2(r.z.Round(), r.w.Round()) + new int2(1, 1));
          from_r.min += Vector2Int.Max(new int2(r.x.Round(), r.y.Round()) - new int2(1, 1), new Vector2Int(0, 0));
 
          var po2 = pivot_px - from_r.min;
@@ -968,6 +982,7 @@ public class ExportPipeline : MonoBehaviour {
    HashSet<string> log_cache = new();
 
    void LogMissing(string msg) {
+      if (!loginfo) return;
       if (log_cache.Add(msg)) Debug.Log(msg);
    }
 
@@ -1040,7 +1055,8 @@ public class ExportPipeline : MonoBehaviour {
 
 
       parsed_pipeline_data_orig = new(sheets_pipeline_descriptor, this);
-      Debug.Log($"units: {parsed_pipeline_data_orig.units.Count}");
+      if (ExportPipeline.editor_prefs.log_info)
+         Debug.Log($"units: {parsed_pipeline_data_orig.units.Count}");
       // if (this.generate_only.IsNonEmpty()) {
       //    parsed_pipeline_data.units.Filter(x =>
       //       generate_only.Exists(ut => ut.name == x.raw_name || ut.Unit_Name == x.raw_name));
@@ -1144,7 +1160,8 @@ public class ExportPipeline : MonoBehaviour {
 
          UpdateProgress();
 
-         Debug.Log($"grid: {parsed_pipeline_data.output_n}, {out_grid}, sz: {out_grid * export_size}");
+         if (loginfo)
+            Debug.Log($"grid: {parsed_pipeline_data.output_n}, {out_grid}, sz: {out_grid * export_size}");
 
 
          export_text_tot_r = new RenderTexture(export_size * out_grid.x, out_grid.y * export_size, 32);
@@ -1158,7 +1175,8 @@ public class ExportPipeline : MonoBehaviour {
 
          sprite_capture_pipeline.time_benchmark = time_benchmark;
 
-         Debug.Log($"px: {out_grid_pix}");
+         if (loginfo)
+            Debug.Log($"px: {out_grid_pix}");
          yield return RunParsedPipeline(parsed_pipeline_data);
 
          CreateFinalTexture(parsed_pipeline_data);
