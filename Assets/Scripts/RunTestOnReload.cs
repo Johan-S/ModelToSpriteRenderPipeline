@@ -15,7 +15,7 @@ namespace DefaultNamespace {
       static void TestK() {
          // RunTestSum();
          // RunTestKernel();
-         TestGetRect();
+         // TestGetRect();
          
       }
 
