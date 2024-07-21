@@ -9,6 +9,8 @@
 /.vscode/
 
 
+DataAssetRefs.asset
+
 /Packages/external_assets/*
 
 
