@@ -1232,7 +1232,7 @@ public class ExportPipeline : MonoBehaviour {
       foreach (var pu in parsed_pipeline_data.units) {
          var tt = tot_sprites.SubArray(sprites_in, sprites_in + pu.sprites_to_generate.Count);
          sprites_in += pu.sprites_to_generate.Count;
-         var sc = GeneratedSpritesContainer.GetUnitCats(tt);
+         var sc = GeneratedSpritesContainer.GetUnitCats(tt, tt.map(x => new MetaRow() { file_name = x.name }));
 
          Debug.Assert(sc.Count == 1, $"Single unit should get since unit cats, but got: {sc.Count} ");
 
