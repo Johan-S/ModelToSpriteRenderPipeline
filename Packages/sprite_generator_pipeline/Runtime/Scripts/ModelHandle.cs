@@ -37,30 +37,28 @@ public class ModelHandle : MonoBehaviour {
       if (!animator) return;
       var last_pos = go.transform.localPosition;
       var last_rot = go.transform.localRotation;
-      
+
       if (TRY_ANIMATOR) {
          var controller = animator.runtimeAnimatorController;
          if (controller) {
-            
             // Debug.Log($"an name: {controller.name}");
             if (controller.animationClips.Exists(cl => cl.name == clip.name)) {
-         
                // animator.StartPlayback();
-               var old = 
+               var old =
                   animator.enabled;
                animator.enabled = true;
                animator.Play(clip.NormalizedName(), -1, time / clip.length);
                animator.Update(1);
                animator.enabled = false;
                // animator.enabled = false;
-            
+
                return;
             } else {
                Debug.Log($"Missing animation: {clip.name}");
             }
          }
-
       }
+
       go.SetActive(false);
       clip.SampleAnimation(go, time);
       go.SetActive(true);
@@ -70,7 +68,6 @@ public class ModelHandle : MonoBehaviour {
          go.transform.localPosition = last_pos;
          go.transform.localRotation = last_rot;
       }
-      
    }
 
    public bool TRY_ANIMATOR;
@@ -102,10 +99,7 @@ public class ModelHandle : MonoBehaviour {
 
    public int animation_frame = 0;
 
-   [Header("Render types")] public Material raw_color_material;
-   public Material forward_depth_material;
-   public Material back_depth_material;
-[NonSerialized]
+   [NonSerialized]
    public Animator model_root;
 
    public bool negate_root_motion;
@@ -114,7 +108,7 @@ public class ModelHandle : MonoBehaviour {
    public Quaternion last_root_rotation;
 
 
-   public GameObject render_obj => model_root.gameObject;
+   public GameObject render_obj => model_root ? model_root.gameObject : null;
 
    public void SetActiveModel(bool a) {
       Init();
