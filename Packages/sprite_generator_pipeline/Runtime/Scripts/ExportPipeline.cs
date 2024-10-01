@@ -412,6 +412,7 @@ public class ExportPipeline : MonoBehaviour {
       SpriteRenderDetails shot_type) {
       SetShotType(shot_type);
 
+      model.render_obj.transform.localPosition = new Vector3();
       bool mirror = pu.model_body.mirror_render;
       var ano = animation_type_object;
       if (animation_type_object && animation_type_object.mirror_render) mirror = !mirror;
