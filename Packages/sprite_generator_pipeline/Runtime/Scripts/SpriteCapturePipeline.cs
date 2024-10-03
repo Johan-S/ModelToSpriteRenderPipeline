@@ -160,9 +160,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public void RunPipelineOnRootTransform(Transform tr) {
       using var _m = _m_RunPipeline.Auto();
       InitTextures();
-      foreach (var om in other_models) {
-         om.SetActive(false);
-      }
 
       time_benchmark?.Begin();
       if (outline_parts) {
@@ -207,6 +204,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    public void RunPipeline() {
+      foreach (var om in other_models) {
+         om.SetActive(false);
+      }
       RunPipelineOnRootTransform(model.render_obj.transform);
    }
 
