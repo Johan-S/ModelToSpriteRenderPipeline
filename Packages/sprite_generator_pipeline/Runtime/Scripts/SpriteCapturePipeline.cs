@@ -56,6 +56,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
       if (exporting) return;
       InitTextures();
 
+      if (!model || !model.isSet) {
+         return;
+      }
+
       RunPipeline();
    }
 
@@ -153,7 +157,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    static readonly ProfilerMarker _m_RunPipeline = Std.Profiler<SpriteCapturePipeline>("RunPipeline");
 
-   public void RunPipeline() {
+   public void RunPipelineOnRootTransform(Transform tr) {
       using var _m = _m_RunPipeline.Auto();
       InitTextures();
       foreach (var om in other_models) {
@@ -163,7 +167,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       time_benchmark?.Begin();
       if (outline_parts) {
          marker_texture.Clear(Color.white);
-         camera_handle.CaptureTo(model.render_obj.transform, marker_texture);
+         camera_handle.CaptureTo(tr, marker_texture);
       } else {
          marker_texture.Clear(Color.white);
       }
@@ -184,7 +188,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       partial_render_result.Clear(default);
 
       if (shade_bottom) {
-         ShadeBottom(basic_shading_texture, partial_render_result);
+         ShadeBottom(basic_shading_texture, partial_render_result, tr);
       } else {
          Graphics.Blit(basic_shading_texture, partial_render_result);
       }
@@ -200,6 +204,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
       foreach (var om in other_models) {
          om.SetActive(true);
       }
+   }
+
+   public void RunPipeline() {
+      RunPipelineOnRootTransform(model.render_obj.transform);
    }
 
    public void CheckModelClipping(RenderTexture rt) {
@@ -236,20 +244,20 @@ public class SpriteCapturePipeline : MonoBehaviour {
       downsampled_result_rexture.Apply();
    }
 
-   float MapShadingHeight(float h) {
+   float MapShadingHeight(float h, Transform tr) {
       var x = h - 0.25f;
       if (x < 0) return x;
 
-      var angle_fac = model.render_obj.transform.up.Dot(camera_handle.transform.up);
+      var angle_fac = tr.up.Dot(camera_handle.transform.up);
 
       return (x * relative_model_height_for_shading * angle_fac + 0.25f);
    }
 
-   public void ShadeBottom(RenderTexture src, RenderTexture dest) {
-      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start));
+   public void ShadeBottom(RenderTexture src, RenderTexture dest, Transform tr) {
+      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start), tr);
 
       float he = be * src.height;
-      float hs = MapShadingHeight(shade_bottom_start) * src.height * relative_model_height_for_shading;
+      float hs = MapShadingHeight(shade_bottom_start, tr) * src.height * relative_model_height_for_shading;
 
       int kernelHandle = shader.SetKernel("ShadeBottom");
 
@@ -266,13 +274,13 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.Dispatch(kernelHandle, dest.width / 8, dest.height / 8, 1);
    }
 
-   public void ShadeBottom(Texture2D t) {
+   public void ShadeBottom(Texture2D t, Transform tr) {
       var px = t.GetPixels();
 
-      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start));
+      var be = MapShadingHeight(Min(shade_bottom_end, shade_bottom_start), tr);
 
       float he = be * t.height;
-      float hs = MapShadingHeight(shade_bottom_start) * t.height * relative_model_height_for_shading;
+      float hs = MapShadingHeight(shade_bottom_start, tr) * t.height * relative_model_height_for_shading;
 
       for (int i = 0; i < px.Length; i++) {
          int h = i / t.height;
