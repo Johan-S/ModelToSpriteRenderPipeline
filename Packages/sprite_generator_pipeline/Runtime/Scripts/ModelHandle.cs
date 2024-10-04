@@ -16,8 +16,10 @@ public class ModelHandle : MonoBehaviour {
 
       Init();
 
-      Destroy(render_obj);
-      render_obj.SetActive(false);
+      if (render_obj) {
+         Destroy(render_obj);
+         render_obj.SetActive(false);
+      }
       model_root = null;
       var m = Instantiate(model, transform);
 
