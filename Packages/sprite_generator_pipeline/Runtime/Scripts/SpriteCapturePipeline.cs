@@ -8,8 +8,13 @@ using UnityEngine;
 using static UnityEngine.Mathf;
 using FilterMode = UnityEngine.FilterMode;
 
+
 [DefaultExecutionOrder(10)]
 public class SpriteCapturePipeline : MonoBehaviour {
+   public interface IBeforeSpriteRender {
+      void Handle();
+      void Cleanup();
+   }
    [Tooltip("Stops the run with an error in case the model clips out of the rendered view..")]
    public bool check_model_clipping;
 
@@ -55,15 +60,13 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    [Button(false)]
    public void RunNow() {
-      
       if (!front_depth_shader) front_depth_shader = Shader.Find("Unlit/DepthForward");
       if (!back_depth_shader) back_depth_shader = Shader.Find("Unlit/DepthBackward");
       InitTextures(false);
       if (!model.isSet) model.SetActiveModel(true);
-      model.UpdateModelAnimationPos(0);
+      if (model.isActiveAndEnabled) model.UpdateModelAnimationPos(0);
       RunPipeline();
       PushToResultTextures();
-      
    }
 
    // Start is called before the first frame update
@@ -176,6 +179,12 @@ public class SpriteCapturePipeline : MonoBehaviour {
       using var _m = _m_RunPipeline.Auto();
       InitTextures(false);
 
+      var handlers = tr.GetComponentsInChildren<IBeforeSpriteRender>();
+
+      foreach (var h in handlers) {
+         h.Handle();
+      }
+
       time_benchmark?.Begin();
       if (outline_parts) {
          marker_texture.Clear(Color.white);
@@ -193,6 +202,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
       }
 
       camera_handle.CaptureTo(basic_shading_texture);
+      
+      foreach (var h in handlers.Reversed()) {
+         h.Cleanup();
+      }
 
 
       time_benchmark?.Lap("Unity Render");
@@ -222,6 +235,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       foreach (var om in other_models) {
          om.SetActive(false);
       }
+
       RunPipelineOnRootTransform(model.render_obj.transform);
    }
 

@@ -15,6 +15,25 @@ public class CameraHandle : MonoBehaviour {
 
    public float camera_size = 4;
 
+   public static Transform camera_tr {
+      get {
+         var a = GetInstance();
+         if (!a) return null;
+         return a._my_cam.transform;
+      }
+   }
+
+   static CameraHandle GetInstance() {
+      if (!instance) {
+         var sc = GameObject.FindWithTag("SpriteCamera");
+         instance = sc.GetComponent<CameraHandle>();
+      }
+
+      return instance;
+   }
+
+   static CameraHandle instance;
+
    void OnValidate() {
       UpdateCamera();
    }
@@ -24,6 +43,7 @@ public class CameraHandle : MonoBehaviour {
    }
 
    void OnEnable() {
+      instance = this;
       if (Application.isPlaying) my_cam.enabled = false;
       UpdateCamera();
    }
@@ -148,16 +168,16 @@ public class CameraHandle : MonoBehaviour {
 
 
    IEnumerable<(Transform tr, Mesh m)> GetMeshes(Transform t) {
-      foreach (var a in t.GetComponentsInChildren<MeshFilter>()) {
-         if (a.sharedMesh) yield return (a.transform, a.sharedMesh);
-      }
+      foreach (var a in t.GetComponentsInChildren<Renderer>()) {
+         if (a is SkinnedMeshRenderer mr) {
+            if (!mr.sharedMesh) continue;
+            var m = new Mesh();
 
-      foreach (var a in t.GetComponentsInChildren<SkinnedMeshRenderer>()) {
-         if (!a.sharedMesh) continue;
-         var m = new Mesh();
-
-         a.BakeMesh(m, true);
-         yield return (a.transform, m);
+            mr.BakeMesh(m, true);
+            yield return (a.transform, m);
+         } else if (a.GetComponent<MeshFilter>() is MeshFilter mf) {
+            yield return (a.transform, mf.sharedMesh);
+         }
       }
    }
 

@@ -14,6 +14,7 @@ TagManager:
   - Stair
   - WallRun
   - ExportPipeline
+  - SpriteCamera
   layers:
   - Default
   - TransparentFX
