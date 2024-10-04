@@ -200,24 +200,33 @@ public class CameraHandle : MonoBehaviour {
          my_cam.backgroundColor = Color.black;
          my_cam.cullingMask = 1 << 15;
          Color last_c = ColorFrom(0);
+         Transform last_part = null;
+         int color_id = 0;
          for (int i = 0; i < meshes.Length; i++) {
             var (tr, m) = meshes[i];
 
-            var par = tr.GetComponent<PartsOutlineController>();
+            var submesh_sort = new[] { 0 };
+            if (m.subMeshCount > 1) submesh_sort = m.subMeshCount.times().sorted(x => m.GetSubMesh(x).vertexCount);
 
-            var mat = tr.localToWorldMatrix;
+            foreach (int j in submesh_sort) {
+               var par = tr.GetComponent<PartsOutlineController>();
 
-            if (par && par.renderAsPartOfLastPart) {
-               mb.SetColor("_Color", last_c);
-            } else {
-               last_c = ColorFrom(i, false);
-               mb.SetColor("_Color", last_c);
+               var mat = tr.localToWorldMatrix;
+
+
+               if (par && par.renderAsPartOfLastPart) {
+                  mb.SetColor("_Color", last_c);
+               } else {
+                  last_part = tr;
+                  last_c = ColorFrom(color_id++, false);
+                  mb.SetColor("_Color", last_c);
+               }
+
+               rp.matProps = mb;
+               rp.layer = 15;
+
+               Graphics.RenderMesh(rp, m, j, mat);
             }
-
-            rp.matProps = mb;
-            rp.layer = 15;
-
-            Graphics.RenderMesh(rp, m, 0, mat);
          }
 
          my_cam.Render();

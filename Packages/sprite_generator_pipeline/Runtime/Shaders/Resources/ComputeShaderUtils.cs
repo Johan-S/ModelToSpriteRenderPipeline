@@ -65,6 +65,7 @@ public static class ComputeShaderUtils {
       var render_texture = new RenderTexture(size.width, size.height, bits);
       render_texture.enableRandomWrite = true;
       render_texture.filterMode = FilterMode.Point;
+      render_texture.hideFlags = Std.NoSave;
 
       return render_texture;
    }

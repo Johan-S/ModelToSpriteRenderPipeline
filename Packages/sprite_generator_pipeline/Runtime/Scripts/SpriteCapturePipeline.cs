@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Profiling;
+using UnityEditor;
 using UnityEngine;
 using static UnityEngine.Mathf;
 using FilterMode = UnityEngine.FilterMode;
@@ -23,8 +24,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    [Tooltip("Outline color for the edges against the background, alpha makes it weaker/stronger.")]
    public Color black_outline_color = Color.black;
+
    [Tooltip("Outline color for the edges between different parts of the model, alpha makes it weaker/stronger.")]
    public Color parts_outline_color_internal = Color.black;
+
    [Tooltip("Outline color for the edges between different depths of the model, alpha makes it weaker/stronger.")]
    public Color black_outline_color_internal = Color.black;
 
@@ -50,11 +53,23 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public Shader front_depth_shader;
    public Shader back_depth_shader;
 
+   [Button(false)]
+   public void RunNow() {
+      
+      if (!front_depth_shader) front_depth_shader = Shader.Find("Unlit/DepthForward");
+      if (!back_depth_shader) back_depth_shader = Shader.Find("Unlit/DepthBackward");
+      InitTextures(false);
+      if (!model.isSet) model.SetActiveModel(true);
+      model.UpdateModelAnimationPos(0);
+      RunPipeline();
+      PushToResultTextures();
+      
+   }
 
    // Start is called before the first frame update
    void Start() {
       if (exporting) return;
-      InitTextures();
+      InitTextures(false);
 
       if (!model || !model.isSet) {
          return;
@@ -64,6 +79,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
    }
 
    void Awake() {
+      result_rexture = null;
       front_depth_shader = Shader.Find("Unlit/DepthForward");
       back_depth_shader = Shader.Find("Unlit/DepthBackward");
    }
@@ -123,16 +139,14 @@ public class SpriteCapturePipeline : MonoBehaviour {
       }
    }
 
-   public void ResetPos() {
-   }
-
    Texture2D MakeTex(int size) {
       var r = new Texture2D(size, size);
       r.filterMode = FilterMode.Point;
+      r.hideFlags = Std.NoSave;
       return r;
    }
 
-   public void InitTextures(bool force = false) {
+   public void InitTextures(bool force) {
       if (result_rexture && !force) return;
 
       other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
@@ -148,6 +162,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
       downsampled_result_rexture = MakeTex(size / export_resolution_downscale);
       downsampled_result_rexture.filterMode = FilterMode.Trilinear;
+      downsampled_result_rexture.name = "rt + " + EditorApplication.timeSinceStartup;
       downsampled_render_result = downsampled_result_rexture.GetRenderTextureFor();
 
       if (display_handle) display_handle.DisplayTex(downsampled_result_rexture, result_rexture);
@@ -159,7 +174,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public void RunPipelineOnRootTransform(Transform tr) {
       using var _m = _m_RunPipeline.Auto();
-      InitTextures();
+      InitTextures(false);
 
       time_benchmark?.Begin();
       if (outline_parts) {
