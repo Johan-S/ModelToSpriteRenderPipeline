@@ -181,6 +181,7 @@ public class ModelHandle : MonoBehaviour {
 
    // Update is called once per frame
    void Update() {
+      if (ExportPipeline.exporting) return;
       if (!model_root) Init();
       if (!model_root) return;
       HandleAnimation();

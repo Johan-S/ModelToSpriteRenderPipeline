@@ -18,6 +18,7 @@ using Object = UnityEngine.Object;
 [DefaultExecutionOrder(20)]
 [InitializeOnLoad]
 public class ExportPipeline : MonoBehaviour {
+   public static ExportPipeline exporting;
    [Serializable]
    [Stat("Export Pipeline Prefs")]
    public class ExportPipelinePrefs {
@@ -193,12 +194,13 @@ public class ExportPipeline : MonoBehaviour {
 
       executed = true;
       sprite_capture_pipeline.exporting = true;
+      exporting = this;
 
       IEnumerator SubPl() {
          yield return
             StartCoroutine(RunPipeline());
 
-
+         exporting = null;
          sprite_capture_pipeline.exporting = false;
       }
 
