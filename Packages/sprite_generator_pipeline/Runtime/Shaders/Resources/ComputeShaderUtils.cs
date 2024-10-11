@@ -136,8 +136,11 @@ public static class ComputeShaderUtils {
    }
 
 
-   public static void ReadPixelsFrom(this Texture2D t, RenderTexture rt) =>
+   public static void ReadPixelsFrom(this Texture2D t, RenderTexture rt) {
+      Debug.Assert(t.width == rt.width && t.height == rt.height);
       ReadPixelsFrom(t, rt, new(0, 0, rt.width, rt.height));
+   }
+
 
    public static void CopyToRenderTexture(this Texture2D t, RenderTexture rt) =>
       ReadPixelsFrom(t, rt, new(0, 0, rt.width, rt.height));

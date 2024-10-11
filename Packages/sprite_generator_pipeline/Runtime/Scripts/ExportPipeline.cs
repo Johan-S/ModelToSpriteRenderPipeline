@@ -19,6 +19,7 @@ using Object = UnityEngine.Object;
 [InitializeOnLoad]
 public class ExportPipeline : MonoBehaviour {
    public static ExportPipeline exporting;
+
    [Serializable]
    [Stat("Export Pipeline Prefs")]
    public class ExportPipelinePrefs {
@@ -1214,10 +1215,16 @@ public class ExportPipeline : MonoBehaviour {
          sprite_gen_meta[i] = mr;
       }
 
-      export_tex_tot = new Texture2D(res_size.x, res_size.y);
-      export_tex_tot.ReadPixelsFrom(export_text_tot_r);
-      export_tex_tot.Apply();
-      export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
+      {
+         export_tex_tot = new Texture2D(res_size.x, res_size.y);
+         RenderTexture.active = export_text_tot_r;
+         export_tex_tot.ReadPixels(
+            new Rect(0, export_text_tot_r.height - export_tex_tot.height, export_tex_tot.width, export_tex_tot.height),
+            0, 0);
+         RenderTexture.active = null;
+         export_tex_tot.Apply();
+         export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
+      }
 
 
       foreach (var metas in sprite_gen_meta) {
