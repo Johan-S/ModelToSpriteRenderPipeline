@@ -58,7 +58,7 @@ float DiffArea(uint2 i, uint2 j) {
    float3 aj_f = pj_f.gba;
    // float3 aj_b = pj_b.gba;
 
-   return (distance(ai_f.g, aj_f.g) > 0.05) * !(IsMarkerDiff(j, i));
+   return (distance(ai_f, aj_f) > 0.05) * !(IsMarkerDiff(j, i));
 
    double di_f = pi_f.x;
    double di_b = pi_b.x;
