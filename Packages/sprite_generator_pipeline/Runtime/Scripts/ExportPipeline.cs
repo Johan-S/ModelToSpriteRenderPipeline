@@ -1231,7 +1231,7 @@ public class ExportPipeline : MonoBehaviour {
       foreach (var metas in sprite_gen_meta) {
          Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
          var spr = GeneratedSpritesContainer.MakeSprite(export_tex_tot, $"{metas.file_name}", metas.rect,
-            metas.pivot);
+            metas.pivot, pixelsPerUnit: effective_export_size / 2);
 
          tot_sprites.Add(spr);
       }
