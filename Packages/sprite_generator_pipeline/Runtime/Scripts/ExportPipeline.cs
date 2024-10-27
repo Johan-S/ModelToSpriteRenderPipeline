@@ -780,6 +780,52 @@ public class ExportPipeline : MonoBehaviour {
 
    [SerializeField] public Transform dummy_holder;
 
+   public void PrepSkinnedMeshPosses(MeshFilter sk) {
+      if (sk.sharedMesh) {
+         var fi = parts_bundle.body_parts.Find(x => x.name == sk.sharedMesh.name);
+         if (fi) {
+            var nm = Instantiate(fi);
+            var a = nm.vertices;
+            var bp = a;
+            var mat = transform.localToWorldMatrix;
+            var bw = bp.map(x => mat * x);
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1) );
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1) );
+            sk.sharedMesh = nm;
+
+
+            // Debug.Log($"Max g: {cols.Max(x => x.r)}, {cols.Max(x => x.b)}, {cols.Max(x => x.b)}, {cols.Max(x => x.a)}");
+
+            // Debug.Log($"Prepped mesh filter: {sk.sharedMesh.name}");
+            Debug.Log($"added mesh: {sk.sharedMesh.name}");
+         } else {
+            Debug.Log($"missing mesh for {sk.sharedMesh.name}");
+         }
+      }
+   }
+
+   public void PrepSkinnedMeshPosses(SkinnedMeshRenderer sk) {
+      if (sk.sharedMesh) {
+         var fi = parts_bundle.body_parts.Find(x => x.name == sk.sharedMesh.name);
+         if (fi) {
+            var nm = Instantiate(fi);
+            Debug.Log($"fi v: {fi.vertices.Length}\n{nm.vertices.Length}");
+            var mat = transform.localToWorldMatrix;
+            var lmat = transform.lossyScale;
+            var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1) );
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1) );
+            sk.sharedMesh = nm;
+            // Debug.Log($"Prepped mesh skin: {sk.sharedMesh.name}");
+            Debug.Log($"added mesh: {sk.sharedMesh.name}");
+         } else {
+            Debug.Log($"missing mesh for {sk.sharedMesh.name}");
+         }
+      } else {
+         Debug.Log($"No shared mesh for: {sk.name}");
+      }
+   }
+
 
    ModelBodyRoot PrepModelObject(ParsedUnit u) {
       GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ??
@@ -837,6 +883,18 @@ public class ExportPipeline : MonoBehaviour {
                if (mesh == null) {
                   Debug.LogError($"Didn't find mesh {kv.Value}");
                } else {
+                  var fi = parts_bundle.body_parts.Find(x => x.name == sk.sharedMesh.name);
+                  if (fi) {
+                     var nm = Instantiate(fi);
+                     var cols = nm.vertices.map(x => new Vector2(x.x, x.y));
+                     nm.uv4 = cols;
+                     nm.uv5 = nm.vertices.map(x => new Vector2(x.z, 0));
+                     // sk.sharedMesh = nm;
+                     // Debug.Log($"Prepped mesh skin: {sk.sharedMesh.name}");
+                  } else {
+                     Debug.Log($"missing mesh for {sk.sharedMesh.name}");
+                  }
+
                   sk.sharedMesh = mesh;
                }
             }
@@ -887,6 +945,11 @@ public class ExportPipeline : MonoBehaviour {
             }
 
             AddThemePartTo(part_o, slot, u.theme_color);
+         }
+
+         foreach (var sk in skinned_rend) {
+            if (sk is SkinnedMeshRenderer am) PrepSkinnedMeshPosses(am);
+            if (sk is MeshRenderer mr) PrepSkinnedMeshPosses(mr.GetComponent<MeshFilter>());
          }
 
          // model.name = u.out_name;
@@ -1252,6 +1315,7 @@ public class ExportPipeline : MonoBehaviour {
          for (int i = 1; i < vals.Count; i++) {
             cat.sprites.AddRange(vals[i].sprites);
          }
+
          PushNewRes(pu, cat);
       }
    }

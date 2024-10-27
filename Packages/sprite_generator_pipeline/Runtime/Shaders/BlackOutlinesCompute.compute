@@ -21,6 +21,8 @@ int res_height;
 
 float depth_margin;
 
+float pos_margin;
+
 float4 outlines_color = float4(0, 0, 0, 1);
 float4 parts_outlines_color = float4(0, 0, 0, 1);
 float4 inner_outlines_color = float4(0, 0, 0, 1);
@@ -36,17 +38,32 @@ float IsOuterMarker(uint2 i) {
    return ImageMarker[i].xy != float2(1, 1);
 
 }
+
 float IsMarkerDiff(uint2 i, uint2 j) {
    return (1 - IsOuterMarker(j)) * (ImageMarker[i].b > ImageMarker[j].b);
 }
 
 float DiffArea(uint2 i, uint2 j) {
 
-   double di_f = FloatFromCol(front_depth_texture[i]);
-   double di_b = FloatFromCol(back_depth_texture[i]);
+   float4 pi_f = front_depth_texture[i];
+   float4 pi_b = back_depth_texture[i];
 
-   double dj_f = FloatFromCol(front_depth_texture[j]);
-   double dj_b = FloatFromCol(back_depth_texture[j]);
+   float4 pj_f = front_depth_texture[j];
+   float4 pj_b = back_depth_texture[j];
+
+
+   float3 ai_f = pi_f.gba;
+   float3 ai_b = pi_b.gba;
+
+   float3 aj_f = pj_f.gba;
+   float3 aj_b = pj_b.gba;
+
+
+   double di_f = pi_f.x;
+   double di_b = pi_b.x;
+
+   double dj_f = pj_f.x;
+   double dj_b = pj_b.x;
 
 
    float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin);
@@ -81,10 +98,11 @@ float4 CalcBlackOutline(int2 xy) {
       return outlines_color * res;
    } else {
 
-      if (IsMarkerDiff(xy, xy - d1) + IsMarkerDiff(xy, xy + d1) + IsMarkerDiff(xy, xy - d2) + IsMarkerDiff(xy, xy + d2)) {
+      if (IsMarkerDiff(xy, xy - d1) + IsMarkerDiff(xy, xy + d1) + IsMarkerDiff(xy, xy - d2) +
+         IsMarkerDiff(xy, xy + d2)) {
          return parts_outlines_color;
       }
-      
+
       if (!IsOuter(xy - d1) && !IsOuter(xy - d2)) {
 
          res = 1 - !DiffArea(xy, xy - d1) * !(DiffArea(xy, xy - d2));

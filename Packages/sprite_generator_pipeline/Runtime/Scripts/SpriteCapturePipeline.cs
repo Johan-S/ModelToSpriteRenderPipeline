@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using static UnityEngine.Mathf;
 using FilterMode = UnityEngine.FilterMode;
 
@@ -15,6 +16,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       void Handle();
       void Cleanup();
    }
+
    [Tooltip("Stops the run with an error in case the model clips out of the rendered view..")]
    public bool check_model_clipping;
 
@@ -160,8 +162,12 @@ public class SpriteCapturePipeline : MonoBehaviour {
       basic_shading_texture = result_rexture.GetRenderTextureFor();
       marker_texture = result_rexture.GetRenderTextureFor();
       marker_texture.name = "marker_texture";
-      front_depth_texture = result_rexture.GetRenderTextureFor();
-      back_depth_texture = result_rexture.GetRenderTextureFor();
+      front_depth_texture = result_rexture.GetRenderTextureFor(hdr: true);
+      back_depth_texture = result_rexture.GetRenderTextureFor(hdr: true);
+
+      ltex = new Texture2D(back_depth_texture.width, back_depth_texture.height, back_depth_texture.graphicsFormat,
+         TextureCreationFlags.None);
+      ltex.name = "See wtf is there";
 
       downsampled_result_rexture = MakeTex(size / export_resolution_downscale);
       downsampled_result_rexture.filterMode = FilterMode.Trilinear;
@@ -174,6 +180,11 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public TimeBenchmark time_benchmark;
 
    static readonly ProfilerMarker _m_RunPipeline = Std.Profiler<SpriteCapturePipeline>("RunPipeline");
+
+   public void HdrDepth() {
+   }
+
+   public Texture2D ltex;
 
    public void RunPipelineOnRootTransform(Transform tr) {
       using var _m = _m_RunPipeline.Auto();
@@ -194,15 +205,31 @@ public class SpriteCapturePipeline : MonoBehaviour {
       }
 
       if (outline_depth) {
-         camera_handle.CaptureTo(front_depth_texture, front_depth_shader, Color.white);
-         camera_handle.CaptureTo(back_depth_texture, back_depth_shader, Color.white);
+         camera_handle.CaptureTo(front_depth_texture, front_depth_shader, new Color(1, 0, 0, 0));
+         camera_handle.CaptureTo(back_depth_texture, back_depth_shader, new Color(1, 0, 0, 0));
+
+         void Runlogs() {
+            
+            ltex.ReadPixelsFrom(back_depth_texture);
+            ltex.Apply();
+            var cl = ltex.GetPixels();
+            var cols = back_depth_texture.ReadPixels_Expensive();
+            cols = cl;
+            var hs = cols.map(x => x.r).ToSet();
+            var st = hs.sorted();
+            Debug.Log($"hs {hs.Count}: , {st[1..].enumerate().map(iv => iv.value - st[iv.i]).Min()}\n\n{st.join("\n")}\n");
+            Debug.Log($"Max g: {cols.Max(x => x.r)}, {cols.Max(x => x.g)}, {cols.Max(x => x.b)}, {cols.Max(x => x.a)}");
+            Debug.Log($"Min g: {cols.Min(x => x.r)}, {cols.Min(x => x.g)}, {cols.Min(x => x.b)}, {cols.Min(x => x.a)}");
+         }
+
+         // Runlogs();
       } else {
          front_depth_texture.Clear(Color.black);
          back_depth_texture.Clear(Color.black);
       }
 
       camera_handle.CaptureTo(basic_shading_texture);
-      
+
       foreach (var h in handlers.Reversed()) {
          h.Cleanup();
       }
