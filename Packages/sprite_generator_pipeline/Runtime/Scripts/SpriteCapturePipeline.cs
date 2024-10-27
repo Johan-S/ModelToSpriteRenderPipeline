@@ -363,7 +363,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       );
 
       float depth_to_z = camera_handle.TotalDepth();
-      float dm = 0.024f;
+      float dm = 0.035f; //  = 0.024f;
       float depth_margin = dm / depth_to_z;
 
       shader.SetFloat("original_dist_margin", original_dist_margin);

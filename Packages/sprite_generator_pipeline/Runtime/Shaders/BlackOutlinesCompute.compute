@@ -205,6 +205,9 @@ void OutlineOriginalDists(uint3 id : SV_DispatchThreadID) {
 
    // TODO: insert actual code here!
    float4 res = CalcBlackOutline_OriginalDists(id.xy);
+   float4 res2 = CalcBlackOutline(id.xy);
+
+   res = max(res, res2);
 
    float4 px = ImageInput[id.xy];
 
