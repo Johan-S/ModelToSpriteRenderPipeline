@@ -8,4 +8,7 @@ using UnityEngine;
 public class PartsOutlineController : MonoBehaviour {
 
    public bool renderAsPartOfLastPart;
+
+
+   public int[] sub_mesh_render_order;
 }

@@ -226,11 +226,16 @@ public class CameraHandle : MonoBehaviour {
             var (tr, m) = meshes[i];
 
             var submesh_sort = new[] { 0 };
-            if (m.subMeshCount > 1) submesh_sort = m.subMeshCount.times().sorted(x => m.GetSubMesh(x).vertexCount);
+            var par = tr.GetComponent<PartsOutlineController>();
+            if (m.subMeshCount > 1) {
+               if (par && par.sub_mesh_render_order.IsNonEmpty()) {
+                  submesh_sort = par.sub_mesh_render_order.Copy().where(x => x < m.subMeshCount);
+               } else {
+                  submesh_sort = m.subMeshCount.times().sorted(x => m.GetSubMesh(x).vertexCount);
+               }
+            }
 
             foreach (int j in submesh_sort) {
-               var par = tr.GetComponent<PartsOutlineController>();
-
                var mat = tr.localToWorldMatrix;
 
 
