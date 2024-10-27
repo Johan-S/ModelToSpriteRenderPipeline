@@ -1226,6 +1226,7 @@ public class ExportPipeline : MonoBehaviour {
          export_tex_tot_res.Add((export_tex_tot, sprite_gen_meta));
       }
 
+      int sprites_in = tot_sprites.Count;
 
       foreach (var metas in sprite_gen_meta) {
          Vector2 pix = new(export_tex_tot.width, export_tex_tot.height);
@@ -1235,7 +1236,6 @@ public class ExportPipeline : MonoBehaviour {
          tot_sprites.Add(spr);
       }
 
-      int sprites_in = 0;
 
       int tsr = parsed_pipeline_data.units.Sum(x => x.sprites_to_generate.Count);
 
@@ -1244,9 +1244,14 @@ public class ExportPipeline : MonoBehaviour {
          sprites_in += pu.sprites_to_generate.Count;
          var sc = GeneratedSpritesContainer.GetUnitCats(tt, tt.map(x => new MetaRow() { file_name = x.name }));
 
-         Debug.Assert(sc.Count == 1, $"Single unit should get since unit cats, but got: {sc.Count} ");
+         Debug.AssertFormat(sc.Count == 1, "Single unit should get since unit cats, but got {1}: {0} - {2}", sc.Count,
+            pu.out_name, sc.Keys.join(", "));
 
-         GeneratedSpritesContainer.UnitCats cat = sc.Values.First();
+         var vals = sc.Values.ToList();
+         GeneratedSpritesContainer.UnitCats cat = vals[0];
+         for (int i = 1; i < vals.Count; i++) {
+            cat.sprites.AddRange(vals[i].sprites);
+         }
          PushNewRes(pu, cat);
       }
    }
