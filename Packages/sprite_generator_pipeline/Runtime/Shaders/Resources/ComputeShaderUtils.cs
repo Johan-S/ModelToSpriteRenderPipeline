@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 public static class ComputeShaderUtils {
    public static Color FloatFromColor(float z1r) {
@@ -37,7 +38,7 @@ public static class ComputeShaderUtils {
    public static Buffer<float4> gpu_GetVisibleRect(this Texture tex) {
       Buffer<float4> res = new(1);
       shader.SetKernel("GetRectKernel");
-         
+
       shader.SetTexture("tex_in", tex);
       shader.SetInts("tex_in_size", tex.width, tex.height);
 
@@ -59,10 +60,11 @@ public static class ComputeShaderUtils {
       return render_texture;
    }
 
-   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits = 32) {
+   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits = 32, bool hdr = false) {
       int2 size = new int2(texture.width.UpperDiv(8), texture.height.UpperDiv(8)) * 8;
 
-      var render_texture = new RenderTexture(size.width, size.height, bits);
+      var render_texture =
+         new RenderTexture(size.width, size.height, bits, hdr ? DefaultFormat.LDR : DefaultFormat.HDR);
       render_texture.enableRandomWrite = true;
       render_texture.filterMode = FilterMode.Point;
       render_texture.hideFlags = Std.NoSave;

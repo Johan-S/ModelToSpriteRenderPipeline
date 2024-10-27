@@ -781,6 +781,41 @@ public class ExportPipeline : MonoBehaviour {
    [SerializeField] public Transform dummy_holder;
 
 
+   public Mesh PrepMeshWithOriginalPos(Transform tr, Mesh mesh) {
+      if (mesh) {
+         var fi = parts_bundle.body_parts.Find(x => x.name == mesh.name);
+         if (fi) {
+            var nm = Instantiate(fi);
+            var a = nm.vertices;
+            var bp = a;
+            var mat = tr.localToWorldMatrix;
+            var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1));
+            return nm;
+         } else {
+            Debug.Log($"missing mesh for {mesh.name}");
+         }
+      }
+
+      return mesh;
+   }
+
+   public void StoreOOriginalPosForModel(Transform tr) {
+      foreach (var sk in tr.GetComponentsInChildren<Renderer>()) {
+         if (sk is SkinnedMeshRenderer am) {
+            var m = PrepMeshWithOriginalPos(am.transform, am.sharedMesh);
+            if (m) am.sharedMesh = m;
+         }
+
+         if (sk is MeshRenderer mr) {
+            var mf = mr.GetComponent<MeshFilter>();
+            var m = PrepMeshWithOriginalPos(mr.transform, mf.sharedMesh);
+            if (m) mf.sharedMesh = m;
+         }
+      }
+   }
+
    ModelBodyRoot PrepModelObject(ParsedUnit u) {
       GameObject model_prefab = u.model_body.body_category?.model_root_prefab?.gameObject ??
                                 Resources.Load<GameObject>($"BaseModels/{u.model_name}");
@@ -889,6 +924,9 @@ public class ExportPipeline : MonoBehaviour {
             AddThemePartTo(part_o, slot, u.theme_color);
          }
 
+         if (sprite_capture_pipeline.use_original_pos_outlining) {
+            StoreOOriginalPosForModel(model_body.transform);
+         }
          // model.name = u.out_name;
       });
       return model_body_prefab;
@@ -1252,6 +1290,7 @@ public class ExportPipeline : MonoBehaviour {
          for (int i = 1; i < vals.Count; i++) {
             cat.sprites.AddRange(vals[i].sprites);
          }
+
          PushNewRes(pu, cat);
       }
    }

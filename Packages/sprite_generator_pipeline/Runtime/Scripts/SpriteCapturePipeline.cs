@@ -15,6 +15,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       void Handle();
       void Cleanup();
    }
+
    [Tooltip("Stops the run with an error in case the model clips out of the rendered view..")]
    public bool check_model_clipping;
 
@@ -54,14 +55,18 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public RenderTexture front_depth_texture;
    public RenderTexture back_depth_texture;
 
+   public RenderTexture original_pos_texture;
+
 
    public Shader front_depth_shader;
    public Shader back_depth_shader;
+   public Shader original_pos_shader;
 
    [Button(false)]
    public void RunNow() {
       if (!front_depth_shader) front_depth_shader = Shader.Find("Unlit/DepthForward");
       if (!back_depth_shader) back_depth_shader = Shader.Find("Unlit/DepthBackward");
+      if (!original_pos_shader) original_pos_shader = Shader.Find("Unlit/DrawOriginalMeshpoints");
       InitTextures(false);
       if (!model.isSet) model.SetActiveModel(true);
       if (model.isActiveAndEnabled) model.UpdateModelAnimationPos(0);
@@ -163,6 +168,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
       front_depth_texture = result_rexture.GetRenderTextureFor();
       back_depth_texture = result_rexture.GetRenderTextureFor();
 
+      original_pos_texture = result_rexture.GetRenderTextureFor(hdr: true);
+
       downsampled_result_rexture = MakeTex(size / export_resolution_downscale);
       downsampled_result_rexture.filterMode = FilterMode.Trilinear;
       downsampled_result_rexture.name = "rt + " + EditorApplication.timeSinceStartup;
@@ -196,13 +203,16 @@ public class SpriteCapturePipeline : MonoBehaviour {
       if (outline_depth) {
          camera_handle.CaptureTo(front_depth_texture, front_depth_shader, Color.white);
          camera_handle.CaptureTo(back_depth_texture, back_depth_shader, Color.white);
+         if (use_original_pos_outlining) {
+            camera_handle.CaptureTo(original_pos_texture);
+         }
       } else {
          front_depth_texture.Clear(Color.black);
          back_depth_texture.Clear(Color.black);
       }
 
       camera_handle.CaptureTo(basic_shading_texture);
-      
+
       foreach (var h in handlers.Reversed()) {
          h.Cleanup();
       }
@@ -332,15 +342,24 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public bool try_shader_outlining;
 
+   public bool use_original_pos_outlining;
+
+   [Range(0, 0.25f)]
+   public float original_dist_margin = 0.05f;
 
    void AddBlackOutlineGOU(RenderTexture result, RenderTexture marker) {
       RenderTexture render_tex;
-      int kernelHandle = shader.SetKernel("CSMain");
+      int kernelHandle = shader.SetKernel(
+         use_original_pos_outlining
+            ? "OutlineOriginalDists"
+            : "OutlineDepth"
+      );
 
       float depth_to_z = camera_handle.TotalDepth();
       float dm = 0.024f;
       float depth_margin = dm / depth_to_z;
 
+      shader.SetFloat("original_dist_margin", original_dist_margin);
       shader.SetFloat("depth_margin", depth_margin);
       shader.SetInt("res_width", result.width);
       shader.SetInt("res_height", result.height);
