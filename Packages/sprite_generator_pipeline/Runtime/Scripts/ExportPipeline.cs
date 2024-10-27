@@ -787,10 +787,10 @@ public class ExportPipeline : MonoBehaviour {
             var nm = Instantiate(fi);
             var a = nm.vertices;
             var bp = a;
-            var mat = transform.localToWorldMatrix;
-            var bw = bp.map(x => mat * x);
-            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1) );
-            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1) );
+            var mat = sk.transform.localToWorldMatrix;
+            var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1));
             sk.sharedMesh = nm;
 
 
@@ -810,11 +810,10 @@ public class ExportPipeline : MonoBehaviour {
          if (fi) {
             var nm = Instantiate(fi);
             Debug.Log($"fi v: {fi.vertices.Length}\n{nm.vertices.Length}");
-            var mat = transform.localToWorldMatrix;
-            var lmat = transform.lossyScale;
+            var mat = sk.localToWorldMatrix;
             var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
-            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1) );
-            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1) );
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1));
             sk.sharedMesh = nm;
             // Debug.Log($"Prepped mesh skin: {sk.sharedMesh.name}");
             Debug.Log($"added mesh: {sk.sharedMesh.name}");
@@ -947,7 +946,7 @@ public class ExportPipeline : MonoBehaviour {
             AddThemePartTo(part_o, slot, u.theme_color);
          }
 
-         foreach (var sk in skinned_rend) {
+         foreach (var sk in model_body.GetComponentsInChildren<Renderer>()) {
             if (sk is SkinnedMeshRenderer am) PrepSkinnedMeshPosses(am);
             if (sk is MeshRenderer mr) PrepSkinnedMeshPosses(mr.GetComponent<MeshFilter>());
          }

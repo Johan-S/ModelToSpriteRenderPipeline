@@ -378,8 +378,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetTexture(kernelHandle, "Result", render_result);
       shader.SetTexture(kernelHandle, "ImageInput", partial_render_result);
       shader.SetTexture(kernelHandle, "ImageMarker", marker);
-      shader.SetTexture(kernelHandle, "front_depth_texture", back_depth_texture);
-      shader.SetTexture(kernelHandle, "back_depth_texture", front_depth_texture);
+      shader.SetTexture(kernelHandle, "front_depth_texture", front_depth_texture);
+      shader.SetTexture(kernelHandle, "back_depth_texture", back_depth_texture);
 
       shader.Dispatch(kernelHandle, marker.width / 8, marker.height / 8, 1);
    }

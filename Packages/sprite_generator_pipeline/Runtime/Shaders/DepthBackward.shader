@@ -16,6 +16,7 @@ Shader "Unlit/DepthBackward"
       {
          Cull Front
          ColorMask RGBA
+         Blend One Zero
 
          CGPROGRAM
          #pragma vertex vert
@@ -62,7 +63,7 @@ Shader "Unlit/DepthBackward"
             fixed4 col = tex2D(_MainTex, i.uv);
             // apply fog
             float z = i.vertex.z;
-            return float4(z, i.uv4.xy, i.uv5.x);
+            return float4(i.uv4.xy, i.uv5.x, z);
          }
          ENDCG
       }
