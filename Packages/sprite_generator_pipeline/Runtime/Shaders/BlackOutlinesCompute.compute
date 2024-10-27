@@ -11,14 +11,16 @@ RWTexture2D<float4> Result;
 Texture2D<float4> ImageInput;
 Texture2D<float4> ImageMarker;
 
-
 Texture2D<float4> front_depth_texture;
 Texture2D<float4> back_depth_texture;
+
+Texture2D<float4> original_pos_texture;
 
 int res_width;
 
 int res_height;
 
+float camera_total_depth;
 
 float depth_margin;
 
@@ -31,7 +33,7 @@ float4 inner_outlines_color = float4(0, 0, 0, 1);
 
 float IsOuter(uint2 i) {
 
-   return front_depth_texture[i].xyz == float3(1, 1, 1);
+   return back_depth_texture[i].xyz == float3(1, 1, 1);
 
 }
 
@@ -47,11 +49,11 @@ float IsMarkerDiff(uint2 i, uint2 j) {
 
 float DiffArea(uint2 i, uint2 j) {
 
-   double di_f = FloatFromCol(front_depth_texture[i]);
-   double di_b = FloatFromCol(back_depth_texture[i]);
+   double di_f = FloatFromCol(back_depth_texture[i]);
+   double di_b = FloatFromCol(front_depth_texture[i]);
 
-   double dj_f = FloatFromCol(front_depth_texture[j]);
-   double dj_b = FloatFromCol(back_depth_texture[j]);
+   double dj_f = FloatFromCol(back_depth_texture[j]);
+   double dj_b = FloatFromCol(front_depth_texture[j]);
 
 
    float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin);
@@ -140,20 +142,24 @@ void ShadeBottom(uint3 id : SV_DispatchThreadID) {
 
 float DiffArea_OriginalPoints(uint2 i, uint2 j) {
 
-   float4 pi_f = front_depth_texture[i];
-   float4 pi_b = back_depth_texture[i];
+   float4 pi_f = original_pos_texture[i];
 
-   float4 pj_f = front_depth_texture[j];
-   float4 pj_b = back_depth_texture[j];
+   float4 pj_f = original_pos_texture[j];
 
 
-   float3 ai_f = pi_f.gba;
-   // float3 ai_b = pi_b.gba;
+   // 64 is from CAMERA depth limit, this translates the depth here to world coordinates
+   // making it comparable to the rest.
+   pi_f.w = FloatFromCol(front_depth_texture[i]) * camera_total_depth;
 
-   float3 aj_f = pj_f.gba;
-   // float3 aj_b = pj_b.gba;
+   pj_f.w = FloatFromCol(front_depth_texture[j]) * camera_total_depth;
 
-   return (distance(ai_f, aj_f) > 0.05) * !(IsMarkerDiff(j, i));
+
+   front_depth_texture[i];
+
+   float od = distance(pi_f.w, pj_f.w);
+
+
+   return (distance(pi_f.xyz, pj_f.xyz) > od + original_dist_margin) * !(IsMarkerDiff(j, i));
 }
 
 float4 CalcBlackOutline_OriginalDists(int2 xy) {
@@ -182,7 +188,7 @@ float4 CalcBlackOutline_OriginalDists(int2 xy) {
       if (IsMarkerDiff(xy, xy - d1) + IsMarkerDiff(xy, xy + d1) + IsMarkerDiff(xy, xy - d2) +
          IsMarkerDiff(xy, xy + d2)) {
          return parts_outlines_color;
-         }
+      }
 
       if (!IsOuter(xy - d1) && !IsOuter(xy - d2)) {
 

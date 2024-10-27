@@ -1,4 +1,4 @@
-Shader "Unlit/DrawOriginalMeshpoints"
+Shader "Klockan/SpritePipeline/DrawOriginalMeshpoints"
 {
    Properties
    {

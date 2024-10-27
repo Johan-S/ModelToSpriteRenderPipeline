@@ -5,6 +5,7 @@ using System.Linq;
 using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using static UnityEngine.Mathf;
 using FilterMode = UnityEngine.FilterMode;
 
@@ -57,16 +58,17 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public RenderTexture original_pos_texture;
 
-
+   [Header("Shaders")]
    public Shader front_depth_shader;
+
    public Shader back_depth_shader;
-   public Shader original_pos_shader;
+   public Shader draw_original_meshpoints;
+
+   void Init() {
+   }
 
    [Button(false)]
    public void RunNow() {
-      if (!front_depth_shader) front_depth_shader = Shader.Find("Unlit/DepthForward");
-      if (!back_depth_shader) back_depth_shader = Shader.Find("Unlit/DepthBackward");
-      if (!original_pos_shader) original_pos_shader = Shader.Find("Unlit/DrawOriginalMeshpoints");
       InitTextures(false);
       if (!model.isSet) model.SetActiveModel(true);
       if (model.isActiveAndEnabled) model.UpdateModelAnimationPos(0);
@@ -88,8 +90,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    void Awake() {
       result_rexture = null;
-      front_depth_shader = Shader.Find("Unlit/DepthForward");
-      back_depth_shader = Shader.Find("Unlit/DepthBackward");
    }
 
    ModelHandle[] other_models = Array.Empty<ModelHandle>();
@@ -156,6 +156,9 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public void InitTextures(bool force) {
       if (result_rexture && !force) return;
+      front_depth_shader = Shader.Find("Klockan/SpritePipeline/DepthForward");
+      back_depth_shader = Shader.Find("Klockan/SpritePipeline/DepthBackward");
+      draw_original_meshpoints = Shader.Find("Klockan/SpritePipeline/DrawOriginalMeshpoints");
 
       other_models = FindObjectsOfType<ModelHandle>().Where(x => x != model).ToArray();
       // Debug.Log($"Init texture with size {size}");
@@ -168,7 +171,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       front_depth_texture = result_rexture.GetRenderTextureFor();
       back_depth_texture = result_rexture.GetRenderTextureFor();
 
-      original_pos_texture = result_rexture.GetRenderTextureFor(hdr: true);
+      original_pos_texture = result_rexture.GetRenderTextureFor(format: Std.Graphics.Full);
 
       downsampled_result_rexture = MakeTex(size / export_resolution_downscale);
       downsampled_result_rexture.filterMode = FilterMode.Trilinear;
@@ -176,6 +179,10 @@ public class SpriteCapturePipeline : MonoBehaviour {
       downsampled_render_result = downsampled_result_rexture.GetRenderTextureFor();
 
       if (display_handle) display_handle.DisplayTex(downsampled_result_rexture, result_rexture);
+
+      foreach (var (fi, tex) in GetType().GetFieldValues<Texture>(this)) {
+         if (tex.name.IsEmpty()) tex.name = fi.Name.ToTitleCase();
+      }
    }
 
    public TimeBenchmark time_benchmark;
@@ -204,7 +211,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
          camera_handle.CaptureTo(front_depth_texture, front_depth_shader, Color.white);
          camera_handle.CaptureTo(back_depth_texture, back_depth_shader, Color.white);
          if (use_original_pos_outlining) {
-            camera_handle.CaptureTo(original_pos_texture);
+            camera_handle.CaptureTo(original_pos_texture, draw_original_meshpoints, new Color(-1000, 0, 0));
          }
       } else {
          front_depth_texture.Clear(Color.black);
@@ -363,6 +370,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetFloat("depth_margin", depth_margin);
       shader.SetInt("res_width", result.width);
       shader.SetInt("res_height", result.height);
+      shader.SetFloat("camera_total_depth", camera_handle.TotalDepth());
       shader.SetVector("outlines_color", black_outline_color);
       shader.SetVector("parts_outlines_color", parts_outline_color_internal);
       shader.SetVector("inner_outlines_color", black_outline_color_internal);
@@ -372,6 +380,7 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetTexture(kernelHandle, "ImageMarker", marker);
       shader.SetTexture(kernelHandle, "front_depth_texture", front_depth_texture);
       shader.SetTexture(kernelHandle, "back_depth_texture", back_depth_texture);
+      shader.SetTexture(kernelHandle, "original_pos_texture", original_pos_texture);
 
       shader.Dispatch(kernelHandle, marker.width / 8, marker.height / 8, 1);
    }

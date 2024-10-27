@@ -786,8 +786,6 @@ public class ExportPipeline : MonoBehaviour {
          var fi = parts_bundle.body_parts.Find(x => x.name == mesh.name);
          if (fi) {
             var nm = Instantiate(fi);
-            var a = nm.vertices;
-            var bp = a;
             var mat = tr.localToWorldMatrix;
             var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
             nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));

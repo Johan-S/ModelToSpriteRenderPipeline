@@ -1,4 +1,4 @@
-Shader "Unlit/DepthBackward"
+Shader "Klockan/SpritePipeline/DepthBackward"
 {
    Properties
    {

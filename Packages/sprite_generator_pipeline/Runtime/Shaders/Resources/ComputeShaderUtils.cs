@@ -60,11 +60,11 @@ public static class ComputeShaderUtils {
       return render_texture;
    }
 
-   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits = 32, bool hdr = false) {
+   public static RenderTexture GetRenderTextureFor(this Texture2D texture, int bits = 32,
+      GraphicsFormat? format = default) {
       int2 size = new int2(texture.width.UpperDiv(8), texture.height.UpperDiv(8)) * 8;
 
-      var render_texture =
-         new RenderTexture(size.width, size.height, bits, hdr ? DefaultFormat.LDR : DefaultFormat.HDR);
+      var render_texture = new RenderTexture(size.width, size.height, bits, format ?? texture.graphicsFormat);
       render_texture.enableRandomWrite = true;
       render_texture.filterMode = FilterMode.Point;
       render_texture.hideFlags = Std.NoSave;
