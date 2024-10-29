@@ -24,7 +24,6 @@ public class CameraHandle_Shader : MonoBehaviour {
    void Start() {
       if (base_render_mesh) {
          var tl = GetMeshes(base_render_mesh).ToList();
-
          Debug.Log($"meshes: {tl.Count}\n{tl.join("\n", x => x.tr.name)}");
       }
    }
