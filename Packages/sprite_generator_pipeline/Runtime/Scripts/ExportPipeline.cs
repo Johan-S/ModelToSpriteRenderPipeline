@@ -784,13 +784,8 @@ public class ExportPipeline : MonoBehaviour {
    public Mesh PrepMeshWithOriginalPos(Transform tr, Mesh mesh) {
       if (mesh) {
          if (!mesh.isReadable) {
-            var fi = parts_bundle.body_parts.Find(x => x.name == mesh.name);
-            if (!fi) {
-               Debug.Log($"Found unreadable mesh: {mesh.name} in object {tr.name}!");
-               return mesh;
-            }
-
-            mesh = fi;
+            Debug.Log($"Found unreadable mesh: {mesh.name} in object {tr.name}!");
+            return mesh;
          }
 
          var nm = Instantiate(mesh);
