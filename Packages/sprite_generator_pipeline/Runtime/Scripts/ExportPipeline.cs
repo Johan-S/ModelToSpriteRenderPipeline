@@ -788,7 +788,17 @@ public class ExportPipeline : MonoBehaviour {
             return mesh;
          }
 
+         if (mesh.name.Contains("(PREPPED ORIG POS)")) return mesh;
+         if (mesh.uv5.IsNonEmpty()) {
+            Debug.LogError($"Mesh {mesh.name} alreadt contains uv5 in object {tr.name}!!");
+            return mesh;
+         }
+         if (mesh.uv6.IsNonEmpty()) {
+            Debug.LogError($"Mesh {mesh.name} alreadt contains uv6 in object {tr.name}!!");
+            return mesh;
+         }
          var nm = Instantiate(mesh);
+         nm.name = mesh.name + " (PREPPED ORIG POS)";
          var mat = tr.localToWorldMatrix;
          var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
          nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));
@@ -922,9 +932,7 @@ public class ExportPipeline : MonoBehaviour {
             AddThemePartTo(part_o, slot, u.theme_color);
          }
 
-         if (sprite_capture_pipeline.use_original_pos_outlining) {
-            StoreOOriginalPosForModel(model_body.transform);
-         }
+         StoreOOriginalPosForModel(model_body.transform);
          // model.name = u.out_name;
       });
       return model_body_prefab;
