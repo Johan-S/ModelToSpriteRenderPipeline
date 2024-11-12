@@ -565,6 +565,10 @@ public class ExportPipeline : MonoBehaviour {
          if (mb.Mouth) {
             sprite_to_generate.marker_locations[Mouth] = Trans(mb.Mouth.transform.position);
          }
+
+         if (mb.Tail) {
+            sprite_to_generate.marker_locations[Tail] = Trans(mb.Tail.transform.position);
+         }
       }
 
 

@@ -12,6 +12,7 @@ public class ModelBodyRoot : MonoBehaviour {
    public Transform Off_Hand_Shield;
    public Transform Off_Hand;
    public Transform NewHelmet;
+   public Transform Tail;
 
 
    public Transform[] mounting_points;
