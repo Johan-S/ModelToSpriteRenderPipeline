@@ -6,27 +6,17 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class DisplayHandle : MonoBehaviour {
+   public RawImage[] displays;
 
-
-   public Image[] extra_displays;
-
-
-   public RawImage diplay;
-   public RawImage diplay_small;
-
-   void Start() {
-      extra_displays = GetComponentsInChildren<Image>().Where(x => x.name == "image_sprite").ToArray();
-   }
+   public RawImage[] displays_small;
 
    public void DisplayTex(Texture t, Texture raw_t) {
-      
-
-      diplay.texture = raw_t;
-      diplay_small.texture = t;
-
-      foreach (var d in extra_displays) {
-         // d.sprite = sprite;
+      foreach (var d in displays) {
+         d.texture = raw_t;
       }
 
+      foreach (var d in displays_small) {
+         d.texture = t;
+      }
    }
 }

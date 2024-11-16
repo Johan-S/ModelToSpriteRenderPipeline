@@ -20,8 +20,12 @@ public class ModelHandle : MonoBehaviour {
          Destroy(render_obj);
          render_obj.SetActive(false);
       }
+
       model_root = null;
+      mesh_prepper.Clear();
       var m = Instantiate(model, transform);
+
+      mesh_prepper.StoreOOriginalPosForModel(m.transform);
 
       model_action?.Invoke(m);
 
@@ -29,11 +33,121 @@ public class ModelHandle : MonoBehaviour {
       return m;
    }
 
+   public MeshPrepper mesh_prepper = new();
+
    public bool isSet => model_root;
    static readonly ProfilerMarker _m_SampleAnimation = Std.Profiler<ModelHandle>("SampleAnimation");
 
+   public class MeshPrepper {
+      public void Clear() {
+         foreach (var stored_meshes in stored_model_mesh) {
+            Std.DestroyNow(stored_meshes.Value.changed_mesh);
+         }
+
+         stored_model_mesh.Clear();
+         stored_for = null;
+         retreived = false;
+      }
+
+      Mesh PrepMeshWithOriginalPos(Transform tr, Mesh mesh) {
+         if (mesh) {
+            if (stored_model_mesh.TryGetValue(tr, out var meshes)) {
+               if (meshes.changed_mesh == mesh || meshes.old_mesh == mesh) return meshes.changed_mesh;
+            }
+
+            if (!mesh.isReadable) {
+               Debug.Log($"Found unreadable mesh: {mesh.name} in object {tr.name}!");
+               return mesh;
+            }
+
+            if (mesh.name.Contains("(PREPPED ORIG POS)")) return mesh;
+            if (mesh.uv5.IsNonEmpty()) {
+               Debug.LogError($"Mesh {mesh.name} alreadt contains uv5 in object {tr.name}!!");
+               return mesh;
+            }
+
+            if (mesh.uv6.IsNonEmpty()) {
+               Debug.LogError($"Mesh {mesh.name} alreadt contains uv6 in object {tr.name}!!");
+               return mesh;
+            }
+
+            var nm = Instantiate(mesh);
+            nm.name = mesh.name + " (PREPPED ORIG POS)";
+            var mat = tr.localToWorldMatrix;
+            var bw = nm.vertices.map(x => (Vector3)(mat * new Vector4(x.x, x.y, x.z, 1)) * (1f / 1));
+            nm.uv5 = bw.map(x => new Vector2(x.x, x.y) * (1f / 1));
+            nm.uv6 = bw.map(x => new Vector2(x.z, 0) * (1f / 1));
+
+            stored_model_mesh[tr] = (mesh, nm);
+            return nm;
+         }
+
+         return mesh;
+      }
+
+      Dictionary<Transform, (Mesh old_mesh, Mesh changed_mesh)> stored_model_mesh = new();
+
+      public void RetreiveOriginalMeshes(Transform tr) {
+         if (tr != stored_for) {
+            Debug.Log($"Trying to retreive for wrong mesh {tr.name}, had {stored_for?.name ?? "NULL"}");
+            return;
+         }
+
+         foreach (var sk in tr.GetComponentsInChildren<Renderer>()) {
+            if (!stored_model_mesh.TryGetValue(sk.transform, out var meshes)) continue;
+            if (sk is SkinnedMeshRenderer am) {
+               if (am.sharedMesh == meshes.changed_mesh) {
+                  am.sharedMesh = meshes.old_mesh;
+               }
+            }
+
+            if (sk is MeshRenderer mr) {
+               var mf = sk.GetComponent<MeshFilter>();
+               if (mf.sharedMesh == meshes.changed_mesh) {
+                  mf.sharedMesh = meshes.old_mesh;
+               }
+            }
+         }
+
+         retreived = true;
+      }
+
+      public Transform stored_for;
+
+      public bool retreived;
+
+      public void StoreOOriginalPosForModel(Transform tr) {
+         if (tr == stored_for && !retreived && ExportPipeline.exporting) {
+            return;
+         }
+
+         if (tr != stored_for) {
+            Clear();
+         }
+
+         stored_for = tr;
+
+         foreach (var sk in tr.GetComponentsInChildren<Renderer>()) {
+            if (sk is SkinnedMeshRenderer am) {
+               var m = PrepMeshWithOriginalPos(am.transform, am.sharedMesh);
+               if (m) am.sharedMesh = m;
+            }
+
+            if (sk is MeshRenderer mr) {
+               var mf = mr.GetComponent<MeshFilter>();
+               var m = PrepMeshWithOriginalPos(mr.transform, mf.sharedMesh);
+               if (m) mf.sharedMesh = m;
+            }
+         }
+
+         retreived = false;
+      }
+   }
+
    void SampleAnimation(GameObject go, float time, AnimationClip clip) {
       using var _m = _m_SampleAnimation.Auto();
+
+      mesh_prepper.StoreOOriginalPosForModel(go.transform);
 
       var animator = model_root;
       if (!animator) return;
@@ -137,6 +251,11 @@ public class ModelHandle : MonoBehaviour {
    }
 
    void LateUpdate() {
+      if (model_root) {
+         if (!ExportPipeline.exporting) {
+            mesh_prepper.RetreiveOriginalMeshes(model_root.transform);
+         }
+      }
    }
 
    // [Button]
@@ -150,7 +269,7 @@ public class ModelHandle : MonoBehaviour {
             Debug.Log($"Root motion: {animation_clip.name}");
          }
 
-         if (!model_root) model_root = GetComponentInChildren<Animator>();
+         FetchLocalModel();
          if (model_root) {
             animation_t += animation_speed / animation_clip.length * dt;
             if (animation_t > 1) animation_t -= 1;
@@ -177,6 +296,18 @@ public class ModelHandle : MonoBehaviour {
 
          SampleAnimation(render_obj, animation_time, animation_clip);
       }
+   }
+
+   void FetchLocalModel() {
+      if (!model_root) model_root = GetComponentInChildren<Animator>();
+      if (model_root && model_root.enabled) {
+         Debug.LogError($"Animator should not be enabled! Disable animatior on: {model_root.name}", model_root);
+         model_root.enabled = false;
+      }
+   }
+
+   void Awake() {
+      FetchLocalModel();
    }
 
    // Update is called once per frame
