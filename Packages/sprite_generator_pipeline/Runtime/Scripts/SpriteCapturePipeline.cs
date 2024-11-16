@@ -29,6 +29,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public bool outline_depth = true;
    public bool outline_parts = true;
 
+   public bool outline_two_sided_depth = true;
+
    [Tooltip("Outline color for the edges against the background, alpha makes it weaker/stronger.")]
    public Color black_outline_color = Color.black;
 
@@ -37,6 +39,22 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    [Tooltip("Outline color for the edges between different depths of the model, alpha makes it weaker/stronger.")]
    public Color black_outline_color_internal = Color.black;
+
+
+   public bool use_original_pos_outlining;
+
+   [Range(0, 0.25f)]
+   public float original_dist_margin = 0.05f;
+
+
+   [Header("Shading")] public bool shade_bottom;
+   [Range(0, 1)] public float shade_bottom_start;
+   [Range(0, 1)] public float shade_bottom_end;
+
+   [Range(0, 1)] public float shade_bottom_mag;
+
+
+   [Range(0, 3)] public float relative_model_height_for_shading = 1;
 
    [Header("Unity Bindings")] public ModelHandle model;
 
@@ -96,15 +114,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
 
    public bool exporting;
-
-   [Header("Shading")] public bool shade_bottom;
-   [Range(0, 1)] public float shade_bottom_start;
-   [Range(0, 1)] public float shade_bottom_end;
-
-   [Range(0, 1)] public float shade_bottom_mag;
-
-
-   [Range(0, 3)] public float relative_model_height_for_shading = 1;
 
    public Action GetMoveBackFunk() {
       var neg = model.negate_root_motion;
@@ -349,11 +358,6 @@ public class SpriteCapturePipeline : MonoBehaviour {
 
    public bool try_shader_outlining;
 
-   public bool use_original_pos_outlining;
-
-   [Range(0, 0.25f)]
-   public float original_dist_margin = 0.05f;
-
    void AddBlackOutlineGOU(RenderTexture result, RenderTexture marker) {
       RenderTexture render_tex;
       int kernelHandle = shader.SetKernel(
@@ -379,7 +383,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
       shader.SetTexture(kernelHandle, "ImageInput", partial_render_result);
       shader.SetTexture(kernelHandle, "ImageMarker", marker);
       shader.SetTexture(kernelHandle, "front_depth_texture", front_depth_texture);
-      shader.SetTexture(kernelHandle, "back_depth_texture", back_depth_texture);
+      shader.SetTexture(kernelHandle, "back_depth_texture",
+         outline_two_sided_depth ? back_depth_texture : front_depth_texture);
       shader.SetTexture(kernelHandle, "original_pos_texture", original_pos_texture);
 
       shader.Dispatch(kernelHandle, marker.width / 8, marker.height / 8, 1);

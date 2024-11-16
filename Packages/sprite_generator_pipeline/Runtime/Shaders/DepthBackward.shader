@@ -15,6 +15,8 @@ Shader "Klockan/SpritePipeline/DepthBackward"
       Pass
       {
          Cull Front
+         ZWrite On
+         ZTest On
          CGPROGRAM
          #pragma vertex vert
          #pragma fragment frag

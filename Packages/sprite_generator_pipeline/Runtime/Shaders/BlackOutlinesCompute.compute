@@ -59,7 +59,7 @@ float DiffArea(uint2 i, uint2 j) {
    float res = (di_f <= dj_b + depth_margin) * (dj_f <= di_b + depth_margin);
 
 
-   return (1 - res) * !(IsMarkerDiff(j, i));
+   return (1 - res) * !(IsMarkerDiff(j, i)) * !(IsMarkerDiff(i, j));
 }
 
 float4 CalcBlackOutline(int2 xy) {
@@ -159,7 +159,7 @@ float DiffArea_OriginalPoints(uint2 i, uint2 j) {
    float od = distance(pi_f.w, pj_f.w);
 
 
-   return (distance(pi_f.xyz, pj_f.xyz) > od + original_dist_margin) * !(IsMarkerDiff(j, i));
+   return (distance(pi_f.xyz, pj_f.xyz) > od + original_dist_margin) * !(IsMarkerDiff(j, i)) * !(IsMarkerDiff(i, j));;
 }
 
 float4 CalcBlackOutline_OriginalDists(int2 xy) {
