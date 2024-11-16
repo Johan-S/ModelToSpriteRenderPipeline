@@ -173,6 +173,7 @@ public class CameraHandle : MonoBehaviour {
             if (!mr.sharedMesh) {
                continue;
             }
+
             var m = new Mesh();
 
             mr.BakeMesh(m, true);
@@ -224,37 +225,83 @@ public class CameraHandle : MonoBehaviour {
          Color last_c = ColorFrom(0);
          Transform last_part = null;
          int color_id = 0;
-         for (int i = 0; i < meshes.Length; i++) {
-            var (tr, m) = meshes[i];
 
-            var submesh_sort = new[] { 0 };
-            var par = tr.GetComponent<PartsOutlineController>();
-            if (m.subMeshCount > 1) {
-               if (par && par.sub_mesh_render_order.IsNonEmpty()) {
-                  submesh_sort = par.sub_mesh_render_order.Copy().where(x => x < m.subMeshCount);
-               } else {
-                  submesh_sort = m.subMeshCount.times().sorted(x => m.GetSubMesh(x).vertexCount);
-               }
+         Dictionary<Renderer, Color> part_dict = new();
+         bool[] done = new bool[meshes.Length];
+
+         int last_count = -1;
+         while (part_dict.Count < meshes.Length) {
+            if (last_count == part_dict.Count) {
+               Debug.LogError(
+                  $"Bad parts cycle, can't decide how to render parts as they refer to each other: \n {meshes.where(x => !part_dict.ContainsKey(x.tr.GetComponent<Renderer>())).join(", ", x => x.tr.name)}");
+               break;
             }
 
-            foreach (int j in submesh_sort) {
-               var mat = tr.localToWorldMatrix;
+            last_count = part_dict.Count;
 
+            for (int i = 0; i < meshes.Length; i++) {
+               if (done[i]) continue;
 
-               if (par && par.renderAsPartOfLastPart) {
-                  mb.SetColor("_Color", last_c);
-               } else {
-                  last_part = tr;
-                  last_c = ColorFrom(color_id++, false);
-                  mb.SetColor("_Color", last_c);
+               var (tr, m) = meshes[i];
+
+               var submesh_sort = new[] { 0 };
+               var par = tr.GetComponent<PartsOutlineController>();
+
+               bool use_last = par && par.renderAsPartOfLastPart;
+
+               if (par) {
+                  if (par && par.renderAsPartOfPart) {
+                     if (!part_dict.TryGetValue(par.renderAsPartOfPart, out var parent_id)) {
+                        continue;
+                     }
+
+                     last_c = parent_id;
+                     use_last = true;
+                     last_part = tr;
+                  }
+
+                  if (!use_last && par.merge_submesh_areas) {
+                     last_part = tr;
+
+                     last_c = ColorFrom(color_id++, false);
+                     use_last = true;
+                  }
                }
 
-               rp.matProps = mb;
-               rp.layer = 15;
 
-               Graphics.RenderMesh(rp, m, j, mat);
+               if (m.subMeshCount > 1) {
+                  if (par && par.sub_mesh_render_order.IsNonEmpty()) {
+                     submesh_sort = par.sub_mesh_render_order.Copy().where(x => x < m.subMeshCount);
+                  } else {
+                     submesh_sort = m.subMeshCount.times().sorted(x => m.GetSubMesh(x).vertexCount);
+                  }
+               }
+
+
+               foreach (int j in submesh_sort) {
+                  var mat = tr.localToWorldMatrix;
+
+
+                  if (use_last) {
+                  } else {
+                     last_part = tr;
+
+                     last_c = ColorFrom(color_id++, false);
+                  }
+
+                  mb.SetColor("_Color", last_c);
+                  part_dict[tr.GetComponent<Renderer>()] = last_c;
+
+                  rp.matProps = mb;
+                  rp.layer = 15;
+
+                  Graphics.RenderMesh(rp, m, j, mat);
+               }
+
+               done[i] = true;
             }
          }
+
 
          my_cam.Render();
       }
