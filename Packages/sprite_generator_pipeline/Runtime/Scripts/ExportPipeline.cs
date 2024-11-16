@@ -483,11 +483,12 @@ public class ExportPipeline : MonoBehaviour {
 
       int mapped_mats = 0;
 
-
-      foreach (var x in model.GetComponentsInChildren<Renderer>()) {
-         if (x.transform.parent.parent == model.transform) {
-            x.material = res_mat;
-            mapped_mats++;
+      if (res_mat) {
+         foreach (var x in model.GetComponentsInChildren<Renderer>()) {
+            if (x.transform.parent.parent == model.transform) {
+               x.material = res_mat;
+               mapped_mats++;
+            }
          }
       }
 
@@ -571,10 +572,11 @@ public class ExportPipeline : MonoBehaviour {
          }
       }
 
-
-      foreach (var x in model.GetComponentsInChildren<Renderer>()) {
-         if (x.transform.parent.parent == model.transform) {
-            x.material = res_mat;
+      if (res_mat) {
+         foreach (var x in model.GetComponentsInChildren<Renderer>()) {
+            if (x.transform.parent.parent == model.transform) {
+               x.material = res_mat;
+            }
          }
       }
    }
@@ -633,7 +635,7 @@ public class ExportPipeline : MonoBehaviour {
          Directory.CreateDirectory(folder);
       }
 
-      Material res_mat = ApplyMaterialColor(pu.colors, pu.material);
+      Material res_mat = !pu.material ? null : ApplyMaterialColor(pu.colors, pu.material);
 
       foreach (var sg in pu.sprites_to_generate) {
          var mb = sprite_capture_pipeline.GetMoveBackFunk();
@@ -797,10 +799,12 @@ public class ExportPipeline : MonoBehaviour {
             Debug.LogError($"Mesh {mesh.name} alreadt contains uv5 in object {tr.name}!!");
             return mesh;
          }
+
          if (mesh.uv6.IsNonEmpty()) {
             Debug.LogError($"Mesh {mesh.name} alreadt contains uv6 in object {tr.name}!!");
             return mesh;
          }
+
          var nm = Instantiate(mesh);
          nm.name = mesh.name + " (PREPPED ORIG POS)";
          var mat = tr.localToWorldMatrix;

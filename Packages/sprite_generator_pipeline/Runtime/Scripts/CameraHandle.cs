@@ -170,7 +170,9 @@ public class CameraHandle : MonoBehaviour {
    IEnumerable<(Transform tr, Mesh m)> GetMeshes(Transform t) {
       foreach (var a in t.GetComponentsInChildren<Renderer>()) {
          if (a is SkinnedMeshRenderer mr) {
-            if (!mr.sharedMesh) continue;
+            if (!mr.sharedMesh) {
+               continue;
+            }
             var m = new Mesh();
 
             mr.BakeMesh(m, true);
