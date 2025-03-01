@@ -535,12 +535,15 @@ public class ExportPipeline : MonoBehaviour {
       if (sprite_to_generate.an.animation_type_object != null) {
          var cid = output_i - 1;
          var o = sprite_gen_meta[cid];
-         Vector3 model_off = sprite_to_generate.an.animation_type_object.model_offsetmodel_offset;
+         Vector3 model_off = sprite_to_generate.an.animation_type_object.model_offset;
          Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
 
          if (model_off != default) {
-            // TODO: This is probably wrong.
-            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, Trans(model_off), camera_d);
+
+            var model_off_world = model.transform.TransformPoint(model_off) - model.transform.position;
+
+            var sp = Trans(model_off_world);
+            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, sp, (Vector2)o.rect.size * (1f / effective_export_size) * camera_d);
             sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
          }
       }
