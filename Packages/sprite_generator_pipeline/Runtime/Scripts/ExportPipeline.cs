@@ -29,6 +29,8 @@ public class ExportPipeline : MonoBehaviour {
    public static ExportPipelinePrefs prefs = StandardLib.EditorSettingsHandler.Register<ExportPipelinePrefs>();
 
    public static ExportPipelinePrefs editor_prefs => prefs;
+   
+   public bool force_single_sheet;
 
    static bool loginfo => prefs.log_info;
 
@@ -1158,6 +1160,7 @@ public class ExportPipeline : MonoBehaviour {
 
       time_benchmark = new();
       batch_id = -1;
+      if (force_single_sheet) max_per_grid = 100000000;
       foreach (var parsed_pipeline_data in parsed_pipeline_data_orig.SplitMe(max_per_grid)) {
          batch_id++;
          output_i = 0;
