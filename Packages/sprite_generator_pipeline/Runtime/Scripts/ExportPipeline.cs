@@ -517,6 +517,20 @@ public class ExportPipeline : MonoBehaviour {
       DumpExport(sprite_capture_pipeline.downsampled_render_result, sprite_to_generate.name);
       // CopyAndDownsampleTo(sprite_capture_pipeline.result_rexture, export_tex, FileOutput,
       //    mirror: mirror);
+      bool mirror = sprite_to_generate.pu.model_body.mirror_render !=
+                    sprite_to_generate.an.animation_type_object.mirror_render;
+      var mat = sprite_capture_pipeline.camera_handle.transform.rotation;
+      mat = Quaternion.Inverse(mat);
+      // var mat2 = Quaternion.Euler(30, 0, 0);
+      var cp = sprite_capture_pipeline.camera_handle.transform.position;
+
+      Vector3 Trans(Vector3 p) {
+         p = mat * p;
+         if (mirror) p.x *= -1;
+         return p;
+      }
+      
+      
 
       if (sprite_to_generate.an.animation_type_object != null) {
          var cid = output_i - 1;
@@ -525,7 +539,8 @@ public class ExportPipeline : MonoBehaviour {
          Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
 
          if (model_off != default) {
-            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, model_off, camera_d);
+            // TODO: This is probably wrong.
+            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, Trans(model_off), camera_d);
             sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
          }
       }
@@ -543,18 +558,6 @@ public class ExportPipeline : MonoBehaviour {
       var mb = model.model_root.GetComponent<ModelBodyRoot>();
 
       if (mb) {
-         bool mirror = sprite_to_generate.pu.model_body.mirror_render !=
-                       sprite_to_generate.an.animation_type_object.mirror_render;
-         var mat = sprite_capture_pipeline.camera_handle.transform.rotation;
-         mat = Quaternion.Inverse(mat);
-         // var mat2 = Quaternion.Euler(30, 0, 0);
-         var cp = sprite_capture_pipeline.camera_handle.transform.position;
-
-         Vector3 Trans(Vector3 p) {
-            p = mat * p;
-            if (mirror) p.x *= -1;
-            return p;
-         }
 
 
          if (mb.Main_Hand) {

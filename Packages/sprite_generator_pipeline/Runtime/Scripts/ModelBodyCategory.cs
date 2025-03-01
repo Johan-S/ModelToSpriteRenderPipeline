@@ -14,6 +14,7 @@ public class ModelBodyCategory : ScriptableObject {
 
    public bool no_gear;
 
+   [Tooltip("Is in local model space, so Z is forward backward for the model.")]
    public Vector3 model_offset;
 
 
