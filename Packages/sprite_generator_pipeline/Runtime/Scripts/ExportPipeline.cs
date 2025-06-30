@@ -553,7 +553,7 @@ public class ExportPipeline : MonoBehaviour {
          export_tex.ReadPixelsFrom(sprite_capture_pipeline.downsampled_render_result);
          var data = export_tex.EncodeToPNG();
          if (write_files) {
-            Std.EnsureLocalDir($"{export_to_folder}/{export_sheet_name}");
+            Std.EnsureLocalDir($"{export_to_folder}/{export_sheet_name}/file");
             File.WriteAllBytes($"{export_to_folder}/{export_sheet_name}/{sprite_to_generate.name}.png", data);
          }
       }
