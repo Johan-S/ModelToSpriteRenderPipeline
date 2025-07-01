@@ -86,6 +86,7 @@ public class ExportPipeline : MonoBehaviour {
    [Space] [Header("Pipeline Toggles")] public bool compress_rects;
 
    public bool idle_only;
+   public bool icon_only;
    public bool export_when_done;
    public static bool export_override;
 

@@ -345,6 +345,9 @@ public class ParsedPipelineData {
       var anims = animation_set.res;
       if (pipeline.idle_only && !ExportPipeline.export_override)
          anims = anims.Where(x => x.category == "Idle").Take(1).ToList();
+      if (pipeline.icon_only && !ExportPipeline.export_override) {
+         anims = anims.Where(x => x.category == "Icon").Take(1).ToList();
+      }
 
       foreach (var an in anims) {
          AnimationSubsystem.LogAnimationErrors(pu.animation_type, an.category, an.animation_type_object);
@@ -490,7 +493,10 @@ public class AnimationWrap {
       this.category = category;
       this.frame = frame;
       this.animation_type_object = animation_type_object;
+      icon = category == "Icon";
    }
+
+   public bool icon;
 
 
    public string name;
