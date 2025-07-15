@@ -56,18 +56,18 @@ public class ModelHandle : MonoBehaviour {
             }
 
             if (!mesh.isReadable) {
-               Debug.Log($"Found unreadable mesh: {mesh.name} in object {tr.name}!");
+               Debug.Log($"Found unreadable mesh: {mesh.name} in object {tr.name}!", tr.gameObject);
                return mesh;
             }
 
             if (mesh.name.Contains("(PREPPED ORIG POS)")) return mesh;
             if (mesh.uv5.IsNonEmpty()) {
-               Debug.LogError($"Mesh {mesh.name} alreadt contains uv5 in object {tr.name}!!");
+               Debug.LogError($"Mesh {mesh.name} already contains uv5 in object {tr.name}!!", tr.gameObject);
                return mesh;
             }
 
             if (mesh.uv6.IsNonEmpty()) {
-               Debug.LogError($"Mesh {mesh.name} alreadt contains uv6 in object {tr.name}!!");
+               Debug.LogError($"Mesh {mesh.name} already contains uv6 in object {tr.name}!!", tr.gameObject);
                return mesh;
             }
 
