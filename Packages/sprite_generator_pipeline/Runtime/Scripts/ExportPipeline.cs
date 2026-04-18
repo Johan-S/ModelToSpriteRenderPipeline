@@ -31,7 +31,7 @@ public class ExportPipeline : MonoBehaviour {
    public static ExportPipelinePrefs prefs = StandardLib.EditorSettingsHandler.Register<ExportPipelinePrefs>();
 
    public static ExportPipelinePrefs editor_prefs => prefs;
-   
+
    public bool force_single_sheet;
 
    static bool loginfo => prefs.log_info;
@@ -532,8 +532,7 @@ public class ExportPipeline : MonoBehaviour {
          if (mirror) p.x *= -1;
          return p;
       }
-      
-      
+
 
       if (sprite_to_generate.an.animation_type_object != null) {
          var cid = output_i - 1;
@@ -542,11 +541,11 @@ public class ExportPipeline : MonoBehaviour {
          Vector2 camera_d = sprite_capture_pipeline.camera_handle.OrthographicRectSize;
 
          if (model_off != default) {
-
             var model_off_world = model.transform.TransformPoint(model_off) - model.transform.position;
 
             var sp = Trans(model_off_world);
-            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, sp, (Vector2)o.rect.size * (1f / effective_export_size) * camera_d);
+            var sprite_pivot = GetAdjustedSpritePivot(o.pivot, sp,
+               (Vector2)o.rect.size * (1f / effective_export_size) * camera_d);
             sprite_gen_meta[cid] = new(o.file_name, o.rect, sprite_pivot);
          }
       }
@@ -564,8 +563,6 @@ public class ExportPipeline : MonoBehaviour {
       var mb = model.model_root.GetComponent<ModelBodyRoot>();
 
       if (mb) {
-
-
          if (mb.Main_Hand) {
             sprite_to_generate.marker_locations[Main_Hand] = Trans(mb.Main_Hand.transform.position);
          }
@@ -581,6 +578,11 @@ public class ExportPipeline : MonoBehaviour {
          if (mb.Tail) {
             sprite_to_generate.marker_locations[Tail] = Trans(mb.Tail.transform.position);
          }
+
+         if (mb.mounting_points.IsNonEmpty())
+            foreach (var mp in mb.mounting_points) {
+               sprite_to_generate.WIP_marker_locations[mp.name] = Trans(mp.transform.position);
+            }
       }
 
       if (res_mat) {
@@ -965,7 +967,7 @@ public class ExportPipeline : MonoBehaviour {
                if (animation_type_object.negate_root_motion) {
                   model.model_root.applyRootMotion = true;
                   model.negate_root_motion = true;
-                                      } else {
+               } else {
                   if (animation_type_object.looping_root) {
                      sprite_capture_pipeline.HandleLoopingRootMotion(clip, t);
                   }
@@ -978,13 +980,14 @@ public class ExportPipeline : MonoBehaviour {
                model.model_root.applyRootMotion = old_app;
             }
          }
+
          if (animation_type_object) {
             model.transform.localPosition += animation_type_object.model_root_pos;
             if (animation_type_object.model_root_rot.w != default) {
                model.render_obj.transform.localRotation = animation_type_object.model_root_rot;
             }
          }
-         
+
 
          sprite_capture_pipeline.model.enabled = false;
          sprite_capture_pipeline.RunPipeline();
@@ -1350,17 +1353,21 @@ public class ExportPipeline : MonoBehaviour {
          if (exporting.write_effect_mount_markers) {
             var locs = spr[0].marker_locations.Keys.sorted();
 
-            a.markers = new UnitAnimationData.MountMarker[locs.Length];
+            a.markers = new();
 
             for (int i = 0; i < locs.Length; i++) {
                AnimationTypeObject.EffectPosMarkerTags loc = locs[i];
-               a.markers[i] = new UnitAnimationData.MountMarker() {
-                  mount_id =  loc.ToString(),
+               a.markers.Add(new UnitAnimationData.MountMarker() {
+                  mount_id = loc.ToString(),
                   mount_pos = spr.map(x => x.marker_locations[loc]),
-               };
-
+               });
             }
-
+            foreach (var mk in spr[0].WIP_marker_locations.Keys) {
+               a.markers.Add(new UnitAnimationData.MountMarker() {
+                  mount_id = mk,
+                  mount_pos = spr.map(x => x.WIP_marker_locations[mk]),
+               });
+            }
          }
 
          int time = a.effect_time_ms;

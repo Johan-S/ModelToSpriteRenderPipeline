@@ -27,4 +27,7 @@ public class GeneratedSprite : Named {
    public Dictionary<AnimationTypeObject.EffectPosMarkerTags, Vector3> marker_locations = new() {
       { AnimationTypeObject.EffectPosMarkerTags.None, new Vector3(0, 0.6f, 0) }
    };
+
+   public Dictionary<string, Vector3> WIP_marker_locations = new() {
+   };
 }
