@@ -20,6 +20,8 @@ using Object = UnityEngine.Object;
 public class ExportPipeline : MonoBehaviour {
    public static ExportPipeline exporting;
 
+   public bool write_effect_mount_markers;
+
    [Serializable]
    [Stat("Export Pipeline Prefs")]
    public class ExportPipelinePrefs {
@@ -963,7 +965,7 @@ public class ExportPipeline : MonoBehaviour {
                if (animation_type_object.negate_root_motion) {
                   model.model_root.applyRootMotion = true;
                   model.negate_root_motion = true;
-               } else {
+                                      } else {
                   if (animation_type_object.looping_root) {
                      sprite_capture_pipeline.HandleLoopingRootMotion(clip, t);
                   }
@@ -976,6 +978,13 @@ public class ExportPipeline : MonoBehaviour {
                model.model_root.applyRootMotion = old_app;
             }
          }
+         if (animation_type_object) {
+            model.transform.localPosition += animation_type_object.model_root_pos;
+            if (animation_type_object.model_root_rot.w != default) {
+               model.render_obj.transform.localRotation = animation_type_object.model_root_rot;
+            }
+         }
+         
 
          sprite_capture_pipeline.model.enabled = false;
          sprite_capture_pipeline.RunPipeline();
@@ -1338,6 +1347,21 @@ public class ExportPipeline : MonoBehaviour {
 
          Debug.Assert(a.time_ms.Length == a.sprites.Length, a.unit + " " + a.category);
 
+         if (exporting.write_effect_mount_markers) {
+            var locs = spr[0].marker_locations.Keys.sorted();
+
+            a.markers = new UnitAnimationData.MountMarker[locs.Length];
+
+            for (int i = 0; i < locs.Length; i++) {
+               AnimationTypeObject.EffectPosMarkerTags loc = locs[i];
+               a.markers[i] = new UnitAnimationData.MountMarker() {
+                  mount_id =  loc.ToString(),
+                  mount_pos = spr.map(x => x.marker_locations[loc]),
+               };
+
+            }
+
+         }
 
          int time = a.effect_time_ms;
 
