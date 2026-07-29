@@ -112,65 +112,75 @@ public static class AnimationBlender {
             return null;
         }
 
+        var ctrl = animator.runtimeAnimatorController;
+        animator.runtimeAnimatorController = null;
+
+        bool old_enabled = animator.enabled;
         animator.enabled = true;
 
-        // 1. Prepare the new clip and calculate duration
-        AnimationClip bakedClip = new AnimationClip();
-        bakedClip.name = $"{clipA.name}_baked_{clipB.name}";
-        bakedClip.frameRate = clipA.frameRate;
+        try {
 
-        float length = clipA.length;
-        float timeStep = 1f / bakedClip.frameRate;
+           // 1. Prepare the new clip and calculate duration
+           AnimationClip bakedClip = new AnimationClip();
+           bakedClip.name = $"{clipA.name}_baked_{clipB.name}";
+           bakedClip.frameRate = clipA.frameRate;
 
-        // 2. Setup the Playable Graph to handle the complex blending math natively
-        PlayableGraph graph = PlayableGraph.Create("BakeGraph");
-        graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+           float length = clipA.length;
+           float timeStep = 1f / bakedClip.frameRate;
 
-        var animOutput = AnimationPlayableOutput.Create(graph, "Output", animator);
-        var mixer = AnimationMixerPlayable.Create(graph, 2);
-        animOutput.SetSourcePlayable(mixer);
+           // 2. Setup the Playable Graph to handle the complex blending math natively
+           PlayableGraph graph = PlayableGraph.Create("BakeGraph");
+           graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
 
-        var playableA = AnimationClipPlayable.Create(graph, clipA);
-        var playableB = AnimationClipPlayable.Create(graph, clipB);
+           var animOutput = AnimationPlayableOutput.Create(graph, "Output", animator);
+           var mixer = AnimationMixerPlayable.Create(graph, 2);
+           animOutput.SetSourcePlayable(mixer);
 
-        graph.Connect(playableA, 0, mixer, 0);
-        graph.Connect(playableB, 0, mixer, 1);
+           var playableA = AnimationClipPlayable.Create(graph, clipA);
+           var playableB = AnimationClipPlayable.Create(graph, clipB);
 
-        mixer.SetInputWeight(0, 1f - blendWeight);
-        mixer.SetInputWeight(1, blendWeight);
+           graph.Connect(playableA, 0, mixer, 0);
+           graph.Connect(playableB, 0, mixer, 1);
 
-        // 3. Setup the Recorder to listen to the GameObject's transforms
-        GameObjectRecorder recorder = new GameObjectRecorder(go);
-        
-        // This binds every Transform in the hierarchy. 
-        // It captures positions, rotations, and scales exactly as they appear visually.
-        recorder.BindComponentsOfType<Transform>(go, true);
+           mixer.SetInputWeight(0, 1f - blendWeight);
+           mixer.SetInputWeight(1, blendWeight);
 
-        var st = go.transform.localPosition;
-        // 4. Step through time frame-by-frame, forcing the graph to pose the model, and taking a snapshot
-        for (float t = 0; t <= length; t += timeStep)
-        {
-            playableA.SetTime(t);
-            playableB.SetTime(t * clipB.length / clipA.length);
-            
-            // Force the graph to evaluate at this exact frame
-            graph.Evaluate(0f);
-            animator.Update(0f);
-            go.transform.localPosition = st;
+           // 3. Setup the Recorder to listen to the GameObject's transforms
+           GameObjectRecorder recorder = new GameObjectRecorder(go);
+           
+           // This binds every Transform in the hierarchy. 
+           // It captures positions, rotations, and scales exactly as they appear visually.
+           recorder.BindComponentsOfType<Transform>(go, true);
 
-            // Record the visual pose into the clip
-            recorder.TakeSnapshot(timeStep);
+           var st = go.transform.localPosition;
+           // 4. Step through time frame-by-frame, forcing the graph to pose the model, and taking a snapshot
+           for (float t = 0; t <= length; t += timeStep)
+           {
+               playableA.SetTime(t);
+               playableB.SetTime(t * clipB.length / clipA.length);
+               
+               // Force the graph to evaluate at this exact frame
+               graph.Evaluate(0f);
+               animator.Update(0f);
+               go.transform.localPosition = st;
+
+               // Record the visual pose into the clip
+               recorder.TakeSnapshot(timeStep);
+           }
+
+           // 5. Save the recorded data into our new clip and clean up
+           recorder.SaveToClip(bakedClip);
+           graph.Destroy();
+
+           // 6. Restore Animation Clip Settings (Looping, Root Transform Baking) from Clip A
+           AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(clipA);
+           AnimationUtility.SetAnimationClipSettings(bakedClip, settings);
+
+           return bakedClip;
         }
-
-        // 5. Save the recorded data into our new clip and clean up
-        recorder.SaveToClip(bakedClip);
-        graph.Destroy();
-
-        // 6. Restore Animation Clip Settings (Looping, Root Transform Baking) from Clip A
-        AnimationClipSettings settings = AnimationUtility.GetAnimationClipSettings(clipA);
-        AnimationUtility.SetAnimationClipSettings(bakedClip, settings);
-
-        animator.enabled = false;
-        return bakedClip;
+        finally {
+           animator.enabled = old_enabled;
+           animator.runtimeAnimatorController = ctrl;
+        }
     }
 }
