@@ -3,11 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Profiling;
 using UnityEngine;
+using UnityEngine.Animations;
+using UnityEngine.Playables;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Serialization;
 
 [DefaultExecutionOrder(5)]
 public class ModelHandle : MonoBehaviour {
+   
+   [System.Serializable]
+   public struct AnimationBlendData
+   {
+      public AnimationClip Clip;
+      public float Time;
+      [Range(0, 1)]
+      public float Weight;
+      public float dt;
+   }
+
+   public List<AnimationBlendData> animation_blend_datas = new();
+   
    public GameObject ResetModel(GameObject model, Action<GameObject> model_action) {
       if (!model) {
          Debug.LogError("Trying to set missing model!");
@@ -186,12 +201,99 @@ public class ModelHandle : MonoBehaviour {
       }
    }
 
+   void SampleAnimation(GameObject go, List<AnimationBlendData> blendData) {
+      using var _m = _m_SampleAnimation.Auto();
+
+      mesh_prepper.StoreOOriginalPosForModel(go.transform);
+
+      var animator = model_root;
+      if (!animator) return;
+      var last_pos = go.transform.localPosition;
+      var last_rot = go.transform.localRotation;
+
+
+      {
+         SampleMultipleAnimations(go, blendData);
+      }
+      last_root_motion = go.transform.localPosition;
+      last_root_rotation = go.transform.localRotation;
+      if (negate_root_motion) {
+         go.transform.localPosition = last_pos;
+         go.transform.localRotation = last_rot;
+      }
+   }
+   
+   public static void SampleMultipleAnimations(GameObject go, List<AnimationBlendData> blendData)
+   {
+      // The GameObject needs an Animator component, but it DOES NOT need a controller assigned.
+      Animator animator = go.GetComponent<Animator>();
+      if (animator == null)
+      {
+         Debug.LogWarning("SampleMultipleAnimations requires an Animator component on the target GameObject.");
+         return;
+      }
+
+      animator.enabled = true;
+
+      // 1. Create a manual playable graph
+      PlayableGraph graph = PlayableGraph.Create("InstantBlendGraph");
+      graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
+
+      // 2. Create the output and link it to the Animator
+      var animOutput = AnimationPlayableOutput.Create(graph, "AnimationOutput", animator);
+        
+      // 3. Create a mixer to handle the blending
+      var mixer = AnimationMixerPlayable.Create(graph, blendData.Count);
+      animOutput.SetSourcePlayable(mixer);
+
+      // 4. Plug each clip into the mixer
+      for (int i = 0; i < blendData.Count; i++)
+      {
+         var data = blendData[i];
+         if (data.Clip == null) continue;
+
+         // Create a playable for this specific clip
+         var clipPlayable = AnimationClipPlayable.Create(graph, data.Clip);
+
+         // Connect it to the mixer port 'i'
+         graph.Connect(clipPlayable, 0, mixer, i);
+            
+         // Set the blend weight
+         mixer.SetInputWeight(i, data.Weight);
+
+         // Set the exact time frame for this clip
+         clipPlayable.SetTime(data.Time);
+      }
+
+      // 5. Instantly force the graph to evaluate. 
+      // This applies the blended bone transforms to the GameObject right now.
+      AnimatorCullingMode originalCulling = animator.cullingMode;
+      animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+      // Disable the default controller so it doesn't snap back to Idle
+      animator.runtimeAnimatorController = null;
+      graph.Evaluate();
+      animator.Update(0f);
+      animator.cullingMode = originalCulling;
+
+      // 6. Destroy the graph to clean up memory and release control of the Animator
+      graph.Destroy();
+   }
+   public bool TRY_BLEND;
+
    public bool TRY_ANIMATOR;
 
    public void SetAnimationNow_Float(AnimationClip clip, float x) {
       {
          // o.GetComponent<Animator>().enabled = false;
          SampleAnimation(render_obj, x * clip.length, clip);
+         render_obj.transform.localPosition += model_offset;
+      }
+   }
+
+   public void SetAnimationNowBlend_Float(List<AnimationBlendData> blendData) {
+      {
+         // o.GetComponent<Animator>().enabled = false;
+         SampleAnimation(render_obj, blendData);
          render_obj.transform.localPosition += model_offset;
       }
    }
@@ -294,7 +396,31 @@ public class ModelHandle : MonoBehaviour {
             animation_time = animation_t * animation_clip.length;
          }
 
-         SampleAnimation(render_obj, animation_time, animation_clip);
+         if (TRY_BLEND) {
+            float wt = 0;
+            for (int i = 0; i < animation_blend_datas.Count; i++) {
+               var a = animation_blend_datas[i];
+               float nwt = wt + a.Weight;
+               if (nwt > 1) {
+                  a.Weight = 1 - wt;
+                  wt = 1;
+               } else if (nwt < 1 && i == animation_blend_datas.Count - 1) {
+                  a.Weight = 1 - wt;
+                  wt = 1;
+               } else {
+                  wt = nwt;
+               }
+               a.Time += animation_speed * a.Clip.length * Time.deltaTime;
+               a.Time %= a.Clip.length;
+               animation_blend_datas[i] = a;
+            }
+            
+            SampleAnimation(render_obj, animation_blend_datas);
+         } else {
+                  
+            SampleAnimation(render_obj, animation_time, animation_clip);
+         }
+
       }
    }
 
