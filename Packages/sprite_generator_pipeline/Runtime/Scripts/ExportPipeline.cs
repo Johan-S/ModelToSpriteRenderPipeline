@@ -457,6 +457,10 @@ public class ExportPipeline : MonoBehaviour {
       SpriteRenderDetails shot_type = sprite_to_generate.shot_type;
       using var _m = _m_RunOutputImpl.Auto();
       var model = sprite_capture_pipeline.model;
+      var clip = an.clip;
+      if (an.clip2) {
+         clip = AnimationBlender.BakeBlendedClip(model.render_obj, an.clip, an.clip2, an.weight2);
+      }
 
       SetModelRotation(pu, an.animation_type_object, sprite_to_generate.shot_type);
       {
@@ -470,12 +474,12 @@ public class ExportPipeline : MonoBehaviour {
                   model.negate_root_motion = true;
                } else {
                   if (animation_type_object.looping_root) {
-                     sprite_capture_pipeline.HandleLoopingRootMotion(an.clip, an.frame / 60f / an.clip.length);
+                     sprite_capture_pipeline.HandleLoopingRootMotion(clip, an.frame / 60f / clip.length);
                   }
                }
             }
 
-            sprite_capture_pipeline.model.SetAnimationNow(an.clip, an.frame);
+            sprite_capture_pipeline.model.SetAnimationNow(clip, an.frame);
          }
          finally {
             model.negate_root_motion = old_neg;

@@ -501,6 +501,8 @@ public class AnimationWrap {
 
    public string name;
    public AnimationClip clip;
+   public AnimationClip clip2;
+   public float weight2;
    public string category;
    public int frame;
    public int time_ms;

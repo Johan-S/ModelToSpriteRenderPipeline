@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using Shared;
 using TMPro;
+using UnityEditor;
 using static ExportPipeline;
 
 [DefaultExecutionOrder(-150)]
@@ -121,9 +122,17 @@ public class AnimationManager : MonoBehaviour {
                int tot_dur = 0;
                foreach (var (fr, dur) in data.capture_frame.Zip(data.time_ms)) {
                   tot_dur += dur;
-                  p.res.Add(new(data.clip, clip, data.category, fr, data) {
-                     time_ms = tot_dur,
-                  });
+                  if (data.clip_ref2) {
+                     p.res.Add(new(data.clip, clip, data.category, fr, data) {
+                        time_ms = tot_dur,
+                        clip2 = data.clip_ref2,
+                        weight2 = data.clip_ref2_weight,
+                     });
+                  } else {
+                     p.res.Add(new(data.clip, clip, data.category, fr, data) {
+                        time_ms = tot_dur,
+                     });
+                  }
                }
             }
          }

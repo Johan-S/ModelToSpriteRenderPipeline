@@ -159,6 +159,8 @@ public class ModelHandle : MonoBehaviour {
       }
    }
 
+   public string RootBoneName = "";
+
    void SampleAnimation(GameObject go, float time, AnimationClip clip) {
       using var _m = _m_SampleAnimation.Auto();
 
@@ -277,6 +279,7 @@ public class ModelHandle : MonoBehaviour {
 
       // 6. Destroy the graph to clean up memory and release control of the Animator
       graph.Destroy();
+      animator.enabled = false;
    }
    public bool TRY_BLEND;
 
@@ -383,20 +386,11 @@ public class ModelHandle : MonoBehaviour {
       }
    }
 
+   AnimationClip ani_clip_old;
+   float old_timer;
    void HandleAnimation() {
       if (animation_clip != null) {
-         if (animation_clip.length == 0) {
-            animation_time = 0;
-            animation_t = 0;
-         } else {
-            animation_t += animation_speed * Time.deltaTime / animation_clip.length;
-            if (animation_t > 1) animation_t -= 1;
-            if (animation_t > 1) animation_t = 0;
-
-            animation_time = animation_t * animation_clip.length;
-         }
-
-         if (TRY_BLEND) {
+         if (animation_blend_datas.Count > 0) {
             float wt = 0;
             for (int i = 0; i < animation_blend_datas.Count; i++) {
                var a = animation_blend_datas[i];
@@ -414,11 +408,37 @@ public class ModelHandle : MonoBehaviour {
                a.Time %= a.Clip.length;
                animation_blend_datas[i] = a;
             }
-            
+         }
+         var ani_clip = this.animation_clip;
+         if (animation_blend_datas.Count == 2 && !TRY_BLEND) {
+            if (ani_clip_old && old_timer > 0) {
+               ani_clip = ani_clip_old;
+               old_timer = 1;
+            }
+            else {
+               old_timer -= Time.deltaTime;
+               ani_clip = AnimationBlender.BakeBlendedClip(render_obj, animation_blend_datas[0].Clip,
+                  animation_blend_datas[1].Clip, animation_blend_datas[1].Weight);
+               ani_clip_old = ani_clip;
+            }
+         }
+         if (ani_clip.length == 0) {
+            animation_time = 0;
+            animation_t = 0;
+         } else {
+            animation_t += animation_speed * Time.deltaTime / ani_clip.length;
+            if (animation_t > 1) animation_t -= 1;
+            if (animation_t > 1) animation_t = 0;
+
+            animation_time = animation_t * ani_clip.length;
+         }
+
+         if (TRY_BLEND) {
             SampleAnimation(render_obj, animation_blend_datas);
+            
          } else {
                   
-            SampleAnimation(render_obj, animation_time, animation_clip);
+            SampleAnimation(render_obj, animation_time, ani_clip);
          }
 
       }
