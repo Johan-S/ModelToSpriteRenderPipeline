@@ -108,7 +108,7 @@ public class ModelHandle : MonoBehaviour {
             return;
          }
 
-         foreach (var sk in tr.GetComponentsInChildren<Renderer>()) {
+         foreach (var sk in tr.GetComponentsInChildren<Renderer>(true)) {
             if (!stored_model_mesh.TryGetValue(sk.transform, out var meshes)) continue;
             if (sk is SkinnedMeshRenderer am) {
                if (am.sharedMesh == meshes.changed_mesh) {
@@ -142,7 +142,7 @@ public class ModelHandle : MonoBehaviour {
 
          stored_for = tr;
 
-         foreach (var sk in tr.GetComponentsInChildren<Renderer>()) {
+         foreach (var sk in tr.GetComponentsInChildren<Renderer>(true)) {
             if (sk is SkinnedMeshRenderer am) {
                var m = PrepMeshWithOriginalPos(am.transform, am.sharedMesh);
                if (m) am.sharedMesh = m;

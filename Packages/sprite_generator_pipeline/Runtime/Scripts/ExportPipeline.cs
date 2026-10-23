@@ -451,6 +451,70 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
+   // Applies the per animation equipment slot states from the animation type object to the loaded model,
+   // hiding the slot contents or swapping in one of the models slot variants. Default restores what the prefab has.
+   public void SetModelEquipment(AnimationTypeObject animation_type_object) {
+      var mb = model.model_root ? model.model_root.GetComponent<ModelBodyRoot>() : null;
+      if (!mb) return;
+
+      var ano = animation_type_object;
+      var variants = mb.slot_variants ?? Array.Empty<ModelBodyRoot.SlotVariant>();
+
+      foreach (var slot in EnumUtil.Values<AnimationTypeObject.EquipmentSlot>()) {
+         var state = ano ? ano.GetSlotState(slot) : AnimationTypeObject.EquipmentSlotState.Default;
+         var slot_variants = variants.where(x => x.slot == slot);
+
+         ModelBodyRoot.SlotVariant active = null;
+         if (state == AnimationTypeObject.EquipmentSlotState.Variant) {
+            active = slot_variants.Find(x => x.variant == ano.equipment_variant);
+            if (active == null) {
+               LogOnce(
+                  $"Missing slot variant '{ano.equipment_variant}' for {slot} on model {mb.name}, hiding slot for animation {ano.name}.");
+            }
+         }
+
+         HashSet<GameObject> variant_objects = new();
+         foreach (var v in slot_variants) {
+            if (v.objects == null) continue;
+            foreach (var o in v.objects) {
+               if (!o) continue;
+               o.SetActive(v == active);
+               variant_objects.Add(o);
+            }
+         }
+
+         var slot_tr = mb.GetSlot(slot);
+         if (!slot_tr) {
+            if (state != AnimationTypeObject.EquipmentSlotState.Default) {
+               LogOnce($"Missing slot {slot} on model {mb.name}, can't apply equipment state for animation {ano.name}.");
+            }
+
+            continue;
+         }
+
+         bool show_default = state == AnimationTypeObject.EquipmentSlotState.Default;
+         int found = 0;
+         foreach (var rend in slot_tr.GetComponentsInChildren<Renderer>(true)) {
+            if (IsUnder(rend.transform, variant_objects)) continue;
+            rend.gameObject.SetActive(show_default);
+            found++;
+         }
+
+         if (found == 0 && !show_default) {
+            LogOnce(
+               $"Slot {slot} on model {mb.name} has nothing under it to hide, check the slot wiring in the prefab (animation {ano.name}).");
+         }
+      }
+   }
+
+   static bool IsUnder(Transform tr, HashSet<GameObject> roots) {
+      for (var t = tr; t; t = t.parent) {
+         if (roots.Contains(t.gameObject)) return true;
+      }
+
+      return false;
+   }
+
    public void OverrideRunSpritePipeline(GeneratedSprite sprite_to_generate, Material res_mat) {
       ParsedUnit pu = sprite_to_generate.pu;
       AnimationWrap an = sprite_to_generate.an;
@@ -463,6 +527,7 @@ public class ExportPipeline : MonoBehaviour {
       }
 
       SetModelRotation(pu, an.animation_type_object, sprite_to_generate.shot_type);
+      SetModelEquipment(an.animation_type_object);
       {
          bool old_neg = model.negate_root_motion;
          bool old_app = model.model_root.applyRootMotion;
@@ -921,6 +986,7 @@ public class ExportPipeline : MonoBehaviour {
       if (sprite_capture_pipeline.exporting) return;
 
       var model_body = PrepModelObject(pu);
+      SetModelEquipment(load_animation_on_play);
 
       Material res_mat = ApplyMaterialColor(pu.colors, pu.material);
 
@@ -962,6 +1028,7 @@ public class ExportPipeline : MonoBehaviour {
 
          var animation_type_object = load_animation_on_play;
          SetModelRotation(pu, load_animation_on_play, default_shot_types[0]);
+         SetModelEquipment(load_animation_on_play);
 
 
          if (animation_type_object != null) {
@@ -1020,6 +1087,10 @@ public class ExportPipeline : MonoBehaviour {
    void LogMissing(string msg) {
       if (!loginfo) return;
       if (log_cache.Add(msg)) Debug.Log(msg);
+   }
+
+   void LogOnce(string msg) {
+      if (log_cache.Add(msg)) Debug.LogWarning(msg);
    }
 
    BodyModelData MakeHeavyData() {
