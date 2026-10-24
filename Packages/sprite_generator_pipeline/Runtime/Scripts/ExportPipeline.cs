@@ -492,6 +492,10 @@ public class ExportPipeline : MonoBehaviour {
 
          HashSet<GameObject> variant_objects = new();
          foreach (var v in slot_variants) {
+            if (v.objects.IsEmpty() || v.objects.Exists(x => !x)) {
+               LogOnce($"Slot variant '{v.variant}' for {v.slot} on model {mb.name} has empty or missing objects.");
+            }
+
             if (v.objects == null) continue;
             foreach (var o in v.objects) {
                if (!o) continue;
@@ -519,7 +523,7 @@ public class ExportPipeline : MonoBehaviour {
             if (authored) found++;
          }
 
-         if (found == 0 && !show_default) {
+         if (found == 0 && state == AnimationTypeObject.EquipmentSlotState.Hidden) {
             LogOnce(
                $"Slot {slot} on model {mb.name} has nothing under it to hide, check the slot wiring in the prefab (animation {ano.name}).");
          }
