@@ -220,6 +220,12 @@ public class ModelHandle : MonoBehaviour {
       {
          SampleMultipleAnimations(go, blendData);
       }
+
+      // Skinned meshes are only re-skinned once per frame, so a camera render right after this would still show
+      // the previous pose while BakeMesh (parts pass) sees the new bones. Toggling the object forces a re-skin,
+      // same as the SetActive pair around clip.SampleAnimation above.
+      go.SetActive(false);
+      go.SetActive(true);
       last_root_motion = go.transform.localPosition;
       last_root_rotation = go.transform.localRotation;
       if (negate_root_motion) {
