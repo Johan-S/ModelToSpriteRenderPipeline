@@ -507,6 +507,99 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
+   // Pulls the off hand onto the shaft of the item in the main hand, after the pose is sampled. The shaft is the long
+   // axis of the item mesh, the hand slides to the closest point on it and keeps the main hand's distance to the shaft.
+   public void SetOffHandIK(AnimationTypeObject animation_type_object) {
+      var ano = animation_type_object;
+      if (!ano || ano.off_hand_ik_weight <= 0) return;
+
+      var animator = model.model_root;
+      var mb = animator ? animator.GetComponent<ModelBodyRoot>() : null;
+      if (!mb || !animator.isHuman) {
+         LogOnce($"Off hand IK needs a humanoid model with a ModelBodyRoot, skipping for {ano.name}.");
+         return;
+      }
+
+      if (!mb.Main_Hand) {
+         LogOnce($"Off hand IK needs the Main_Hand slot on model {mb.name}, skipping for {ano.name}.");
+         return;
+      }
+
+      var mf = mb.Main_Hand.GetComponentsInChildren<MeshFilter>().Find(x => x.sharedMesh);
+      if (!mf) {
+         LogOnce($"Off hand IK found no item mesh under Main_Hand on model {mb.name}, skipping for {ano.name}.");
+         return;
+      }
+
+      var left_hand = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+      bool main_is_left = left_hand && mb.Main_Hand.IsChildOf(left_hand);
+      var main_hand = animator.GetBoneTransform(main_is_left ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+      var upper = animator.GetBoneTransform(main_is_left ? HumanBodyBones.RightUpperArm : HumanBodyBones.LeftUpperArm);
+      var lower = animator.GetBoneTransform(main_is_left ? HumanBodyBones.RightLowerArm : HumanBodyBones.LeftLowerArm);
+      var hand = animator.GetBoneTransform(main_is_left ? HumanBodyBones.RightHand : HumanBodyBones.LeftHand);
+      if (!main_hand || !upper || !lower || !hand) {
+         LogOnce($"Off hand IK is missing arm bones on model {mb.name}, skipping for {ano.name}.");
+         return;
+      }
+
+      // Shaft from the mesh bounds long axis, in world space.
+      var bounds = mf.sharedMesh.bounds;
+      int a = 0;
+      for (int i = 1; i < 3; i++) {
+         if (bounds.size[i] > bounds.size[a]) a = i;
+      }
+
+      var half = Vector3.zero;
+      half[a] = bounds.extents[a];
+      var s0 = mf.transform.TransformPoint(bounds.center - half);
+      var s1 = mf.transform.TransformPoint(bounds.center + half);
+
+      float hold_radius = DistanceToSegment(main_hand.position, s0, s1, out _);
+      float dist = DistanceToSegment(hand.position, s0, s1, out var closest);
+      if (dist > ano.off_hand_ik_max_dist) return;
+
+      var away = hand.position - closest;
+      var normal = away.sqrMagnitude > 1e-8f ? away.normalized : Vector3.Cross(s1 - s0, upper.position - closest).normalized;
+      var target = closest + normal * hold_radius;
+
+      SolveTwoBoneIK(upper, lower, hand, target, ano.off_hand_ik_weight);
+   }
+
+   static float DistanceToSegment(Vector3 p, Vector3 s0, Vector3 s1, out Vector3 closest) {
+      var d = s1 - s0;
+      float len = d.magnitude;
+      if (len < 1e-6f) {
+         closest = s0;
+         return Vector3.Distance(p, s0);
+      }
+
+      float t = Mathf.Clamp(Vector3.Dot(p - s0, d) / (len * len), 0, 1);
+      closest = s0 + d * t;
+      return Vector3.Distance(p, closest);
+   }
+
+   // Standard two bone IK keeping the bend plane the animation gave the limb.
+   static void SolveTwoBoneIK(Transform a, Transform b, Transform c, Vector3 target, float weight) {
+      target = Vector3.Lerp(c.position, target, weight);
+
+      var ab = b.position - a.position;
+      var bc = c.position - b.position;
+      float lab = ab.magnitude;
+      float lbc = bc.magnitude;
+      float lat = Mathf.Clamp((target - a.position).magnitude, 1e-4f, lab + lbc - 1e-4f);
+
+      var axis = Vector3.Cross(ab, bc);
+      if (axis.sqrMagnitude < 1e-8f) axis = Vector3.Cross(target - a.position, bc);
+      if (axis.sqrMagnitude < 1e-8f) axis = Vector3.up;
+      axis.Normalize();
+
+      float old_angle = Vector3.Angle(-ab, bc);
+      float new_angle = Mathf.Acos(Mathf.Clamp((lab * lab + lbc * lbc - lat * lat) / (2 * lab * lbc), -1, 1)) * Mathf.Rad2Deg;
+      b.rotation = Quaternion.AngleAxis(old_angle - new_angle, axis) * b.rotation;
+
+      a.rotation = Quaternion.FromToRotation(c.position - a.position, target - a.position) * a.rotation;
+   }
+
    static bool IsUnder(Transform tr, HashSet<GameObject> roots) {
       for (var t = tr; t; t = t.parent) {
          if (roots.Contains(t.gameObject)) return true;
@@ -545,6 +638,7 @@ public class ExportPipeline : MonoBehaviour {
             }
 
             sprite_capture_pipeline.model.SetAnimationNow(clip, an.frame);
+            SetOffHandIK(animation_type_object);
          }
          finally {
             model.negate_root_motion = old_neg;
@@ -1045,6 +1139,7 @@ public class ExportPipeline : MonoBehaviour {
                }
 
                sprite_capture_pipeline.model.SetAnimationNow_Float(clip, t);
+               SetOffHandIK(animation_type_object);
             }
             finally {
                model.negate_root_motion = old_neg;
