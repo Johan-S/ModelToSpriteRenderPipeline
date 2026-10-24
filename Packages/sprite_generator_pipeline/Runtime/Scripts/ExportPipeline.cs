@@ -451,11 +451,28 @@ public class ExportPipeline : MonoBehaviour {
       }
    }
 
+   // Active state of the slot items as authored in the prefab, taken when a model instance is first seen so that
+   // Default can put back exactly what the prefab had, hidden items included.
+   ModelBodyRoot equipment_authored_for;
+   Dictionary<GameObject, bool> equipment_authored_active = new();
+
    // Applies the per animation equipment slot states from the animation type object to the loaded model,
    // hiding the slot contents or swapping in one of the models slot variants. Default restores what the prefab has.
    public void SetModelEquipment(AnimationTypeObject animation_type_object) {
       var mb = model.model_root ? model.model_root.GetComponent<ModelBodyRoot>() : null;
       if (!mb) return;
+
+      if (mb != equipment_authored_for) {
+         equipment_authored_for = mb;
+         equipment_authored_active.Clear();
+         foreach (var slot in EnumUtil.Values<AnimationTypeObject.EquipmentSlot>()) {
+            var tr = mb.GetSlot(slot);
+            if (!tr) continue;
+            foreach (var rend in tr.GetComponentsInChildren<Renderer>(true)) {
+               equipment_authored_active[rend.gameObject] = rend.gameObject.activeSelf;
+            }
+         }
+      }
 
       var ano = animation_type_object;
       var variants = mb.slot_variants ?? Array.Empty<ModelBodyRoot.SlotVariant>();
@@ -496,8 +513,10 @@ public class ExportPipeline : MonoBehaviour {
          int found = 0;
          foreach (var rend in slot_tr.GetComponentsInChildren<Renderer>(true)) {
             if (IsUnder(rend.transform, variant_objects)) continue;
-            rend.gameObject.SetActive(show_default);
-            found++;
+            var go = rend.gameObject;
+            bool authored = equipment_authored_active.Get(go, true);
+            go.SetActive(show_default && authored);
+            if (authored) found++;
          }
 
          if (found == 0 && !show_default) {
