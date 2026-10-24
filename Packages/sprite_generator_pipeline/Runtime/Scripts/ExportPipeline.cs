@@ -37,7 +37,8 @@ public class ExportPipeline : MonoBehaviour {
    static bool loginfo => prefs.log_info;
 
    void OnValidate() {
-      tag = "ExportPipeline";
+      // Only assign when needed, setting a tag inside OnValidate logs a SendMessage warning.
+      if (!CompareTag("ExportPipeline")) tag = "ExportPipeline";
    }
 
 
