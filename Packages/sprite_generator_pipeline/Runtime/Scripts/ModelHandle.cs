@@ -19,6 +19,9 @@ public class ModelHandle : MonoBehaviour {
       [Range(0, 1)]
       public float Weight;
       public float dt;
+
+      [Tooltip("When set this entry becomes an override layer for the masked humanoid body parts only, Weight is the layer weight.")]
+      public AvatarMask Mask;
    }
 
    public List<AnimationBlendData> animation_blend_datas = new();
@@ -244,8 +247,11 @@ public class ModelHandle : MonoBehaviour {
       // 2. Create the output and link it to the Animator
       var animOutput = AnimationPlayableOutput.Create(graph, "AnimationOutput", animator);
         
-      // 3. Create a mixer to handle the blending
-      var mixer = AnimationMixerPlayable.Create(graph, blendData.Count);
+      // 3. Create a mixer to handle the blending. Masked entries need a layer mixer, where each masked layer
+      //    overrides only its body parts instead of blending the whole body.
+      bool layered = blendData.Exists(x => x.Mask);
+      var layer_mixer = layered ? AnimationLayerMixerPlayable.Create(graph, blendData.Count) : default;
+      Playable mixer = layered ? layer_mixer : AnimationMixerPlayable.Create(graph, blendData.Count);
       animOutput.SetSourcePlayable(mixer);
 
       // 4. Plug each clip into the mixer
@@ -259,7 +265,9 @@ public class ModelHandle : MonoBehaviour {
 
          // Connect it to the mixer port 'i'
          graph.Connect(clipPlayable, 0, mixer, i);
-            
+
+         if (layered && data.Mask) layer_mixer.SetLayerMaskFromAvatarMask((uint)i, data.Mask);
+
          // Set the blend weight
          mixer.SetInputWeight(i, data.Weight);
 

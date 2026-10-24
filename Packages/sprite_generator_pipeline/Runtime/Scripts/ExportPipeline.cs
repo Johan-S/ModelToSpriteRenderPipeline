@@ -650,9 +650,6 @@ public class ExportPipeline : MonoBehaviour {
       using var _m = _m_RunOutputImpl.Auto();
       var model = sprite_capture_pipeline.model;
       var clip = an.clip;
-      if (an.clip2) {
-         clip = AnimationBlender.BakeBlendedClip(model.render_obj, an.clip, an.clip2, an.weight2);
-      }
 
       SetModelRotation(pu, an.animation_type_object, sprite_to_generate.shot_type);
       SetModelEquipment(an.animation_type_object);
@@ -672,7 +669,7 @@ public class ExportPipeline : MonoBehaviour {
                }
             }
 
-            sprite_capture_pipeline.model.SetAnimationNow(clip, an.frame);
+            SampleAnimationFrame(animation_type_object, clip, an.frame / 60f / clip.length);
             SetOffHandIK(animation_type_object);
          }
          finally {
@@ -1173,7 +1170,7 @@ public class ExportPipeline : MonoBehaviour {
                   }
                }
 
-               sprite_capture_pipeline.model.SetAnimationNow_Float(clip, t);
+               SampleAnimationFrame(animation_type_object, clip, t);
                SetOffHandIK(animation_type_object);
             }
             finally {
@@ -1202,6 +1199,27 @@ public class ExportPipeline : MonoBehaviour {
       sprite_capture_pipeline.enabled = true;
    }
 
+
+   // Samples clip at normalized time t. With a clip_ref2 the pose comes from the live playable mixer instead,
+   // blending the whole body or, with a mask, overriding just the masked body parts. Works on humanoid rigs,
+   // where a baked transform clip would not.
+   void SampleAnimationFrame(AnimationTypeObject ano, AnimationClip clip, float t) {
+      var model = sprite_capture_pipeline.model;
+      if (!ano || !ano.clip_ref2) {
+         model.SetAnimationNow_Float(clip, t);
+         return;
+      }
+
+      bool masked = ano.clip_ref2_mask != AnimationTypeObject.ClipMask.None;
+      float t2 = ano.clip_ref2_time >= 0 ? ano.clip_ref2_time : t;
+      model.SetAnimationNowBlend_Float(new List<ModelHandle.AnimationBlendData> {
+         new() { Clip = clip, Time = t * clip.length, Weight = masked ? 1 : 1 - ano.clip_ref2_weight },
+         new() {
+            Clip = ano.clip_ref2, Time = t2 * ano.clip_ref2.length, Weight = ano.clip_ref2_weight,
+            Mask = AnimationTypeObject.GetMask(ano.clip_ref2_mask),
+         },
+      });
+   }
 
    IEnumerator RunParsedPipeline(ParsedPipelineData parsed) {
       foreach (var u in parsed.units) {
