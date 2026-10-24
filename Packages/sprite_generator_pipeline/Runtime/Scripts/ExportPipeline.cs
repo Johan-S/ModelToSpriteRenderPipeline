@@ -476,8 +476,23 @@ public class ExportPipeline : MonoBehaviour {
 
       var ano = animation_type_object;
       var variants = mb.slot_variants ?? Array.Empty<ModelBodyRoot.SlotVariant>();
+      var slots = EnumUtil.Values<AnimationTypeObject.EquipmentSlot>().ToArray();
+      var slot_transforms = slots.map(x => mb.GetSlot(x));
 
-      foreach (var slot in EnumUtil.Values<AnimationTypeObject.EquipmentSlot>()) {
+      // Variant objects are only ever driven by their own variant, never by another slot's default pass, which
+      // matters when slots nest (a shield slot on the forearm contains the hand slot).
+      HashSet<GameObject> all_variant_objects = new();
+      foreach (var v in variants) {
+         if (v.objects.IsEmpty() || v.objects.Exists(x => !x)) {
+            LogOnce($"Slot variant '{v.variant}' for {v.slot} on model {mb.name} has empty or missing objects.");
+         }
+
+         foreach (var o in v.objects ?? Array.Empty<GameObject>()) {
+            if (o) all_variant_objects.Add(o);
+         }
+      }
+
+      foreach (var slot in slots) {
          var state = ano ? ano.GetSlotState(slot) : AnimationTypeObject.EquipmentSlotState.Default;
          var slot_variants = variants.where(x => x.slot == slot);
 
@@ -490,17 +505,9 @@ public class ExportPipeline : MonoBehaviour {
             }
          }
 
-         HashSet<GameObject> variant_objects = new();
          foreach (var v in slot_variants) {
-            if (v.objects.IsEmpty() || v.objects.Exists(x => !x)) {
-               LogOnce($"Slot variant '{v.variant}' for {v.slot} on model {mb.name} has empty or missing objects.");
-            }
-
-            if (v.objects == null) continue;
-            foreach (var o in v.objects) {
-               if (!o) continue;
-               o.SetActive(v == active);
-               variant_objects.Add(o);
+            foreach (var o in v.objects ?? Array.Empty<GameObject>()) {
+               if (o) o.SetActive(v == active);
             }
          }
 
@@ -513,10 +520,14 @@ public class ExportPipeline : MonoBehaviour {
             continue;
          }
 
+         // A slot nested inside this one owns its own subtree.
+         var nested_slots = slot_transforms.where(t => t && t != slot_tr && t.IsChildOf(slot_tr));
+
          bool show_default = state == AnimationTypeObject.EquipmentSlotState.Default;
          int found = 0;
          foreach (var rend in slot_tr.GetComponentsInChildren<Renderer>(true)) {
-            if (IsUnder(rend.transform, variant_objects)) continue;
+            if (IsUnder(rend.transform, all_variant_objects)) continue;
+            if (nested_slots.Exists(t => rend.transform.IsChildOf(t))) continue;
             var go = rend.gameObject;
             bool authored = equipment_authored_active.Get(go, true);
             go.SetActive(show_default && authored);
