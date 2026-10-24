@@ -98,8 +98,6 @@ public class CameraHandle : MonoBehaviour {
 
 
    public void FlatRenderMeshes(Texture2D texture, Mesh[] meshes) {
-      var size = (texture.width, texture.height);
-
       var render_texture = texture.GetCachedRenderTextureFor();
 
       my_cam.targetTexture = render_texture;
@@ -209,8 +207,6 @@ public class CameraHandle : MonoBehaviour {
       }
 
       mb.SetColor("_Color", new Color32(255, 255, (byte)0, 255));
-
-      float ortho_level = 2;
 
       var cmat = my_cam.projectionMatrix;
 
