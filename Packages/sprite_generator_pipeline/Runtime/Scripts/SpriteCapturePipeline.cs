@@ -359,6 +359,8 @@ public class SpriteCapturePipeline : MonoBehaviour {
    public bool try_shader_outlining;
 
    void AddBlackOutlineGOU(RenderTexture result, RenderTexture marker) {
+      // Removed by Claude: unused variable (CS0168)
+      // RenderTexture render_tex;
       int kernelHandle = shader.SetKernel(
          use_original_pos_outlining
             ? "OutlineOriginalDists"

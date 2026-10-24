@@ -98,6 +98,9 @@ public class CameraHandle : MonoBehaviour {
 
 
    public void FlatRenderMeshes(Texture2D texture, Mesh[] meshes) {
+      // Removed by Claude: unused variable (CS0219)
+      // var size = (texture.width, texture.height);
+      //
       var render_texture = texture.GetCachedRenderTextureFor();
 
       my_cam.targetTexture = render_texture;
@@ -208,6 +211,9 @@ public class CameraHandle : MonoBehaviour {
 
       mb.SetColor("_Color", new Color32(255, 255, (byte)0, 255));
 
+      // Removed by Claude: unused variable (CS0219)
+      // float ortho_level = 2;
+      //
       var cmat = my_cam.projectionMatrix;
 
       var id = Matrix4x4.identity;

@@ -249,5 +249,90 @@ public class AnimationSubsystem : MonoBehaviour {
          Debug.LogError($"No unit animation data found for {SpriteRefName}!");
          yield break;
       }
+      // Removed by Claude: unreachable old implementation (CS0162), both branches above yield break
+      //
+      // var standard_names = new UnitAnimationSprites().GetAllAnimations().Map(x => x.name).ToHashSet();
+      //
+      // var acl = parsed_animations.Where(x => x.animation_type == animation_class).ToList();
+      //
+      // var ad = maybe_cat.sprites.GroupBy(x => (x.animation_category, x.yaw)).ToDictionary(x => x.Key, x => x.ToArray());
+      //
+      // if (ad.Count == 0) {
+      //    Debug.LogError($"Missing sprites for: {SpriteRefName}");
+      //    yield break;
+      // }
+      //
+      // var extra_names = ad.Keys.map(x => x.animation_category).filtered(x => !standard_names.Contains(x)).Unique();
+      // var yaws = ad.Keys.map(x => x.yaw).Unique();
+      //
+      // void PushAni(string name, float yaw, Shared.AnimationBundle animation_bundle) {
+      //    var cl = acl.Find(x => x.category == name);
+      //    var key = (name: name, yaw: yaw);
+      //    if (cl == null) {
+      //       ad.Remove(key);
+      //       return;
+      //    }
+      //
+      //    if (!ad.TryGetValue(key, out var sprites)) {
+      //       return;
+      //    }
+      //
+      //    ad.Remove(key);
+      //
+      //    if (cl.time_ms.NotEmpty()) {
+      //       animation_bundle.time_ms = cl.time_ms.Copy();
+      //       try {
+      //          animation_bundle.sprites =
+      //             cl.capture_frame.map(frame => maybe_cat.dict[(cl.category, frame, yaw: yaw)].sprite);
+      //       }
+      //       catch (KeyNotFoundException e) {
+      //          Debug.LogError($"Error when parsing animations for unit {SpriteRefName}: {e}");
+      //       }
+      //    } else {
+      //       animation_bundle.sprites = sprites.map(x => x.sprite);
+      //       if (cl.auto_frames_per_s > 0) {
+      //          animation_bundle.time_ms = sprites.map(x => Mathf.RoundToInt(1000 / cl.auto_frames_per_s));
+      //       } else {
+      //          Debug.Log(
+      //             $"Wrong capture frame: {SpriteRefName} - {name} : {sprites.Length} != {cl.capture_frame.Length}");
+      //
+      //          animation_bundle.time_ms = sprites.map(x => Mathf.RoundToInt(1000 / 10));
+      //       }
+      //    }
+      //
+      //    Debug.Assert(animation_bundle.sprites.Length == animation_bundle.time_ms.Length);
+      //
+      //    animation_bundle.animation_duration_ms = animation_bundle.time_ms.Sum();
+      // }
+      //
+      // foreach (var yaw in yaws) {
+      //    var animation_sprites = new Shared.UnitAnimationSprites();
+      //    animation_sprites.yaw = yaw;
+      //    if (acl.Count == 0) {
+      //       Debug.LogError($"Missing animation class {animation_class} for {SpriteRefName}");
+      //    } else {
+      //       foreach (var (name, am) in animation_sprites.GetAllAnimations()) {
+      //          PushAni(name, yaw, am);
+      //       }
+      //
+      //       foreach (var name in extra_names) {
+      //          var am = new Shared.AnimationBundle();
+      //          animation_sprites.extra_bundles ??= new();
+      //          animation_sprites.extra_bundles.Add((name, am));
+      //          PushAni(name, yaw, am);
+      //       }
+      //    }
+      //
+      //    yield return animation_sprites;
+      // }
+      //
+      // if (!strip_missing_silently) {
+      //    if (ad.Count > 0 || extra_names.Count > 0) {
+      //       var mg = ad.map(x => x.Key.animation_category).Concat(extra_names).Distinct().Sorted();
+      //       Debug.LogError(
+      //          $"Failed to parse {mg.Count} animations for unit {maybe_cat.unit_name}: {mg.join(", ", x => $"'{x}'")}\n" +
+      //          $"CAN STILL VIEW THEM BUT WONT WORK IN GAME");
+      //    }
+      // }
    }
 }
