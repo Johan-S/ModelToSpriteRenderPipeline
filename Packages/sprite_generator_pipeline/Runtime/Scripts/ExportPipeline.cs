@@ -512,18 +512,23 @@ public class ExportPipeline : MonoBehaviour {
             }
          }
 
-         // Variant: only the chosen variant's objects are on. Hidden: all off. Default: as authored in the
-         // prefab, so the slot's own item can be registered as a variant as well and still show by default.
+         var slot_tr = mb.GetSlot(slot);
+
+         // Variant: only the chosen variant's objects are on. Hidden: all off. Shown: everything under the slot
+         // on. Default: as authored in the prefab.
          foreach (var v in slot_variants) {
             foreach (var o in v.objects ?? Array.Empty<GameObject>()) {
                if (!o) continue;
-               bool on = state == AnimationTypeObject.EquipmentSlotState.Variant ? v == active
-                  : state == AnimationTypeObject.EquipmentSlotState.Default && equipment_authored_active.Get(o, false);
+               bool on = state switch {
+                  AnimationTypeObject.EquipmentSlotState.Variant => v == active,
+                  AnimationTypeObject.EquipmentSlotState.Hidden => false,
+                  AnimationTypeObject.EquipmentSlotState.Shown => (slot_tr && o.transform.IsChildOf(slot_tr)) || equipment_authored_active.Get(o, false),
+                  _ => equipment_authored_active.Get(o, false),
+               };
                o.SetActive(on);
             }
          }
 
-         var slot_tr = mb.GetSlot(slot);
          if (!slot_tr) {
             if (state != AnimationTypeObject.EquipmentSlotState.Default) {
                LogOnce($"Missing slot {slot} on model {mb.name}, can't apply equipment state for animation {ano.name}.");
@@ -535,14 +540,17 @@ public class ExportPipeline : MonoBehaviour {
          // A slot nested inside this one owns its own subtree.
          var nested_slots = slot_transforms.where(t => t && t != slot_tr && t.IsChildOf(slot_tr));
 
-         bool show_default = state == AnimationTypeObject.EquipmentSlotState.Default;
          int found = 0;
          foreach (var rend in slot_tr.GetComponentsInChildren<Renderer>(true)) {
             if (IsUnder(rend.transform, all_variant_objects)) continue;
             if (nested_slots.Exists(t => rend.transform.IsChildOf(t))) continue;
             var go = rend.gameObject;
-            bool authored = equipment_authored_active.Get(go, true);
-            go.SetActive(show_default && authored);
+            bool on = state switch {
+               AnimationTypeObject.EquipmentSlotState.Default => equipment_authored_active.Get(go, true),
+               AnimationTypeObject.EquipmentSlotState.Shown => true,
+               _ => false,
+            };
+            go.SetActive(on);
             found++;
          }
 
