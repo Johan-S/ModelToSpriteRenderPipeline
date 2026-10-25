@@ -79,15 +79,23 @@ public class ModelHandle : MonoBehaviour {
             }
 
             if (mesh.name.Contains("(PREPPED ORIG POS)")) return mesh;
-            if (mesh.uv5.IsNonEmpty()) {
-               Debug.LogError($"Mesh {mesh.name} already contains uv5 in object {tr.name}!!", tr.gameObject);
-               return mesh;
-            }
 
-            if (mesh.uv6.IsNonEmpty()) {
-               Debug.LogError($"Mesh {mesh.name} already contains uv6 in object {tr.name}!!", tr.gameObject);
-               return mesh;
+            // Claude: meshes that ship with uv5/uv6 (e.g. the vendor book) used to be refused here, which logged an
+            // error every preview frame and left them without original positions. The channels are only overwritten
+            // on the copy made below, nothing in the pipeline reads the vendor data, so note it once and carry on.
+            if ((mesh.uv5.IsNonEmpty() || mesh.uv6.IsNonEmpty()) && uv_overwritten_logged.Add(mesh.name)) {
+               Debug.Log($"Mesh {mesh.name} in object {tr.name} already had uv5/uv6 data, replacing it with original positions on the prepped copy.", tr.gameObject);
             }
+            // Removed by Claude: see the note above.
+            // if (mesh.uv5.IsNonEmpty()) {
+            //    Debug.LogError($"Mesh {mesh.name} already contains uv5 in object {tr.name}!!", tr.gameObject);
+            //    return mesh;
+            // }
+            //
+            // if (mesh.uv6.IsNonEmpty()) {
+            //    Debug.LogError($"Mesh {mesh.name} already contains uv6 in object {tr.name}!!", tr.gameObject);
+            //    return mesh;
+            // }
 
             var nm = Instantiate(mesh);
             nm.name = mesh.name + " (PREPPED ORIG POS)";
@@ -104,6 +112,8 @@ public class ModelHandle : MonoBehaviour {
       }
 
       Dictionary<Transform, (Mesh old_mesh, Mesh changed_mesh)> stored_model_mesh = new();
+
+      static readonly HashSet<string> uv_overwritten_logged = new();
 
       public void RetreiveOriginalMeshes(Transform tr) {
          if (tr != stored_for) {
