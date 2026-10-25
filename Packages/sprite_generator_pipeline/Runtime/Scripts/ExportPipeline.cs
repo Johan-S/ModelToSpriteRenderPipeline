@@ -532,7 +532,7 @@ public class ExportPipeline : MonoBehaviour {
             var go = rend.gameObject;
             bool authored = equipment_authored_active.Get(go, true);
             go.SetActive(show_default && authored);
-            if (authored) found++;
+            found++;
          }
 
          if (found == 0 && state == AnimationTypeObject.EquipmentSlotState.Hidden) {

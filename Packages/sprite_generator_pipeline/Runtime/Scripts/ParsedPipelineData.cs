@@ -258,6 +258,11 @@ public class ParsedPipelineData {
 
       if (this.extra_units != null) {
          foreach (var u in extra_units) {
+            if (u == null || (u is UnityEngine.Object uo && !uo)) {
+               Debug.LogError("Missing unit in UnitsToRender (deleted asset?), skipping it.");
+               continue;
+            }
+
             var pu = CreateParsedUnit(u);
 
             units.Add(pu);
