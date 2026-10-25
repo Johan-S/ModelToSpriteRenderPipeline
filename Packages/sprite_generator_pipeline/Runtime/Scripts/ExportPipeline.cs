@@ -473,6 +473,12 @@ public class ExportPipeline : MonoBehaviour {
                equipment_authored_active[rend.gameObject] = rend.gameObject.activeSelf;
             }
          }
+
+         foreach (var v in mb.slot_variants ?? Array.Empty<ModelBodyRoot.SlotVariant>()) {
+            foreach (var o in v.objects ?? Array.Empty<GameObject>()) {
+               if (o) equipment_authored_active[o] = o.activeSelf;
+            }
+         }
       }
 
       var ano = animation_type_object;
@@ -506,9 +512,14 @@ public class ExportPipeline : MonoBehaviour {
             }
          }
 
+         // Variant: only the chosen variant's objects are on. Hidden: all off. Default: as authored in the
+         // prefab, so the slot's own item can be registered as a variant as well and still show by default.
          foreach (var v in slot_variants) {
             foreach (var o in v.objects ?? Array.Empty<GameObject>()) {
-               if (o) o.SetActive(v == active);
+               if (!o) continue;
+               bool on = state == AnimationTypeObject.EquipmentSlotState.Variant ? v == active
+                  : state == AnimationTypeObject.EquipmentSlotState.Default && equipment_authored_active.Get(o, false);
+               o.SetActive(on);
             }
          }
 
